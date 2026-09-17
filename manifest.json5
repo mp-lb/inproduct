@@ -1,0 +1,12 @@
+{
+  name: 'InProduct',
+  emoji: '👑',
+  description: 'A collection of tools to put in your product.',
+  projectSlug: 'inproduct',
+  packagePrefix: '@mp-lb',
+  shadcnPreset: 'b1VlIttI',
+  frontends: [{name:'frontend',type:'react-vite'}],
+  backends: ['backend'],
+  libs: ['inproduct'],
+  extensions: []
+}

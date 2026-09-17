@@ -1,0 +1,55 @@
+project: inproduct
+env-files:
+  - .env.local
+  - .env
+homepage: http://localhost:${FRONTEND_PORT}
+ports:
+  - BACKEND_PORT
+  - FRONTEND_PORT
+native:
+  frontend:
+    cmd: pnpm --filter @mp-lb/inproduct-frontend dev --host 0.0.0.0 --port ${FRONTEND_PORT}
+    env: "*"
+  backend:
+    cmd: pnpm --filter @mp-lb/inproduct-backend dev
+    env: "*"
+tasks:
+  context-build:
+    cmds:
+      - node scripts/context-files.mjs build {{REST}}
+  context-copy:
+    cmds:
+      - node scripts/context-files.mjs copy {{REST}}
+  compile-agents:
+    cmds:
+      - zap task context-build -- {{REST}}
+  setup:
+    cmds:
+      - pnpm install
+  build:
+    cmds:
+      - pnpm build
+  lint:
+    cmds:
+      - |
+        if [ -n "{{REST}}" ]; then
+          pnpm exec eslint {{REST}}
+        else
+          pnpm lint
+        fi
+  check:
+    cmds:
+      - zap task lint -- {{REST}}
+      - pnpm typecheck
+  typecheck:
+    cmds:
+      - pnpm typecheck
+  test:
+    cmds:
+      - pnpm test
+  worktree-setup:
+    cmds:
+      - pnpm install
+      - cp "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.env" . 2>/dev/null || true
+      - '[ ! -f AGENTS.base.md ] || zap task context-copy'
+      - grep -qxF '@AGENTS_WORKTREE.md' AGENTS.md || printf '\n@AGENTS_WORKTREE.md\n' >> AGENTS.md
