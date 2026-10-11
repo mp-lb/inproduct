@@ -5,7 +5,8 @@ import { docsRoute } from "./shared";
 export const docs = defineDocs({
   dir: "../../docs/public",
   docs: {
-    async: true,
+    // Four short guides fit in one bundle: keep hydration synchronous.
+    async: false,
     postprocess: {
       includeProcessedMarkdown: true,
     },

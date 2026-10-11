@@ -92,3 +92,17 @@ configuration convention are missing reusable onboarding features, not applicati
 requirements to couple landing/docs. No new account, seat, GCP or DNS change is
 required to use the default provider hostname.
 MyShop is private and local-only and must never be included in a public deployment.
+
+## Navigation regression checks
+
+The four short MDX guides are bundled eagerly, so the initial article and table of
+contents hydrate synchronously. This avoids suspending the article on a separate
+content download while browser history is changing. Revisit lazy loading only with
+explicit hydration/preload handling if the collection grows.
+
+After `pnpm docs:check`, run `pnpm docs:test`. The test uses installed Chrome locally,
+allocates an ephemeral loopback port, and serves the actual static output. CI installs
+Playwright Chromium and selects it with `PLAYWRIGHT_CHANNEL=chromium`. The test covers
+MyShop → Backend → reload → Back → Forward, delayed scripts, direct entry/reload for
+every guide, search interactivity and uncaught hydration errors. Set `TEST_DOCS_URL`
+to an existing docs origin to run the same read-only checks against a deployment.

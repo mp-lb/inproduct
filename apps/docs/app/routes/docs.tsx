@@ -12,7 +12,6 @@ import { docs, source } from "@/lib/source";
 import { baseOptions } from "@/lib/layout";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { useMDXComponents } from "@/components/mdx";
-import { use } from "react";
 import { getPageMarkdownUrl, gitConfig } from "@/lib/shared";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -31,8 +30,7 @@ function Content({ path, markdownUrl }: { path: string; markdownUrl: string }) {
   const page = docs.getPage(path);
   if (!page) throw new Error(`unknown page: ${path}`);
 
-  // content is loaded lazily, call `page.preload()` in your loader to avoid suspending
-  const { toc } = use(page.load());
+  const { toc } = page;
   const Mdx = page.body;
 
   return (

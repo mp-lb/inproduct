@@ -305,3 +305,12 @@ h2 {
     scroll-behavior: auto;
   }
 }
+
+.site-footer nav {
+  display: flex;
+  gap: 20px;
+}
+.block-list h3 a {
+  color: inherit;
+  text-underline-offset: 3px;
+}

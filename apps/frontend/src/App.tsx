@@ -15,7 +15,7 @@ export const App = () => (
         InProduct
       </a>
       <nav aria-label="Main navigation">
-        <a href="#building-blocks">The bits</a>
+        <a href="#building-blocks">The pieces</a>
         {import.meta.env.VITE_DOCS_URL && (
           <a href={import.meta.env.VITE_DOCS_URL}>Docs</a>
         )}
@@ -44,7 +44,12 @@ export const App = () => (
       <p>
         <span aria-hidden="true">[ip]</span> InProduct
       </p>
-      <a href="#">Back to top ↑</a>
+      <nav aria-label="Footer navigation">
+        {import.meta.env.VITE_DOCS_URL && (
+          <a href={import.meta.env.VITE_DOCS_URL}>Docs</a>
+        )}
+        <a href="#">Back to top ↑</a>
+      </nav>
     </footer>
   </div>
 )

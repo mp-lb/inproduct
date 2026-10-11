@@ -16,3 +16,6 @@ apps/docs/.source
 
 .secrets/*.tmp
 secrets.json
+
+test-results/
+playwright-report/

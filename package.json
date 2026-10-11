@@ -15,13 +15,15 @@
     "docs:gen": "python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-docs build",
     "docs:check": "pnpm docs:gen",
     "secrets:test": "node --test scripts/secrets/*.test.mjs",
-    "secrets:sync": "node scripts/secrets/sync.mjs"
+    "secrets:sync": "node scripts/secrets/sync.mjs",
+    "docs:test": "python3 scripts/run_validation.py -- pnpm exec playwright test --config tests/docs/playwright.config.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "2.31.0",
     "@mp-lb/forum-secrets": "0.2.1",
     "@mp-lb/fssstack-config": "0.3.1",
     "@mp-lb/fssstack-testing": "0.1.0",
+    "@playwright/test": "1.64.0",
     "@types/node": "20.19.39",
     "eslint": "9.39.4",
     "prettier": "3.8.3",

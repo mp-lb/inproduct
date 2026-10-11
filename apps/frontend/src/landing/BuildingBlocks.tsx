@@ -1,26 +1,31 @@
 const blocks = [
   {
     name: "Feature flags",
+    anchor: "feature-flags",
     description: "Turn features on or off for specific users.",
     symbol: "[±]",
   },
   {
     name: "Audit logs",
+    anchor: "audit-logs",
     description: "Track who changed what, and when.",
     symbol: "[≡]",
   },
   {
     name: "AI observability",
+    anchor: "ai-observability",
     description: "Inspect AI requests, responses, and costs.",
     symbol: "[◎]",
   },
   {
     name: "Notifications",
+    anchor: "notifications",
     description: "Send and manage notifications from your app.",
     symbol: "[!]",
   },
   {
     name: "Prompts",
+    anchor: "prompts",
     description: "Manage prompts as version-controlled Markdown.",
     symbol: "[>]",
   },
@@ -42,7 +47,15 @@ export const BuildingBlocks = () => (
           <span className="block-symbol" aria-hidden="true">
             {block.symbol}
           </span>
-          <h3>{block.name}</h3>
+          <h3>
+            {import.meta.env.VITE_DOCS_URL ? (
+              <a href={`${import.meta.env.VITE_DOCS_URL}#${block.anchor}`}>
+                {block.name}
+              </a>
+            ) : (
+              block.name
+            )}
+          </h3>
           <p>{block.description}</p>
         </li>
       ))}
