@@ -256,3 +256,83 @@ test("unrelated catalog fields may have structured values; consumed fields must 
   for (const value of [42, false, null, {}, []])
     assert.throws(() => selectCredentials({ NPM_TOKEN: value }, "publish"));
 });
+
+test("cleanup uses bounded retries and preserves a failed command's outcome", () => {
+  let cleanupCalled = false;
+  assert.throws(
+    () =>
+      runSecretProcess(
+        "test",
+        [],
+        {},
+        {},
+        () => ({ status: 1 }),
+        (temporary, options) => {
+          cleanupCalled = true;
+          assert.deepEqual(options, {
+            recursive: true,
+            force: true,
+            maxRetries: 5,
+            retryDelay: 200,
+          });
+
+          rmSync(temporary, { recursive: true, force: true });
+          throw Object.assign(Error("SYNTHETIC_SECRET cleanup path"), {
+            code: "ENOTEMPTY",
+          });
+        },
+      ),
+    (error) =>
+      error.message.startsWith("Credential-consuming command failed;") &&
+      error.message.includes("cleanup also failed") &&
+      !error.message.includes("SYNTHETIC_SECRET"),
+  );
+
+  assert.equal(cleanupCalled, true);
+});
+
+test("cleanup failure after success is reported distinctly without leaking paths", () => {
+  assert.throws(
+    () =>
+      runSecretProcess(
+        "test",
+        [],
+        {},
+        {},
+        () => ({ status: 0 }),
+        (temporary) => {
+          rmSync(temporary, { recursive: true, force: true });
+          throw Error("SYNTHETIC_SECRET cleanup path");
+        },
+      ),
+    (error) =>
+      error.message.includes("command succeeded") &&
+      error.message.includes("cleanup failed") &&
+      !error.message.includes("SYNTHETIC_SECRET"),
+  );
+});
+
+test("a thrown subprocess error is sanitized and still cleans temporary data", () => {
+  let cleaned = false;
+  assert.throws(
+    () =>
+      runSecretProcess(
+        "test",
+        [],
+        {},
+        {},
+        () => {
+          throw Error("SYNTHETIC_SECRET");
+        },
+        (temporary, options) => {
+          rmSync(temporary, options);
+          cleaned = true;
+        },
+      ),
+    (error) =>
+      error.message.startsWith("Credential-consuming command failed;") &&
+      !error.message.includes("SYNTHETIC_SECRET"),
+  );
+
+  assert.equal(cleaned, true);
+});

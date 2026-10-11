@@ -38,12 +38,16 @@ export const runSecretProcess = (
   environment,
   selected,
   run = spawnSync,
+  remove = rmSync,
 ) => {
   // The secret-bearing process never inherits the catalog key or unrelated tokens.
   // Capture and discard output: third-party diagnostics may contain credentials.
   const temporary = mkdtempSync(
     join(tmpdir(), "inproduct-credential-command-"),
   );
+
+  let commandFailed = false;
+  let cleanupFailed = false;
 
   try {
     const result = run(command, args, {
@@ -61,11 +65,34 @@ export const runSecretProcess = (
       maxBuffer: 16 * 1024 * 1024,
     });
 
-    if (result.error || result.status !== 0)
-      throw Error(
-        "Credential-consuming command failed; output withheld to protect secrets.",
-      );
+    commandFailed = Boolean(result.error) || result.status !== 0;
+  } catch {
+    commandFailed = true;
   } finally {
-    rmSync(temporary, { recursive: true, force: true });
+    try {
+      // npm/CLI descendants can finish writing cache entries just after their
+      // parent exits. Node retries transient ENOTEMPTY/EBUSY failures with
+      // bounded backoff (five retries, 200 ms linear delay).
+      remove(temporary, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 200,
+      });
+    } catch {
+      cleanupFailed = true;
+    }
   }
+
+  if (commandFailed)
+    throw Error(
+      "Credential-consuming command failed; output withheld to protect secrets." +
+        (cleanupFailed
+          ? " Temporary credential data cleanup also failed."
+          : ""),
+    );
+  if (cleanupFailed)
+    throw Error(
+      "Credential-consuming command succeeded, but temporary credential data cleanup failed. Verify the remote result before retrying.",
+    );
 };
