@@ -83,6 +83,10 @@ test("Back before reload hydration uses the destination article", async ({
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/docs/myshop");
+  await page.waitForFunction(
+    () => window.__reactRouterDataRouter?.state.initialized,
+  );
+
   await page.getByRole("button", { name: /^Search\b/ }).click();
   await page.getByRole("dialog").press("Escape");
   await page
