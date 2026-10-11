@@ -12,18 +12,8 @@ export const parseSecrets = (text) => {
     throw Error("Secrets must contain a JSON object (content omitted).");
   }
 
-  if (
-    !values ||
-    Array.isArray(values) ||
-    typeof values !== "object" ||
-    Object.entries(values).some(
-      ([key, value]) =>
-        !/^[A-Z_][A-Z0-9_]*$/.test(key) || typeof value !== "string",
-    )
-  )
-    throw Error(
-      "Secrets must map environment names to strings (content omitted).",
-    );
+  if (!values || Array.isArray(values) || typeof values !== "object")
+    throw Error("Secrets must contain a JSON object (content omitted).");
   return values;
 };
 
@@ -31,7 +21,12 @@ export const selectCredentials = (values, consumer) => {
   const names = aliases[consumer];
   if (!names) throw Error("Unknown credential consumer.");
   const candidates = names.filter((name) => Object.hasOwn(values, name));
-  if (!candidates.length || candidates.some((name) => !values[name].trim()))
+  if (
+    !candidates.length ||
+    candidates.some(
+      (name) => typeof values[name] !== "string" || !values[name].trim(),
+    )
+  )
     throw Error(`Missing ${names[0]} in the authorized standard file.`);
   if (new Set(candidates.map((name) => values[name])).size !== 1)
     throw Error(

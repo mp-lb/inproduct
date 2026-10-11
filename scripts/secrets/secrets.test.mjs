@@ -19,14 +19,8 @@ import {
 } from "./secretProcess.mjs";
 import { readStandardSecrets, verifySnapshot } from "./readStandardSecrets.mjs";
 
-test("strict JSON rejects malformed/structured values without leaking input", () => {
-  for (const input of [
-    '{"SECRET":"SYNTHETIC_BAD"',
-    "null",
-    "[]",
-    '{"NPM_TOKEN":42}',
-    '{"bad-name":"SYNTHETIC_BAD"}',
-  ]) {
+test("strict JSON rejects malformed roots without leaking input", () => {
+  for (const input of ['{"SECRET":"SYNTHETIC_BAD"', "null", "[]"]) {
     assert.throws(
       () => parseSecrets(input),
       (error) => !error.message.includes("SYNTHETIC_BAD"),
@@ -238,4 +232,27 @@ test("credential command caches/logs are isolated and removed on failure", () =>
   );
 
   assert.equal(existsSync(temporary), false);
+});
+
+test("unrelated catalog fields may have structured values; consumed fields must be strings", () => {
+  const values = parseSecrets(
+    JSON.stringify({
+      NPM_TOKEN: "fake-npm",
+      VERCEL_TOKEN: "fake-vercel",
+      providerConfig: { account: 42 },
+      enabled: true,
+    }),
+  );
+
+  assert.deepEqual(selectCredentials(values, "deploy"), {
+    VERCEL_TOKEN: "fake-vercel",
+  });
+
+  assert.deepEqual(selectCredentials(values, "publish"), {
+    NPM_TOKEN: "fake-npm",
+    NODE_AUTH_TOKEN: "fake-npm",
+  });
+
+  for (const value of [42, false, null, {}, []])
+    assert.throws(() => selectCredentials({ NPM_TOKEN: value }, "publish"));
 });

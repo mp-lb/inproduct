@@ -14,7 +14,7 @@ uses that reviewed version until refreshed; provider rotations require a refresh
 GitHub supplies `SECRETS_KEY` only to the credential-consuming step. The pinned,
 lockfile-verified `@mp-lb/forum-secrets@0.2.1` decryptor reads the v3 envelope in
 memory. The selected fields are `VERCEL_TOKEN` (`VERCEL_API_TOKEN` alias) for
-deployment, and `NPM_TOKEN` (`NODE_AUTH_TOKEN` alias) for npm publication. Both
+deployment, and `NPM_TOKEN` (`NODE_AUTH_TOKEN` alias) for npm publication. Unrelated catalog fields are ignored and may be structured values. Both
 aliases may exist only with identical nonempty values; missing, malformed or
 conflicting fields fail closed. There is no fallback to another project's token.
 
@@ -60,7 +60,7 @@ generated ArcNet runner itself is unchanged. Stackforge setup reruns preserve
 existing workflow files. Do not replace this workflow with the older direct-token
 template when regenerating configuration.
 
-Validation: eight synthetic credential tests, lint (two existing Fumadocs export
+Validation: nine synthetic credential tests, lint (two existing Fumadocs export
 warnings), typecheck, workspace tests and build passed locally. The docs build
 reported existing CSS/browser-module and file-watcher warnings but completed
 its static artifact checks. Live validation verifies only decryption/selection,
