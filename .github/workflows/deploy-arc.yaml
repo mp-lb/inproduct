@@ -42,6 +42,6 @@ jobs:
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - name: Deploy referenced static sites
-        run: node .arcnet/run.mjs deploy
+        run: node scripts/secrets/run.mjs deploy
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}

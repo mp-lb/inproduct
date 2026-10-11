@@ -62,6 +62,13 @@
         "version": 3,
         "routes": [
           {
+            "src": "/api/search",
+            "headers": {
+              "Content-Type": "application/json; charset=utf-8"
+            },
+            "continue": true
+          },
+          {
             "handle": "filesystem"
           },
           {

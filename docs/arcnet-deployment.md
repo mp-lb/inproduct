@@ -44,15 +44,21 @@ permission and may incur usage; none were uploaded during preparation.
 
 ## Necessary owner actions
 
+Shared credentials now follow [standard-secrets.md](./standard-secrets.md).
+Landing and docs remain independently buildable and deployable; no combined
+hosting/build assumption is introduced. The following live setup/cutover steps
+remain disabled and require their own authorization.
+
 1. Approve creation of exactly one static project, inproduct-docs, under mp-lb,
    or supply a separately verified existing docs reference. For approved creation,
    set docs.creationApproved=true in .arcnet/project.json and run locally
    `node .arcnet/run.mjs create docs` with authorized VERCEL_TOKEN. Review the
    recorded ID and copy it into arcnet.vercel.json as mode existing; keep overall
    approved=false. This is a remote mutation, separate from setup.
-2. Authorize token access for both projects and configure GitHub environment
-   arcnet-production, secret VERCEL_TOKEN, and suitable environment protections.
-   No additional secret names are required. Do not add a deploying seat solely
+2. Before any future ArcNet cutover, verify token access to the approved targets
+   through the shared encrypted standard file and SECRETS_KEY loader, and configure
+   appropriate arcnet-production environment protections. Do not add a direct
+   VERCEL_TOKEN GitHub secret. Do not add a deploying seat solely
    for this setup without reviewing its separate monthly cost.
 3. Authorize local preview uploads, set approved=true only in a local review
    checkout, run `node .arcnet/run.mjs preview`, complete the route checks, then

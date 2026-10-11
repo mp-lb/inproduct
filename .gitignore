@@ -13,3 +13,6 @@ CLAUDE.md
 apps/docs/build
 apps/docs/.react-router
 apps/docs/.source
+
+.secrets/*.tmp
+secrets.json

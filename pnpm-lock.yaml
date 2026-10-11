@@ -11,6 +11,9 @@ importers:
       '@changesets/cli':
         specifier: 2.31.0
         version: 2.31.0(@types/node@20.19.39)
+      '@mp-lb/forum-secrets':
+        specifier: 0.2.1
+        version: 0.2.1
       '@mp-lb/fssstack-config':
         specifier: 0.3.1
         version: 0.3.1(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(prettier@3.8.3)(typescript@5.9.3)
@@ -1205,6 +1208,11 @@ packages:
     peerDependenciesMeta:
       '@cfworker/json-schema':
         optional: true
+
+  '@mp-lb/forum-secrets@0.2.1':
+    resolution: {integrity: sha512-Z7uJh01uUJoE0OB7RZAIUhGjiHf3pKvkQMdgrAkr2rsa5Ojrxbt2aMGHX8JHHCqj3gYE6Mq224WTrhK6ZtyGJQ==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   '@mp-lb/fssstack-config@0.3.1':
     resolution: {integrity: sha512-JyBK9fVzSfdu8XyIIb33+o6jT9dnByJBP1juTrtirkkXJQU+DtZYfrXUHnU17NspK61NGw0V80VhIl0hVHBjPw==}
@@ -6500,6 +6508,8 @@ snapshots:
       zod-to-json-schema: 3.25.2(zod@3.25.76)
     transitivePeerDependencies:
       - supports-color
+
+  '@mp-lb/forum-secrets@0.2.1': {}
 
   '@mp-lb/fssstack-config@0.3.1(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(prettier@3.8.3)(typescript@5.9.3)':
     dependencies:

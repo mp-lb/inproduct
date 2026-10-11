@@ -13,7 +13,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]' }}
+    if: ${{ github.repository == 'mp-lb/inproduct' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]') }}
     concurrency:
       group: release-${{ github.ref }}
       cancel-in-progress: true
@@ -70,10 +70,9 @@ jobs:
 
       - name: Publish
         if: ${{ steps.changesets.outputs.count != '0' }}
-        run: pnpm changeset publish
+        run: node scripts/secrets/run.mjs publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
 
       - name: Push release commit and tags
         if: ${{ steps.changesets.outputs.count != '0' }}
