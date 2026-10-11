@@ -225,6 +225,9 @@ test("credential command caches/logs are isolated and removed on failure", () =>
       temporary = options.env.HOME;
       assert.ok(existsSync(temporary));
       assert.equal(options.env.NPM_CONFIG_LOGS_MAX, "0");
+      assert.equal(options.env.VERCEL_TELEMETRY_DISABLED, "1");
+      assert.equal(options.env.NO_UPDATE_NOTIFIER, "1");
+      assert.equal(options.env.NPM_CONFIG_UPDATE_NOTIFIER, "false");
       assert.ok(options.env.NPM_CONFIG_CACHE.startsWith(temporary));
       writeFileSync(join(temporary, "fake-log"), "SYNTHETIC_SECRET");
       return { status: 1 };

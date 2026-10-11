@@ -60,6 +60,10 @@ export const runSecretProcess = (
         XDG_CACHE_HOME: join(temporary, "cache"),
         NPM_CONFIG_CACHE: join(temporary, "npm-cache"),
         NPM_CONFIG_LOGS_MAX: "0",
+        // Pinned Vercel CLI otherwise starts detached cache-writing workers.
+        VERCEL_TELEMETRY_DISABLED: "1",
+        NO_UPDATE_NOTIFIER: "1",
+        NPM_CONFIG_UPDATE_NOTIFIER: "false",
       },
       stdio: ["ignore", "pipe", "pipe"],
       maxBuffer: 16 * 1024 * 1024,
