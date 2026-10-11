@@ -1,0 +1,30 @@
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": "build/client",
+  "routes": [
+    {
+      "src": "/api/search",
+      "headers": {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      "continue": true
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/(.+?)/?",
+      "dest": "/$1/index.html",
+      "check": true
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/404.html",
+      "status": 404
+    }
+  ]
+}

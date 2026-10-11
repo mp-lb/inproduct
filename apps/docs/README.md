@@ -71,7 +71,23 @@ retains the official Fumadocs theme.
 
 ## Hosting boundary
 
-No docs hosting has been created or configured. The existing `apps/frontend/vercel.json`
-belongs to the deployed landing page and remains unchanged. Approved tooling can consume
-`apps/docs/build/client`; it must preserve static assets, prerendered paths and SPA fallback.
+Docs deploy independently using `apps/docs/vercel.json`: project root `apps/docs`,
+build `pnpm build`, output `build/client`. Routing serves files and directory indexes
+before the SPA 404 fallback; `/api/search` retains its JSON content type.
+The landing deployment is independent and unchanged. Its optional Docs navigation
+link reads the non-secret `VITE_DOCS_URL` build value; configure it with the verified
+public docs URL after the separate docs project is deployed. No landing is required
+for docs hosting, and no docs deployment is required to build the landing.
+
+Use a dedicated docs hostname as the location convention, initially the actual
+provider-assigned hostname. A custom `docs.<project-domain>` is optional and needs
+one-time domain/DNS verification. The intended project name is `inproduct-docs`;
+its exact public hostname must be verified before configuring the link.
+ArcNet tooling owns builds, static artifacts, reference validation and deployment;
+operator prerequisites are an existing provider account and scoped encrypted
+credential access. Project creation remains a separate approved step in the
+current adapter. Automatic hostname registration and a shared URL-to-project
+configuration convention are missing reusable onboarding features, not application
+requirements to couple landing/docs. No new account, seat, GCP or DNS change is
+required to use the default provider hostname.
 MyShop is private and local-only and must never be included in a public deployment.

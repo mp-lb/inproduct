@@ -16,6 +16,9 @@ export const App = () => (
       </a>
       <nav aria-label="Main navigation">
         <a href="#building-blocks">The bits</a>
+        {import.meta.env.VITE_DOCS_URL && (
+          <a href={import.meta.env.VITE_DOCS_URL}>Docs</a>
+        )}
       </nav>
     </header>
     <main id="main">

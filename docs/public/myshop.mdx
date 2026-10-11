@@ -17,11 +17,11 @@ cd inproduct
 zap task setup
 zap task context-build
 zap task myshop
+zap launch MyShop
 zap status
 ```
 
-`zap task myshop` builds the library before starting MyShop. Open its `127.0.0.1` URL
-from Zap's output. Ports are allocated by Zap rather than hard-coded. No `.env` secrets
+`zap task myshop` builds the library before starting MyShop. Use `zap launch MyShop` (or `zap o MyShop`) to open the local example. Ports are allocated by Zap rather than hard-coded. No `.env` secrets
 or database seed commands are needed.
 
 Four deterministic products are loaded from `apps/myshop/src/catalog.ts`: Everyday mug
