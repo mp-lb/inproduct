@@ -1,0 +1,21 @@
+name: Documentation
+on:
+  push:
+    branches: [main]
+    paths: ["apps/docs/**", "docs/public/**", "docs/agents-md/**", "etc/tsconfig.frontend.json", "packages/inproduct/src/**", "scripts/check-docs.mjs", "scripts/prepare-docs-preview.mjs", "package.json", "pnpm-lock.yaml", ".github/workflows/docs.yaml"]
+  pull_request:
+    paths: ["apps/docs/**", "docs/public/**", "docs/agents-md/**", "etc/tsconfig.frontend.json", "packages/inproduct/src/**", "scripts/check-docs.mjs", "scripts/prepare-docs-preview.mjs", "package.json", "pnpm-lock.yaml", ".github/workflows/docs.yaml"]
+permissions:
+  contents: read
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm docs:check

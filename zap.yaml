@@ -10,7 +10,7 @@ ports:
   - MYSHOP_PORT
 native:
   docs:
-    cmd: CHOKIDAR_USEPOLLING=1 pnpm --filter @mp-lb/inproduct-docs dev --host 127.0.0.1 --port ${DOCS_PORT}
+    cmd: CHOKIDAR_USEPOLLING=1 pnpm --filter @mp-lb/inproduct-docs dev
     env: "*"
   myshop:
     cmd: pnpm --filter @mp-lb/inproduct-myshop dev --host 127.0.0.1 --port ${MYSHOP_PORT}
@@ -22,6 +22,10 @@ native:
     cmd: pnpm --filter @mp-lb/inproduct-backend dev
     env: "*"
 tasks:
+  docs-preview:
+    env: "*"
+    cmds:
+      - pnpm --filter @mp-lb/inproduct-docs start
   myshop:
     cmds:
       - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct build

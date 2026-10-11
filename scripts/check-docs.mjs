@@ -23,6 +23,12 @@ for (const [path, title] of [
   );
 }
 
+assert.equal(
+  read("404.html"),
+  read("__spa-fallback.html"),
+  "missing SPA 404 fallback",
+);
+
 const full = read("llms-full.txt");
 assert.ok(full.includes("zap task myshop"));
 assert.ok(

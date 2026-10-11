@@ -11,7 +11,9 @@
     "release": "changeset publish",
     "typecheck": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present typecheck",
     "version-packages": "changeset version",
-    "test": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present test"
+    "test": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present test",
+    "docs:gen": "python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-docs build",
+    "docs:check": "pnpm docs:gen"
   },
   "devDependencies": {
     "@changesets/cli": "2.31.0",

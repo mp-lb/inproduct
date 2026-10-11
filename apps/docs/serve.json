@@ -1,3 +1,15 @@
 {
-  "rewrites": [{ "source": "/**", "destination": "/__spa-fallback.html" }]
+  "cleanUrls": true,
+  "directoryListing": false,
+  "headers": [
+    {
+      "source": "/api/search",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        }
+      ]
+    }
+  ]
 }
