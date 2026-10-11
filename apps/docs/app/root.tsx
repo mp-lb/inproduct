@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 import { RootProvider } from "fumadocs-ui/provider/react-router";
 import type { Route } from "./+types/root";
@@ -13,8 +14,18 @@ import SearchDialog from "@/components/search";
 import NotFound from "./routes/not-found";
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      data-document-path={
+        pathname === "/docs" || pathname.startsWith("/docs/")
+          ? pathname
+          : undefined
+      }
+      suppressHydrationWarning
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

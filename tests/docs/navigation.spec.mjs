@@ -76,3 +76,57 @@ for (const [path, title] of [
     expect(errors).toEqual([]);
   });
 }
+
+test("Back before reload hydration uses the destination article", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/docs/myshop");
+  await page.getByRole("button", { name: /^Search\b/ }).click();
+  await page.getByRole("dialog").press("Escape");
+  await page
+    .getByRole("link", { name: "Backend integration", exact: true })
+    .click();
+
+  await expect(page.locator("article h1")).toHaveText("Backend integration");
+
+  let releaseEntry;
+
+  const entryReady = new Promise((resolve) => {
+    releaseEntry = resolve;
+  });
+
+  await page.route(/\/assets\/entry\.client-.*\.js$/, async (route) => {
+    await entryReady;
+    await route.continue();
+  });
+
+  await page.reload({ waitUntil: "commit" });
+  await expect(page.locator("article h1")).toHaveText("Backend integration");
+  await page.goBack({ waitUntil: "commit" });
+  releaseEntry();
+  await expect(page).toHaveURL(/\/docs\/myshop$/);
+  await expect(page.locator("article h1")).toHaveText("MyShop local example");
+  await page.getByRole("button", { name: /^Search\b/ }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("unknown paths retain the SPA 404 fallback without reloading", async ({
+  page,
+}) => {
+  let documentRequests = 0;
+  page.on("request", (request) => {
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame())
+      documentRequests++;
+  });
+
+  await page.goto("/unknown-page");
+  await page.waitForFunction(
+    () => window.__reactRouterDataRouter?.state.initialized,
+  );
+
+  await expect(page.getByRole("heading", { name: /not found/i })).toBeVisible();
+  expect(documentRequests).toBe(1);
+});

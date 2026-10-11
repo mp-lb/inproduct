@@ -106,3 +106,13 @@ Playwright Chromium and selects it with `PLAYWRIGHT_CHANNEL=chromium`. The test 
 MyShop → Backend → reload → Back → Forward, delayed scripts, direct entry/reload for
 every guide, search interactivity and uncaught hydration errors. Set `TEST_DOCS_URL`
 to an existing docs origin to run the same read-only checks against a deployment.
+
+The client entry also guards history changes before hydration completes. Reloading
+a document preserves earlier same-document history entries; an early Back can
+change the URL while its HTML and embedded loader data still describe the reloaded
+page. Prerendered docs carry their document pathname. If it differs at bootstrap, or
+changes before hydration commits, load the destination document instead of hydrating
+with mismatched data. The guard is removed after hydration; ordinary navigation stays
+client-side. The SPA 404 fallback has no document-path marker to avoid reload loops.
+The early-Back regression holds the entry bundle during reload and navigates after
+only the server-rendered heading is visible, without waiting for router readiness.
