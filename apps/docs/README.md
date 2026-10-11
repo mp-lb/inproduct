@@ -75,14 +75,15 @@ Docs deploy independently using `apps/docs/vercel.json`: project root `apps/docs
 build `pnpm build`, output `build/client`. Routing serves files and directory indexes
 before the SPA 404 fallback; `/api/search` retains its JSON content type.
 The landing deployment is independent and unchanged. Its optional Docs navigation
-link reads the non-secret `VITE_DOCS_URL` build value; configure it with the verified
-public docs URL after the separate docs project is deployed. No landing is required
+link reads the non-secret `VITE_DOCS_URL` build value; the committed production build value was derived from the verified
+`inproduct-docs.vercel.app` hostname. No landing is required
 for docs hosting, and no docs deployment is required to build the landing.
 
 Use a dedicated docs hostname as the location convention, initially the actual
 provider-assigned hostname. A custom `docs.<project-domain>` is optional and needs
-one-time domain/DNS verification. The intended project name is `inproduct-docs`;
-its exact public hostname must be verified before configuring the link.
+one-time domain/DNS verification. The verified project is `inproduct-docs` (`prj_LQy5bWkXPbzDurQBAqQ6XB1Kx1Oq`),
+public hostname `inproduct-docs.vercel.app`. ArcNet selects only this docs project;
+the landing retains its existing Vercel Git deployment trigger.
 ArcNet tooling owns builds, static artifacts, reference validation and deployment;
 operator prerequisites are an existing provider account and scoped encrypted
 credential access. Project creation remains a separate approved step in the

@@ -3,54 +3,15 @@
   "mode": "vercel",
   "slug": "inproduct",
   "repository": "mp-lb/inproduct",
-  "approved": false,
+  "approved": true,
   "account": {
     "type": "team",
     "id": "team_1w5PsP1pNWCex9vAwF4PqvTs"
   },
   "sites": {
-    "frontend": {
-      "mode": "existing",
-      "projectId": "prj_BZ7htFNVvwtaUiJSgVSc2RIWEe49",
-      "projectName": "inproduct",
-      "build": [
-        "pnpm",
-        "--filter",
-        "@mp-lb/inproduct-frontend",
-        "build"
-      ],
-      "output": "apps/frontend/dist",
-      "outputConfig": {
-        "version": 3,
-        "routes": [
-          {
-            "src": "/(.+)/",
-            "headers": {
-              "Location": "/$1"
-            },
-            "status": 308
-          },
-          {
-            "src": "/(.+)\\.html",
-            "headers": {
-              "Location": "/$1"
-            },
-            "status": 308
-          },
-          {
-            "handle": "filesystem"
-          },
-          {
-            "src": "/(.*)",
-            "dest": "/index.html"
-          }
-        ]
-      }
-    },
     "docs": {
-      "mode": "new",
+      "mode": "existing",
       "projectName": "inproduct-docs",
-      "creationApproved": false,
       "build": [
         "pnpm",
         "--filter",
@@ -82,7 +43,8 @@
             "status": 404
           }
         ]
-      }
+      },
+      "projectId": "prj_LQy5bWkXPbzDurQBAqQ6XB1Kx1Oq"
     }
   }
 }
