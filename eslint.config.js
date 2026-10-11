@@ -1,7 +1,8 @@
 import { createBaseEslintConfig } from "@mp-lb/fssstack-config/eslint";
 
 export default [
-  { ignores: ["apps/docs/.react-router/**", "apps/docs/.source/**", "apps/docs/build/**"] },
+  // ArcNet runner is generated from the tested StackForge template.
+  { ignores: [".arcnet/run.mjs", "apps/docs/.react-router/**", "apps/docs/.source/**", "apps/docs/build/**"] },
   ...createBaseEslintConfig({
   project: [
     "./apps/**/tsconfig.json",
