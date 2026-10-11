@@ -1,0 +1,31 @@
+---
+title: Installation
+description: Install the ESM library into your own application.
+---
+
+Use Node.js 22.13 or newer with an ESM application:
+
+```sh
+pnpm add @mp-lb/inproduct
+```
+
+```ts
+import { slugify } from '@mp-lb/inproduct';
+
+const slug = slugify('  Everyday Mug! ');
+console.log(slug); // everyday-mug
+```
+
+Type declarations and declaration maps ship with the package. No environment variables,
+account setup, database, network access or runtime dependencies are required by this utility.
+There is no CommonJS `require` export.
+
+## Behavior and application responsibilities
+
+`slugify` trims and lowercases text, replaces runs outside ASCII `a-z` and `0-9` with
+hyphens, and removes leading/trailing hyphens. It does not transliterate Unicode.
+Punctuation-only or non-ASCII-only labels can produce an empty string. Different labels
+can produce the same slug. Your application must validate empty values and enforce uniqueness.
+It does not generate IDs, sanitize HTML, authorize access or reserve URLs.
+
+The package's TypeScript declarations provide its complete API surface.

@@ -54,6 +54,7 @@ jobs:
       - name: Verify
         if: ${{ steps.changesets.outputs.count != '0' }}
         run: |
+          pnpm lint
           pnpm typecheck
           pnpm test
           pnpm build

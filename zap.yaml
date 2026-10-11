@@ -6,7 +6,15 @@ homepage: http://localhost:${FRONTEND_PORT}
 ports:
   - BACKEND_PORT
   - FRONTEND_PORT
+  - DOCS_PORT
+  - MYSHOP_PORT
 native:
+  docs:
+    cmd: CHOKIDAR_USEPOLLING=1 pnpm --filter @mp-lb/inproduct-docs dev --host 127.0.0.1 --port ${DOCS_PORT}
+    env: "*"
+  myshop:
+    cmd: pnpm --filter @mp-lb/inproduct-myshop dev --host 127.0.0.1 --port ${MYSHOP_PORT}
+    env: "*"
   frontend:
     cmd: pnpm --filter @mp-lb/inproduct-frontend dev --host 0.0.0.0 --port ${FRONTEND_PORT}
     env: "*"
@@ -14,6 +22,13 @@ native:
     cmd: pnpm --filter @mp-lb/inproduct-backend dev
     env: "*"
 tasks:
+  myshop:
+    cmds:
+      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct build
+      - zap up myshop
+  myshop-check:
+    cmds:
+      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop build:local
   context-build:
     cmds:
       - node scripts/context-files.mjs build {{REST}}
@@ -25,7 +40,7 @@ tasks:
       - zap task context-build -- {{REST}}
   setup:
     cmds:
-      - pnpm install
+      - python3 scripts/run_validation.py -- pnpm install
   build:
     cmds:
       - pnpm build
@@ -49,7 +64,7 @@ tasks:
       - pnpm test
   worktree-setup:
     cmds:
-      - pnpm install
+      - python3 scripts/run_validation.py -- pnpm install
       - cp "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.env" . 2>/dev/null || true
       - '[ ! -f AGENTS.base.md ] || zap task context-copy'
       - grep -qxF '@AGENTS_WORKTREE.md' AGENTS.md || printf '\n@AGENTS_WORKTREE.md\n' >> AGENTS.md

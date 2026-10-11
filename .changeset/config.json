@@ -12,6 +12,8 @@
     "@mp-lb/inproduct-server",
     "@mp-lb/inproduct-trpc",
     "@mp-lb/inproduct-backend",
-    "@mp-lb/inproduct-frontend"
+    "@mp-lb/inproduct-frontend",
+    "@mp-lb/inproduct-myshop",
+    "@mp-lb/inproduct-docs"
   ]
 }

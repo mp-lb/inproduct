@@ -72,3 +72,15 @@ zap task check
 - Use workspace package names with `pnpm --filter` for focused commands.
 - Check service logs and port assignments through Zapper while debugging local runs.
 - Update the docs in `docs/` when changing project conventions or release behavior.
+
+## Documentation and local shop
+
+`zap up docs` starts the Fumadocs site. `zap task myshop` builds the library and starts
+the private, local-only shop. Use `zap status` for their allocated loopback URLs.
+See [the MyShop guide](docs/public/myshop.mdx) for seed data, reset behavior and the
+local-only boundary. Public documentation is opt-in under `docs/public/`.
+
+The publishable backend utility is `@mp-lb/inproduct`; `apps/backend` is a private
+health-service scaffold. Releases use Changesets and `.github/workflows/release.yaml`.
+MyShop is excluded from publication and ordinary builds. Validate its bundle explicitly
+with `zap task myshop-check`. Root checks share the local heavy-task queue.

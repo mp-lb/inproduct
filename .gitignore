@@ -9,3 +9,7 @@ AGENTS_WORKTREE.md
 AGENTS.md
 CLAUDE.md
 .forum/
+
+apps/docs/build
+apps/docs/.react-router
+apps/docs/.source

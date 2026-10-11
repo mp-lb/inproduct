@@ -1,0 +1,49 @@
+---
+title: MyShop local example
+description: A tiny synthetic shop with a storefront, cart and product editor.
+---
+
+MyShop is deliberately local-only. It uses React/Vite and the workspace library.
+InProduct supplies product slug generation; all shopping behavior belongs to the example.
+There are no real payments, orders, integrations, customer records or credentials.
+
+## Reproducible setup
+
+Install Node.js 22.13+, pnpm 11 and Zapper, then clone the repository:
+
+```sh
+git clone https://github.com/mp-lb/inproduct.git
+cd inproduct
+zap task setup
+zap task context-build
+zap task myshop
+zap status
+```
+
+`zap task myshop` builds the library before starting MyShop. Open its `127.0.0.1` URL
+from Zap's output. Ports are allocated by Zap rather than hard-coded. No `.env` secrets
+or database seed commands are needed.
+
+Four deterministic products are loaded from `apps/myshop/src/catalog.ts`: Everyday mug
+($18), Market tote ($24), Field notebook ($12) and Desk plant ($16). All prices use USD cents.
+
+## Try the whole loop
+
+1. Add a mug and tote to the cart. Adjust quantities or remove an item.
+2. Open **Manage products**, add a product and watch its slug preview update.
+3. Rename or reprice a product. The storefront and existing cart lines update together.
+4. Try a duplicate name or punctuation-only name to see application validation.
+5. Delete a product; it disappears from the storefront and cart.
+6. Select **Reset demo** to restore the four original products and clear the cart.
+
+State is held in memory in the current tab. Reloading also restores the seeds; other tabs
+are independent. There is no checkout button because no order or payment is created.
+
+Stop it with `zap down myshop`. Inspect logs with `zap logs myshop --no-follow`.
+
+## Local-only boundary
+
+The example package is private and ignored by Changesets. It has no production start script
+and is excluded from the ordinary workspace build. Its explicit `build:local` command exists
+only for local verification. It binds to loopback. Do not expose it through a tunnel, change
+its host binding, or add it to Render/Vercel deployment settings.
