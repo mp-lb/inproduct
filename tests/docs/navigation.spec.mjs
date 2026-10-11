@@ -71,7 +71,7 @@ for (const [path, title] of [
     );
 
     await expect(page.locator("article h1")).toHaveText(title);
-    await page.getByRole("button", { name: "Search ⌘ K", exact: true }).click();
+    await page.getByRole("button", { name: /^Search\b/ }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     expect(errors).toEqual([]);
   });
