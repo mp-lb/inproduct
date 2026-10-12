@@ -16,4 +16,10 @@ export default [
     files: ["scripts/secrets/*.mjs"],
     rules: { "import/extensions": ["error", "ignorePackages", { mjs: "always" }] },
   },
+  // Published storage output runs directly in Node ESM and needs file extensions.
+  {
+    files: ["packages/storage/src/**/*.ts"],
+    ignores: ["packages/storage/src/**/*.test.ts"],
+    rules: { "import/extensions": ["error", "ignorePackages", { js: "always" }] },
+  },
 ];

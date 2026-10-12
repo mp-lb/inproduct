@@ -84,3 +84,6 @@ The publishable backend utility is `@mp-lb/inproduct`; `apps/backend` is a priva
 health-service scaffold. Releases use Changesets and `.github/workflows/release.yaml`.
 MyShop is excluded from publication and ordinary builds. Validate its bundle explicitly
 with `zap task myshop-check`. Root checks share the local heavy-task queue.
+
+The object-storage module is [`@mp-lb/inproduct-storage`](packages/storage/README.md),
+with a configurable storage facade and an in-memory adapter for local use.

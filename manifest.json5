@@ -7,6 +7,6 @@
   shadcnPreset: 'b1VlIttI',
   frontends: [{name:'frontend',type:'react-vite'}],
   backends: ['backend'],
-  libs: ['inproduct'],
+  libs: ['inproduct', 'storage'],
   extensions: []
 }
