@@ -56,6 +56,26 @@ const main = async () => {
   const selected = selectCredentials(values, command);
   for (const value of new Set(Object.values(selected)))
     process.stdout.write(maskCommand(value));
+
+  if (command === "publish") {
+    const response = await globalThis.fetch(
+      "https://registry.npmjs.org/-/whoami",
+      {
+        headers: { Authorization: `Bearer ${selected.NPM_TOKEN}` },
+        signal: globalThis.AbortSignal.timeout(30000),
+      },
+    );
+
+    if (!response.ok)
+      throw Error(
+        `npm credential verification failed (HTTP ${response.status}); update the shared publishing token.`,
+      );
+    console.log("npm publishing token authenticated successfully.");
+    // pnpm 11 uses native registry auth; pass the selected credential explicitly.
+    selected["pnpm_config_//registry.npmjs.org/:_authToken"] =
+      selected.NPM_TOKEN;
+  }
+
   if (command === "deploy")
     runSecretProcess(
       process.execPath,
