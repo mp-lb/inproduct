@@ -1,5 +1,11 @@
 # @mp-lb/inproduct
 
+## 0.0.4
+
+### Patch Changes
+
+- 7a3e41c: Clarify the slug utility's empty-result and collision behavior.
+
 ## 0.0.3
 
 ### Patch Changes
