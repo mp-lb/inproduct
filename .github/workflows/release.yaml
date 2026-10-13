@@ -77,3 +77,6 @@ jobs:
       - name: Push release commit and tags
         if: ${{ steps.changesets.outputs.count != '0' }}
         run: git push origin "HEAD:${GITHUB_REF_NAME}" --follow-tags
+
+      - name: Verify public registry versions and tarballs
+        run: node scripts/verifyPublication.mjs

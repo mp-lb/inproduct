@@ -46,3 +46,10 @@ versions, changelogs, and removes the consumed changeset.
 - Choose `minor` for new compatible APIs.
 - Choose `major` for breaking API, behavior, type, or export changes.
 - The changeset file does not need to be manually edited after it is created.
+
+A successful upload is not sufficient: the release workflow also verifies that
+both public versions and tarballs are accessible anonymously. npm may stage an
+upload for maintainer approval; a `0.0.0-stage` placeholder is not a usable release.
+Approve the prepared version in npm's Staged Packages tab using maintainer 2FA,
+then rerun the Release workflow to verify public availability. Keep the release
+commit and tags even while approval is pending; do not bump or restage the version.
