@@ -1,5 +1,11 @@
 # @mp-lb/inproduct
 
+## 0.0.3
+
+### Patch Changes
+
+- cebc422: Update the published README to link to the renamed MyShop frontend example.
+
 ## 0.0.2
 
 ### Patch Changes
