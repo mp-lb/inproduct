@@ -20,6 +20,10 @@ Slugs use lowercase ASCII letters and digits. Other character runs become hyphen
 Non-ASCII-only or punctuation-only input can yield an empty string. The caller owns validation
 and uniqueness; this utility does not transliterate, persist records or provide commerce APIs.
 
+For example, `slugify('Café')` returns `caf`, while `slugify('!!!')` returns an empty string.
+Distinct labels can also produce the same slug, so check for collisions before using a slug
+as a database key or URL.
+
 See [installation](https://github.com/mp-lb/inproduct/blob/main/docs/public/installation.mdx),
 [backend integration](https://github.com/mp-lb/inproduct/blob/main/docs/public/backend.mdx),
 and the [local-only MyShop example](https://github.com/mp-lb/inproduct/tree/main/apps/myshop-frontend).

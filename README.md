@@ -83,6 +83,9 @@ local-only boundary. Public documentation is opt-in under `docs/public/`.
 `apps/landing-page` is the marketing site. `apps/myshop-frontend` and
 `apps/myshop-backend` form the private local demo. The backend imports the public
 storage library, mounts its HTTP handler, and persists files with its disk adapter. Releases use Changesets and `.github/workflows/release.yaml`.
+The release workflow loads the standard and project encrypted snapshots from `.arcnet/`,
+selects only the npm publishing token through `arcnet env run`, and publishes packages
+after a Changeset is pushed to `main`.
 MyShop is excluded from publication and ordinary builds. Validate its bundle explicitly
 with `zap task myshop-check`. Root checks share the local heavy-task queue.
 
