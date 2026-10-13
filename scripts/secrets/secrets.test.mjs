@@ -33,9 +33,10 @@ test("consumer selection exports only the required shared fields", () => {
     '{"VERCEL_API_TOKEN":"fake-vercel","NPM_TOKEN":"fake-npm","ATLAS_KEY":"fake-atlas","APP_PASSWORD":"fake-app"}',
   );
 
-  assert.deepEqual(selectCredentials(shared, "deploy"), {
-    VERCEL_TOKEN: "fake-vercel",
-  });
+  assert.throws(
+    () => selectCredentials(shared, "deploy"),
+    /Unknown credential consumer/,
+  );
 
   assert.deepEqual(selectCredentials(shared, "publish"), {
     NPM_TOKEN: "fake-npm",
@@ -43,7 +44,7 @@ test("consumer selection exports only the required shared fields", () => {
   });
 
   assert.equal(
-    Object.hasOwn(selectCredentials(shared, "deploy"), "APP_PASSWORD"),
+    Object.hasOwn(selectCredentials(shared, "publish"), "APP_PASSWORD"),
     false,
   );
 });
@@ -51,19 +52,19 @@ test("consumer selection exports only the required shared fields", () => {
 test("aliases agree or fail closed; empty and multiline tokens are rejected", () => {
   assert.deepEqual(
     selectCredentials(
-      { VERCEL_TOKEN: "same", VERCEL_API_TOKEN: "same" },
-      "deploy",
+      { NPM_TOKEN: "same", NODE_AUTH_TOKEN: "same" },
+      "publish",
     ),
-    { VERCEL_TOKEN: "same" },
+    { NPM_TOKEN: "same", NODE_AUTH_TOKEN: "same" },
   );
 
   for (const values of [
     {},
-    { VERCEL_TOKEN: "" },
-    { VERCEL_TOKEN: "a", VERCEL_API_TOKEN: "b" },
-    { VERCEL_TOKEN: "a\nb" },
+    { NPM_TOKEN: "" },
+    { NPM_TOKEN: "a", NODE_AUTH_TOKEN: "b" },
+    { NPM_TOKEN: "a\nb" },
   ])
-    assert.throws(() => selectCredentials(values, "deploy"));
+    assert.throws(() => selectCredentials(values, "publish"));
   assert.throws(() =>
     selectCredentials({ NPM_TOKEN: "a", NODE_AUTH_TOKEN: "b" }, "publish"),
   );
@@ -225,7 +226,6 @@ test("credential command caches/logs are isolated and removed on failure", () =>
       temporary = options.env.HOME;
       assert.ok(existsSync(temporary));
       assert.equal(options.env.NPM_CONFIG_LOGS_MAX, "0");
-      assert.equal(options.env.VERCEL_TELEMETRY_DISABLED, "1");
       assert.equal(options.env.NO_UPDATE_NOTIFIER, "1");
       assert.equal(options.env.NPM_CONFIG_UPDATE_NOTIFIER, "false");
       assert.ok(options.env.NPM_CONFIG_CACHE.startsWith(temporary));
@@ -246,10 +246,6 @@ test("unrelated catalog fields may have structured values; consumed fields must 
       enabled: true,
     }),
   );
-
-  assert.deepEqual(selectCredentials(values, "deploy"), {
-    VERCEL_TOKEN: "fake-vercel",
-  });
 
   assert.deepEqual(selectCredentials(values, "publish"), {
     NPM_TOKEN: "fake-npm",

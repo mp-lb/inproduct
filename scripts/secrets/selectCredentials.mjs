@@ -1,5 +1,4 @@
 const aliases = {
-  deploy: ["VERCEL_TOKEN", "VERCEL_API_TOKEN"],
   publish: ["NPM_TOKEN", "NODE_AUTH_TOKEN"],
 };
 
@@ -35,7 +34,5 @@ export const selectCredentials = (values, consumer) => {
   const token = values[candidates[0]];
   if (/[\r\n\0]/.test(token))
     throw Error(`Invalid ${names[0]} format (content omitted).`);
-  return consumer === "deploy"
-    ? { VERCEL_TOKEN: token }
-    : { NPM_TOKEN: token, NODE_AUTH_TOKEN: token };
+  return { NPM_TOKEN: token, NODE_AUTH_TOKEN: token };
 };
