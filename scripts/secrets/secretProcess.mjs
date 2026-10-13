@@ -47,6 +47,7 @@ export const runSecretProcess = (
   );
 
   let commandFailed = false;
+  let diagnostic = "";
   let cleanupFailed = false;
 
   try {
@@ -70,6 +71,34 @@ export const runSecretProcess = (
     });
 
     commandFailed = Boolean(result.error) || result.status !== 0;
+
+    if (commandFailed) {
+      const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+
+      const codes = [
+        "E401",
+        "E403",
+        "E404",
+        "EOTP",
+        "ENEEDAUTH",
+        "EPUBLISHCONFLICT",
+        "EPRIVATE",
+        "ENOENT",
+        "ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND",
+        "ERR_PNPM_UNSUPPORTED_ENGINE",
+        "ERR_PNPM_GIT_UNCLEAN",
+        "ERR_PNPM_NOTHING_TO_DEPLOY",
+        "ERR_PNPM_BAD_PM_VERSION",
+      ];
+
+      const found = codes.filter(
+        (code) => output.includes(code) || result.error?.code === code,
+      );
+
+      diagnostic = found.length
+        ? ` Recognized error codes: ${found.join(", ")}.`
+        : " No recognized error code.";
+    }
   } catch {
     commandFailed = true;
   } finally {
@@ -91,6 +120,7 @@ export const runSecretProcess = (
   if (commandFailed)
     throw Error(
       "Credential-consuming command failed; output withheld to protect secrets." +
+        diagnostic +
         (cleanupFailed
           ? " Temporary credential data cleanup also failed."
           : ""),
