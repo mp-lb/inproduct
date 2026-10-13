@@ -10,6 +10,7 @@ for (const [path, title] of [
   ["", "InProduct"],
   ["installation/", "Installation"],
   ["backend/", "Backend integration"],
+  ["storage/", "Object storage"],
   ["myshop/", "MyShop local example"],
 ]) {
   assert.ok(
@@ -37,4 +38,32 @@ assert.ok(
 );
 
 assert.ok(read("api/search").includes("MyShop"), "search index missing MyShop");
+const storageMarkdown = read("llms.mdx/docs/storage/content.md");
+
+for (const marker of [
+  "createStorage",
+  "maxBytes",
+  "Memory storage is ephemeral",
+]) {
+  assert.ok(
+    storageMarkdown.includes(marker),
+    `storage Markdown missing: ${marker}`,
+  );
+
+  assert.ok(
+    full.includes(marker),
+    `agent bundle missing storage content: ${marker}`,
+  );
+}
+
+assert.ok(
+  read("api/search").includes("/docs/storage"),
+  "search index missing storage guide",
+);
+
+assert.ok(
+  read("docs/installation/index.html").includes('href="/docs/storage"'),
+  "documentation navigation missing storage guide",
+);
+
 console.log("Verified prerendered documentation, Markdown and local search.");

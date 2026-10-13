@@ -95,7 +95,7 @@ MyShop is private and local-only and must never be included in a public deployme
 
 ## Navigation regression checks
 
-The four short MDX guides are bundled eagerly, so the initial article and table of
+The short MDX guides are bundled eagerly, so the initial article and table of
 contents hydrate synchronously. This avoids suspending the article on a separate
 content download while browser history is changing. Revisit lazy loading only with
 explicit hydration/preload handling if the collection grows.

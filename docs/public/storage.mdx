@@ -1,0 +1,88 @@
+---
+title: Object storage
+description: Initialize storage in your application with a local memory adapter or your own persistence.
+---
+
+`@mp-lb/inproduct-storage` is an independent ESM package for storing objects by key.
+It requires Node.js 22.13 or newer. It does not require the InProduct backend scaffold,
+an account, environment variables, or runtime dependencies.
+
+## Install and initialize
+
+Until the first npm release, add it from a consuming package in this repository's
+workspace and build it from the repository root:
+
+```sh
+pnpm --filter <consumer-package> add @mp-lb/inproduct-storage@workspace:*
+pnpm --filter @mp-lb/inproduct-storage build
+```
+
+After publication, external applications can use `pnpm add @mp-lb/inproduct-storage`.
+Publishing this guide does not publish the npm package.
+
+```ts
+import { createStorage, createMemoryStorageAdapter } from '@mp-lb/inproduct-storage';
+
+const storage = createStorage({
+  adapter: createMemoryStorageAdapter(),
+  prefix: 'receipts',
+  maxBytes: 5 * 1024 * 1024,
+});
+
+await storage.put('2026/order-123.txt', {
+  body: new TextEncoder().encode('Order 123'),
+  contentType: 'text/plain',
+});
+
+const receipt = await storage.get('2026/order-123.txt');
+if (receipt) console.log(new TextDecoder().decode(receipt.body));
+
+await storage.delete('2026/order-123.txt');
+```
+
+## Configure storage
+
+Pass an `adapter` to `createStorage`. The optional `prefix` and `maxBytes` values
+are captured at initialization; changing the original options later has no effect.
+
+- `prefix` namespaces keys: the example stores `receipts/2026/order-123.txt` in the
+  adapter. Omit it for no namespace. An empty prefix is invalid.
+- `maxBytes` limits each write's byte length. It must be a nonnegative safe integer;
+  zero allows empty objects only. Omit it for no limit. It does not limit reads or
+  total stored bytes.
+
+Keys and prefixes are case-sensitive, nonempty slash-separated names. Empty segments,
+`.` and `..` segments, backslashes, and control characters are rejected. Percent escapes
+are literal and Unicode is not normalized. Adapters must treat keys as opaque names,
+not decode them into filesystem paths. Prefixes are naming conveniences, not tenant
+isolation; your application must authorize access before calling storage.
+
+## Read, replace, and delete
+
+`put` stores a `Uint8Array` body and optional caller-supplied `contentType`. It replaces
+the complete object at an existing key. Content type is metadata, not file validation.
+`get` returns the object, or `undefined` when absent. `delete` succeeds even when the
+key is already absent. All three operations are asynchronous.
+
+Invalid configuration throws synchronously. Invalid keys reject operations with
+`TypeError`; writes exceeding `maxBytes` reject with `RangeError`. Adapter failures
+propagate unchanged, so permission or network failures must not be treated as absence.
+The shipped TypeScript declarations and declaration maps are the API reference.
+
+## Memory adapter and persistence
+
+**Memory storage is ephemeral. All objects are lost when the process exits.** Use
+`createMemoryStorageAdapter` for local development and tests. Each instance owns a
+separate store; share an adapter between facades when you want them to share data.
+Bytes and metadata are copied on writes and reads, including Node Buffer input, so
+caller mutations cannot change stored objects. Total memory use is unbounded.
+
+For durable storage, implement the exported `StorageAdapter` contract and pass it to
+`createStorage`. Your adapter owns credentials, persistence, concurrency, and transport.
+It must preserve bytes and content type, isolate stored data from caller mutation,
+replace objects on `put`, make `delete` idempotent, and return `undefined` only for
+missing objects on `get`.
+
+The package includes no S3 or filesystem adapter, listing, streaming, signed URLs,
+retries, or metadata database. Objects are buffered in memory. Your application owns
+authentication, authorization, and file validation.
