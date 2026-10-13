@@ -2,7 +2,6 @@ import process from "node:process";
 import console from "node:console";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readFileSync } from "node:fs";
 import { readStandardSecrets } from "./readStandardSecrets.mjs";
 import { selectCredentials } from "./selectCredentials.mjs";
 import { maskCommand, runSecretProcess } from "./secretProcess.mjs";
@@ -12,8 +11,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const main = async () => {
   process.chdir(root);
   const [command, ...extra] = process.argv.slice(2);
-  if (extra.length || !["validate", "deploy", "publish"].includes(command))
-    throw Error("Usage: node scripts/secrets/run.mjs validate|deploy|publish");
+  if (extra.length || !["validate", "publish"].includes(command))
+    throw Error("Usage: node scripts/secrets/run.mjs validate|publish");
   if (
     command !== "validate" &&
     (process.env.GITHUB_ACTIONS !== "true" ||
@@ -24,30 +23,15 @@ const main = async () => {
       "Credential-consuming commands require the configured repository main CI job.",
     );
 
-  if (command === "deploy") {
-    const config = JSON.parse(
-      readFileSync(resolve(root, ".arcnet/project.json"), "utf8"),
-    );
-
-    if (
-      config.approved !== true ||
-      Object.values(config.sites).some((site) => site.mode !== "existing")
-    )
-      throw Error(
-        "ArcNet remains disabled until references and cutover are approved.",
-      );
-  }
-
   const key = process.env.SECRETS_KEY;
   delete process.env.SECRETS_KEY;
   delete process.env.DOCTRINE_RECIPIENT_SECRET;
   const values = await readStandardSecrets(root, key);
 
   if (command === "validate") {
-    selectCredentials(values, "deploy");
     selectCredentials(values, "publish");
     console.log(
-      "Standard snapshot decrypts; deployment and publishing field selection passed. No provider requests or mutations performed.",
+      "Standard snapshot decrypts; publishing field selection passed. No provider requests or mutations performed.",
     );
 
     return;
@@ -76,15 +60,7 @@ const main = async () => {
       selected.NPM_TOKEN;
   }
 
-  if (command === "deploy")
-    runSecretProcess(
-      process.execPath,
-      [resolve(root, ".arcnet/run.mjs"), "deploy"],
-      process.env,
-      selected,
-    );
-  else
-    runSecretProcess("pnpm", ["changeset", "publish"], process.env, selected);
+  runSecretProcess("pnpm", ["changeset", "publish"], process.env, selected);
   console.log(`${command} completed.`);
 };
 

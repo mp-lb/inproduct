@@ -71,26 +71,13 @@ retains the official Fumadocs theme.
 
 ## Hosting boundary
 
-Docs deploy independently using `apps/docs/vercel.json`: project root `apps/docs`,
-build `pnpm build`, output `build/client`. Routing serves files and directory indexes
-before the SPA 404 fallback; `/api/search` retains its JSON content type.
-The landing deployment is independent and unchanged. Its optional Docs navigation
-link reads the non-secret `VITE_DOCS_URL` build value; the committed production build value was derived from the verified
-`inproduct-docs.vercel.app` hostname. No landing is required
-for docs hosting, and no docs deployment is required to build the landing.
+This repository does not configure docs deployment. Build the static docs with
+`pnpm docs:gen` and preview them with `zap task docs-preview`.
+`apps/docs/vercel.json` retains static routing/build settings for any future
+hosting setup; it does not deploy the site.
 
-Use a dedicated docs hostname as the location convention, initially the actual
-provider-assigned hostname. A custom `docs.<project-domain>` is optional and needs
-one-time domain/DNS verification. The verified project is `inproduct-docs` (`prj_LQy5bWkXPbzDurQBAqQ6XB1Kx1Oq`),
-public hostname `inproduct-docs.vercel.app`. ArcNet selects only this docs project;
-the landing retains its existing Vercel Git deployment trigger.
-ArcNet tooling owns builds, static artifacts, reference validation and deployment;
-operator prerequisites are an existing provider account and scoped encrypted
-credential access. Project creation remains a separate approved step in the
-current adapter. Automatic hostname registration and a shared URL-to-project
-configuration convention are missing reusable onboarding features, not application
-requirements to couple landing/docs. No new account, seat, GCP or DNS change is
-required to use the default provider hostname.
+The landing’s optional Docs link uses `VITE_DOCS_URL`. Hosting and DNS must be
+verified separately before treating any configured URL as live.
 MyShop is private and local-only and must never be included in a public deployment.
 
 ## Navigation regression checks
