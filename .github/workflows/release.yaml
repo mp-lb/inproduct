@@ -6,6 +6,7 @@ on:
       - main
   workflow_dispatch:
 
+
 permissions:
   contents: write
   id-token: write
@@ -13,7 +14,9 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'mp-lb/inproduct' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]') }}
+    if: ${{ github.repository == 'mp-lb/inproduct' && github.ref ==
+      'refs/heads/main' && (github.event_name == 'workflow_dispatch' ||
+      github.actor != 'github-actions[bot]') }}
     concurrency:
       group: release-${{ github.ref }}
       cancel-in-progress: true
@@ -70,9 +73,12 @@ jobs:
 
       - name: Publish
         if: ${{ steps.changesets.outputs.count != '0' }}
-        run: node scripts/secrets/run.mjs publish
+        run: |
+          pnpm exec arcnet env run --consumer publish -- npm whoami
+          pnpm exec arcnet env run --consumer publish -- pnpm changeset publish
         env:
           SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
+          INPRODUCT_SECRETS_KEY: ${{ secrets.INPRODUCT_SECRETS_KEY }}
 
       - name: Push release commit and tags
         if: ${{ steps.changesets.outputs.count != '0' }}

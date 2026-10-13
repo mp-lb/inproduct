@@ -11,16 +11,15 @@
     "release": "changeset publish",
     "typecheck": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present typecheck",
     "version-packages": "changeset version",
-    "test": "pnpm secrets:test && python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present test",
+    "test": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present test",
     "docs:gen": "python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-docs build",
     "docs:check": "pnpm docs:gen",
-    "secrets:test": "node --test scripts/secrets/*.test.mjs",
-    "secrets:sync": "node scripts/secrets/sync.mjs",
-    "docs:test": "python3 scripts/run_validation.py -- pnpm exec playwright test --config tests/docs/playwright.config.mjs"
+    "secrets:sync": "arcnet secrets sync",
+    "docs:test": "python3 scripts/run_validation.py -- pnpm exec playwright test --config tests/docs/playwright.config.mjs",
+    "secrets:check": "arcnet env check"
   },
   "devDependencies": {
     "@changesets/cli": "2.31.0",
-    "@mp-lb/forum-secrets": "0.2.1",
     "@mp-lb/fssstack-config": "0.3.1",
     "@mp-lb/fssstack-testing": "0.1.0",
     "@playwright/test": "1.64.0",
@@ -30,7 +29,8 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tsx": "4.20.6",
     "typescript": "5.9.3",
-    "vitest": "4.0.16"
+    "vitest": "4.0.16",
+    "@mp-lb/arcnet": "0.2.0"
   },
   "description": "A collection of tools to put in your product."
 }

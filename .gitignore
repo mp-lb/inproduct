@@ -14,8 +14,8 @@ apps/docs/build
 apps/docs/.react-router
 apps/docs/.source
 
-.secrets/*.tmp
-secrets.json
+.arcnet/*.tmp
+/secrets.json
 
 test-results/
 playwright-report/

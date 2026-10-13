@@ -16,13 +16,6 @@ export default [
     ],
     tsconfigRootDir: import.meta.dirname,
   }),
-  // Native Node ESM scripts require explicit .mjs import extensions.
-  {
-    files: ["scripts/secrets/*.mjs"],
-    rules: {
-      "import/extensions": ["error", "ignorePackages", { mjs: "always" }],
-    },
-  },
   // Published storage output runs directly in Node ESM and needs file extensions.
   {
     files: ["packages/storage/src/**/*.ts"],
