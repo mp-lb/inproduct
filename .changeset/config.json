@@ -11,9 +11,9 @@
     "@mp-lb/inproduct-core",
     "@mp-lb/inproduct-server",
     "@mp-lb/inproduct-trpc",
-    "@mp-lb/inproduct-backend",
-    "@mp-lb/inproduct-frontend",
-    "@mp-lb/inproduct-myshop",
+    "@mp-lb/inproduct-myshop-backend",
+    "@mp-lb/inproduct-landing-page",
+    "@mp-lb/inproduct-myshop-frontend",
     "@mp-lb/inproduct-docs"
   ]
 }

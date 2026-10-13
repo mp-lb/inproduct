@@ -44,7 +44,7 @@ export function safePath(root, name) {
     rel
       .split("/")
       .some((p) => [".git", "node_modules", ".arcnet"].includes(p)) ||
-    /^apps\/myshop(?:\/|$)/i.test(rel)
+    /^apps\/myshop(?:-(?:frontend|backend))?(?:\/|$)/i.test(rel)
   )
     fail(`Unsafe or local-only artifact path: ${name}`);
   let at = root;

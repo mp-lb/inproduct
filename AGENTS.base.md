@@ -6,13 +6,14 @@ Read MANIFESTO.md for the product philosophy. Setup values live in manifest.json
 
 ## Packages
 
-- apps/frontend: `@mp-lb/inproduct-frontend`, React/Vite with shadcn/ui and Tailwind CSS.
-- apps/backend: `@mp-lb/inproduct-backend`, Node HTTP health service backed by the shared tRPC router.
-- packages/storage: `@mp-lb/inproduct-storage`, independent object-storage facade and local memory adapter.
+- apps/landing-page: `@mp-lb/inproduct-landing-page`, public React/Vite marketing site.
+- apps/myshop-frontend: `@mp-lb/inproduct-myshop-frontend`, local-only React/Vite library demo.
+- apps/myshop-backend: `@mp-lb/inproduct-myshop-backend`, local-only Node HTTP demo using the storage library handler and disk adapter.
+- packages/storage: `@mp-lb/inproduct-storage`, object/file storage, memory and disk adapters, HTTP transport and headless React hooks.
 - packages/inproduct: `@mp-lb/inproduct`, publishable library.
 - packages/core, packages/server, packages/trpc: private shared schemas, server helpers, and API router.
 
-This is an initial scaffold. No extensions are enabled.
+MyShop demonstrates the public libraries through a real frontend/backend boundary. No extensions are enabled.
 
 ## Development
 
@@ -28,7 +29,7 @@ Edit source context in agents-md/ and regenerate with `zap task context-build`. 
 
 Release the library with Changesets and the release workflow. The GitHub CLI is available for pushes and CI checks.
 
-Docs live in `docs/public/` and are rendered by `apps/docs` (Fumadocs). No docs hosting is configured by this repository. MyShop (`apps/myshop`) is private and local-only; never publish or deploy it. Run `zap task myshop` for the seeded demo and `zap task myshop-check` for its explicit local build. Ordinary builds exclude MyShop. Root validations use `scripts/run_validation.py` and share the per-user heavy-task lock; do not nest wrapped commands or remove the lock.
+Docs live in `docs/public/` and are rendered by `apps/docs` (Fumadocs). No docs hosting is configured by this repository. MyShop (`apps/myshop-frontend` and `apps/myshop-backend`) is private and local-only; never publish or deploy it. Run `zap task myshop` for the seeded demo and `zap task myshop-check` for its explicit local build. Ordinary builds exclude both MyShop apps. Uploaded files persist in ignored `apps/myshop-backend/.data/files`; reset only affects the catalog/cart. Root validations use `scripts/run_validation.py` and share the per-user heavy-task lock; do not nest wrapped commands or remove the lock.
 
 ### Public package documentation and delivery
 

@@ -5,8 +5,8 @@
   projectSlug: 'inproduct',
   packagePrefix: '@mp-lb',
   shadcnPreset: 'b1VlIttI',
-  frontends: [{name:'frontend',type:'react-vite'}],
-  backends: ['backend'],
+  frontends: [{name:'landing-page',type:'react-vite'}, {name:'myshop-frontend',type:'react-vite'}],
+  backends: ['myshop-backend'],
   libs: ['inproduct', 'storage'],
   extensions: []
 }

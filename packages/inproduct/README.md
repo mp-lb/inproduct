@@ -22,4 +22,4 @@ and uniqueness; this utility does not transliterate, persist records or provide 
 
 See [installation](https://github.com/mp-lb/inproduct/blob/main/docs/public/installation.mdx),
 [backend integration](https://github.com/mp-lb/inproduct/blob/main/docs/public/backend.mdx),
-and the [local-only MyShop example](https://github.com/mp-lb/inproduct/tree/main/apps/myshop).
+and the [local-only MyShop example](https://github.com/mp-lb/inproduct/tree/main/apps/myshop-frontend).

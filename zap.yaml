@@ -2,27 +2,27 @@ project: inproduct
 env-files:
   - .env.local
   - .env
-homepage: http://localhost:${FRONTEND_PORT}
+homepage: http://localhost:${LANDING_PAGE_PORT}
 links:
   - name: MyShop
-    url: http://localhost:${MYSHOP_PORT}
+    url: http://127.0.0.1:${MYSHOP_FRONTEND_PORT}
 ports:
-  - BACKEND_PORT
-  - FRONTEND_PORT
+  - MYSHOP_BACKEND_PORT
+  - LANDING_PAGE_PORT
   - DOCS_PORT
-  - MYSHOP_PORT
+  - MYSHOP_FRONTEND_PORT
 native:
   docs:
     cmd: CHOKIDAR_USEPOLLING=1 pnpm --filter @mp-lb/inproduct-docs dev
     env: "*"
-  myshop:
-    cmd: pnpm --filter @mp-lb/inproduct-myshop dev --host 127.0.0.1 --port ${MYSHOP_PORT}
+  myshop-frontend:
+    cmd: pnpm --filter @mp-lb/inproduct-myshop-frontend dev --host 127.0.0.1 --port ${MYSHOP_FRONTEND_PORT}
     env: "*"
-  frontend:
-    cmd: pnpm --filter @mp-lb/inproduct-frontend dev --host 0.0.0.0 --port ${FRONTEND_PORT}
+  landing-page:
+    cmd: pnpm --filter @mp-lb/inproduct-landing-page dev --host 0.0.0.0 --port ${LANDING_PAGE_PORT}
     env: "*"
-  backend:
-    cmd: pnpm --filter @mp-lb/inproduct-backend dev
+  myshop-backend:
+    cmd: pnpm --filter @mp-lb/inproduct-myshop-backend dev
     env: "*"
 tasks:
   docs-preview:
@@ -31,11 +31,12 @@ tasks:
       - pnpm --filter @mp-lb/inproduct-docs start
   myshop:
     cmds:
-      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct build
-      - zap up myshop
+      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct --filter @mp-lb/inproduct-storage build
+      - zap up myshop-backend myshop-frontend
   myshop-check:
     cmds:
-      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop build:local
+      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop-backend build:local
+      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop-frontend build:local
   context-build:
     cmds:
       - node scripts/context-files.mjs build {{REST}}

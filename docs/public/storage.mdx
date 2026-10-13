@@ -1,24 +1,26 @@
 ---
-title: Object storage
+title: File storage
 description: Initialize storage in your application with a local memory adapter or your own persistence.
 ---
 
 `@mp-lb/inproduct-storage` is an independent ESM package for storing objects by key.
 It requires Node.js 22.13 or newer. It does not require the InProduct backend scaffold,
-an account, environment variables, or runtime dependencies.
+an account, environment variables, or a hosted runtime. React is optional for the headless hook.
 
 ## Install and initialize
 
-Until the first npm release, add it from a consuming package in this repository's
-workspace and build it from the repository root:
+Install the published package into your application:
+
+```sh
+pnpm add @mp-lb/inproduct-storage
+```
+
+For development within this repository, use the workspace dependency and build it:
 
 ```sh
 pnpm --filter <consumer-package> add @mp-lb/inproduct-storage@workspace:*
 pnpm --filter @mp-lb/inproduct-storage build
 ```
-
-After publication, external applications can use `pnpm add @mp-lb/inproduct-storage`.
-Publishing this guide does not publish the npm package.
 
 ```ts
 import { createStorage, createMemoryStorageAdapter } from '@mp-lb/inproduct-storage';
@@ -83,6 +85,71 @@ It must preserve bytes and content type, isolate stored data from caller mutatio
 replace objects on `put`, make `delete` idempotent, and return `undefined` only for
 missing objects on `get`.
 
-The package includes no S3 or filesystem adapter, listing, streaming, signed URLs,
+The low-level object API has no listing. It does not provide streaming, signed URLs,
 retries, or metadata database. Objects are buffered in memory. Your application owns
 authentication, authorization, and file validation.
+
+
+## Build a backend-backed file manager
+
+Create the storage service on your Node backend and mount the library's HTTP handler:
+
+```ts
+import { createServer } from 'node:http';
+import { createFileStorage } from '@mp-lb/inproduct-storage';
+import { createDiskFileStorageAdapter, createFileStorageHandler } from '@mp-lb/inproduct-storage/node';
+
+const storage = createFileStorage({ adapter: createDiskFileStorageAdapter({ directory: './data/files' }) });
+const server = createServer(createFileStorageHandler({
+  storage,
+  authorize: (request) => yourExistingAdminCheck(request),
+}));
+```
+
+`yourExistingAdminCheck` is your own authorization function, not a library export.
+The handler requires authorization for every operation. Use your application's
+configured port and existing authentication; scope storage to the appropriate tenant.
+The default path is `/api/files`. Serve it on the frontend's origin or behind your proxy.
+
+The frontend only needs an HTTP client, a hook and your table/forms:
+
+```tsx
+import { createFileStorageClient } from '@mp-lb/inproduct-storage';
+import { useFileStorage } from '@mp-lb/inproduct-storage/react';
+
+const client = createFileStorageClient('/api/files');
+
+export const FileStorageSection = () => {
+  const storage = useFileStorage(client);
+  // Render storage.files, loading, busy and error.
+  // Wire uploads to storage.uploadFile(file), filters to storage.setFilters(...),
+  // and actions to storage.edit(...), storage.download(id), storage.remove(id).
+  return <p>{storage.usage?.count ?? 0} files</p>;
+};
+```
+
+The hook handles refresh, stale responses, pagination and browser transfers. React
+18 or 19 is required only for `/react`. The base entry point does not import React
+or Node built-ins. Import `/node` only on the backend. Operations return a success
+boolean and expose failures through `error`; no repeated event-handler catches needed.
+
+## Durable local files
+
+The disk adapter keeps bytes and metadata in the configured directory across browser
+reloads and backend restarts. Use one adapter instance per directory in a single
+process. Writes use atomic replacement and are serialized within the instance.
+It buffers file contents and scans records for listing; use another adapter for large
+collections, distributed processes or shared/network filesystems. Keep data outside
+public/static roots. Atomic replacement is not a backup or a power-loss guarantee.
+
+The service defaults to a 10 MiB file limit; the handler bounds request bodies to
+11 MiB including multipart overhead. Increase both limits together when necessary.
+Duplicate names produce separate IDs. Deletion removes bytes immediately. Edits
+change metadata. Search covers names/tags; exact category/tag filters combine with
+search. Usage totals remain independent of filters. Files are not malware-scanned;
+no audit ledger, retention policy or total-memory/disk quota is supplied.
+
+For tests and ephemeral prototypes, `createFileStorage()` without an adapter still
+uses isolated memory storage. MyShop uses the disk adapter on its backend, never
+in-memory file operations in the browser. See [MyShop](/docs/myshop) for the complete
+frontend/backend demo and its local-only access boundary.

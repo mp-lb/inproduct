@@ -23,9 +23,16 @@ In a real API, validate input at your request boundary, use your application's e
 and enforce uniqueness transactionally in your own database. Authentication, storage, catalog,
 cart and checkout are application responsibilities. This example's Set is not persistent storage.
 
-## Repository backend
+## MyShop backend example
 
-The private `apps/backend` health service and private core/server/tRPC packages are scaffold
-infrastructure. They are not exported by `@mp-lb/inproduct`, and the library does not depend on them.
-From a clone, `zap task setup` and `zap up backend` start the scaffold; use `zap status` to find
-its allocated port. `GET /health` returns a greeting. It is not a MyShop commerce API.
+`apps/myshop-backend` is a local-only consumer of the public storage library.
+It creates storage with the disk adapter and mounts the library's Node HTTP handler.
+`apps/myshop-frontend` uses the HTTP client and headless hook through Vite's proxy.
+
+Run `zap task myshop` to build the libraries and start both services. File uploads
+persist under ignored `apps/myshop-backend/.data/files` across browser reloads and
+backend restarts. See [MyShop](/docs/myshop) and [File storage](/docs/storage).
+
+The separate `apps/landing-page` is the public marketing site. The private
+core/server/tRPC packages remain shared scaffold examples; consumers of the public
+libraries do not need them. MyShop's file API uses the library's HTTP handler.

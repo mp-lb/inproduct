@@ -10,7 +10,7 @@ for (const [path, title] of [
   ["", "InProduct"],
   ["installation/", "Installation"],
   ["backend/", "Backend integration"],
-  ["storage/", "Object storage"],
+  ["storage/", "File storage"],
   ["myshop/", "MyShop local example"],
 ]) {
   assert.ok(
@@ -42,6 +42,8 @@ const storageMarkdown = read("llms.mdx/docs/storage/content.md");
 
 for (const marker of [
   "createStorage",
+  "createFileStorage",
+  "useFileStorage",
   "maxBytes",
   "Memory storage is ephemeral",
 ]) {

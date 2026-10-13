@@ -19,3 +19,5 @@ secrets.json
 
 test-results/
 playwright-report/
+
+apps/myshop-backend/.data/

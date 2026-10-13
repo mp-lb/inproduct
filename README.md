@@ -37,7 +37,7 @@ zap o
 Run a single package or app directly with pnpm filters when you need to work outside the full service set:
 
 ```bash
-pnpm --filter @mp-lb/inproduct-frontend dev
+pnpm --filter @mp-lb/inproduct-landing-page dev
 ```
 
 ## Validate
@@ -80,10 +80,13 @@ the private, local-only shop. Use `zap status` for their allocated loopback URLs
 See [the MyShop guide](docs/public/myshop.mdx) for seed data, reset behavior and the
 local-only boundary. Public documentation is opt-in under `docs/public/`.
 
-The publishable backend utility is `@mp-lb/inproduct`; `apps/backend` is a private
-health-service scaffold. Releases use Changesets and `.github/workflows/release.yaml`.
+`apps/landing-page` is the marketing site. `apps/myshop-frontend` and
+`apps/myshop-backend` form the private local demo. The backend imports the public
+storage library, mounts its HTTP handler, and persists files with its disk adapter. Releases use Changesets and `.github/workflows/release.yaml`.
 MyShop is excluded from publication and ordinary builds. Validate its bundle explicitly
 with `zap task myshop-check`. Root checks share the local heavy-task queue.
 
 The object-storage module is [`@mp-lb/inproduct-storage`](packages/storage/README.md),
-with a configurable storage facade and an in-memory adapter for local use.
+with object/file operations, memory and disk adapters, a Node HTTP handler, a browser
+client and headless React hooks. File uploads survive reloads and backend restarts;
+the catalog/cart remain tab-local.

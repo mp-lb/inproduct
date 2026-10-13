@@ -11,12 +11,12 @@ Project ID: prj_LQy5bWkXPbzDurQBAqQ6XB1Kx1Oq.
 ArcNet repo config selects only docs. Pushes to main build apps/docs and deploy
 its static output using the shared encrypted credentials through
 scripts/secrets/run.mjs. GitHub receives SECRETS_KEY only; no direct VERCEL_TOKEN
-configuration is needed. Publishing is separate and no changesets are pending.
+configuration is needed. Publishing is separate; pending Changesets are not part of docs deployment.
 The landing continues its original Vercel Git main trigger and project.
 
 The docs location convention is a dedicated hostname. The initial default uses
 the verified provider hostname, without custom DNS. Setup derived the public
-landing build value in apps/frontend/.env.production; no dashboard variable is
+landing build value in apps/landing-page/.env.production; no dashboard variable is
 needed. The landing's Docs link is optional so it still builds without docs.
 Local Zap supplies its allocated DOCS_PORT through the non-secret local default.
 
@@ -54,3 +54,12 @@ Sources checked 2026-10-11:
 
 Existing Pro pricing has no ordinary per-project subscription; static usage and
 deployment storage may add metered charges. No zero-cost guarantee is made.
+
+## App folder names
+
+The marketing site now lives at `apps/landing-page` (formerly `apps/frontend`).
+A Git-connected Vercel project must use `apps/landing-page` as its Root Directory
+before deployment. The manual `Deploy landing page` GitHub workflow verifies
+the existing project owns `inproduct.mp-lb.dev`, updates its Root Directory,
+and deploys the selected main commit through the existing Git integration. MyShop is split into `apps/myshop-frontend` and
+`apps/myshop-backend`; both remain excluded from deployment.

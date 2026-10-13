@@ -1,11 +1,11 @@
 ---
 title: MyShop local example
-description: A tiny synthetic shop with a storefront, cart and product editor.
+description: A local frontend and backend demonstrating the InProduct libraries.
 ---
 
-MyShop is deliberately local-only. It uses React/Vite and the workspace library.
-InProduct supplies product slug generation; all shopping behavior belongs to the example.
-There are no real payments, orders, integrations, customer records or credentials.
+MyShop is a private, local-only React/Vite frontend with a Node HTTP backend.
+It demonstrates the public InProduct libraries with a real client/server boundary.
+It is not Next.js. There are no real payments, orders or customer records.
 
 ## Reproducible setup
 
@@ -21,29 +21,48 @@ zap launch MyShop
 zap status
 ```
 
-`zap task myshop` builds the library before starting MyShop. Use `zap launch MyShop` (or `zap o MyShop`) to open the local example. Ports are allocated by Zap rather than hard-coded. No `.env` secrets
-or database seed commands are needed.
+`zap task myshop` builds the libraries and starts `myshop-backend` and
+`myshop-frontend`. Zap allocates both ports; no database credentials or external
+services are needed. The separate `landing-page` service runs the public marketing site.
 
-Four deterministic products are loaded from `apps/myshop/src/catalog.ts`: Everyday mug
-($18), Market tote ($24), Field notebook ($12) and Desk plant ($16). All prices use USD cents.
+## Storefront and products
 
-## Try the whole loop
+Four deterministic products are loaded from `apps/myshop-frontend/src/catalog.ts`:
+Everyday mug ($18), Market tote ($24), Field notebook ($12) and Desk plant ($16).
+Prices use USD cents.
 
 1. Add a mug and tote to the cart. Adjust quantities or remove an item.
-2. Open **Manage products**, add a product and watch its slug preview update.
+2. Open **Admin → Manage products**, add a product and watch its slug preview update.
 3. Rename or reprice a product. The storefront and existing cart lines update together.
 4. Try a duplicate name or punctuation-only name to see application validation.
 5. Delete a product; it disappears from the storefront and cart.
-6. Select **Reset demo** to restore the four original products and clear the cart.
+6. Select **Reset demo** to restore the products and clear the cart.
 
-State is held in memory in the current tab. Reloading also restores the seeds; other tabs
-are independent. There is no checkout button because no order or payment is created.
+Product slugs come from `@mp-lb/inproduct`. Catalog/cart logic remains example
+frontend code held in the current tab. There is no checkout or order creation.
 
-Stop it with `zap down myshop`. Inspect logs with `zap logs myshop --no-follow`.
+## File storage through the backend
+
+Open **Admin → File storage**. Upload a file (up to 10 MiB) or choose **Add example
+file**. Search names/tags, filter category/tag, edit metadata, download, or confirm
+deletion. Usage totals cover all files regardless of filters; longer lists paginate.
+
+The backend creates a file service with the library's disk adapter and mounts its
+HTTP handler. The frontend creates an HTTP client and passes it to the headless hook.
+The app supplies navigation, its table and forms; the library supplies file operations,
+validation, transport, persistence and async state. See [File storage](/docs/storage).
+
+Files and metadata are saved in ignored `apps/myshop-backend/.data/files`. They survive
+browser reloads, frontend/backend restarts and **Reset demo**. Delete files explicitly
+in File storage. Files are not malware-scanned; no production storage is accessed.
 
 ## Local-only boundary
 
-The example package is private and ignored by Changesets. It has no production start script
-and is excluded from the ordinary workspace build. Its explicit `build:local` command exists
-only for local verification. It binds to loopback. Do not expose it through a tunnel, change
-its host binding, or add it to Render/Vercel deployment settings.
+Both MyShop packages are private, excluded from Changesets and ordinary builds, and
+have no production start script. `zap task myshop-check` builds both explicitly for
+local verification. Both services bind to loopback. The backend checks request hosts
+and origins, but has no production login or multi-user authorization.
+
+Never expose either service through a tunnel or add it to hosting/deployment settings.
+Stop with `zap down myshop-frontend myshop-backend`. Inspect logs with
+`zap logs myshop-frontend --no-follow` or `zap logs myshop-backend --no-follow`.

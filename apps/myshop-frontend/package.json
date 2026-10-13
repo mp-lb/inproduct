@@ -1,18 +1,19 @@
 {
-  "name": "@mp-lb/inproduct-myshop",
+  "name": "@mp-lb/inproduct-myshop-frontend",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:local": "tsc --noEmit && vite build",
-    "typecheck": "pnpm --filter @mp-lb/inproduct build && tsc --noEmit",
+    "build:local": "pnpm --filter @mp-lb/inproduct --filter @mp-lb/inproduct-storage build && tsc --noEmit && vite build",
+    "typecheck": "pnpm --filter @mp-lb/inproduct --filter @mp-lb/inproduct-storage build && tsc --noEmit",
     "test": "vitest run --maxWorkers=1"
   },
   "dependencies": {
     "@mp-lb/inproduct": "workspace:*",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "@mp-lb/inproduct-storage": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19",
