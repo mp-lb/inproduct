@@ -89,6 +89,20 @@ export const runSecretProcess = (
         "ERR_PNPM_GIT_UNCLEAN",
         "ERR_PNPM_NOTHING_TO_DEPLOY",
         "ERR_PNPM_BAD_PM_VERSION",
+        "ERR_PNPM_FETCH_401",
+        "ERR_PNPM_FETCH_403",
+        "ERR_PNPM_FETCH_404",
+        "ERR_PNPM_NO_AUTH",
+        "ERR_PNPM_AUTH_REQUIRED",
+        "ERR_PNPM_CANNOT_RESOLVE_WORKSPACE_PROTOCOL",
+        "ERR_PNPM_OUTDATED_LOCKFILE",
+        "ERR_PNPM_NO_MATCHING_VERSION",
+        "ERR_PNPM_BRANCH_IS_BEHIND",
+        "ERR_PNPM_GIT_UNKNOWN_BRANCH",
+        "ERR_PNPM_NOT_YET_SUPPORTED",
+        "ERR_PNPM_INVALID_OPTION",
+        "ERR_PNPM_CONFIG_CONFLICT_AUTH_TYPE",
+        "ERR_PNPM_NO_PUBLISHING_AUTH",
       ];
 
       const found = codes.filter(
@@ -98,6 +112,34 @@ export const runSecretProcess = (
       diagnostic = found.length
         ? ` Recognized error codes: ${found.join(", ")}.`
         : " No recognized error code.";
+
+      const phrases = [
+        "Unknown option",
+        "404 Not Found - PUT",
+        "404 Not Found - GET",
+        "Access token expired",
+        "two-factor",
+        "No authorization header",
+        "not authorized",
+        "permission",
+        "not allowed",
+        "ENEEDAUTH",
+        "Failed to replace env",
+        "npm error",
+        "an error occurred while publishing",
+        "Unable to authenticate",
+        "auth token",
+        "provenance",
+        "ERR_PNPM",
+        "authentication",
+        "already exists",
+      ];
+
+      const hints = phrases.filter((phrase) =>
+        output.toLowerCase().includes(phrase.toLowerCase()),
+      );
+
+      diagnostic += ` Recognized categories: ${hints.join(", ") || "none"}.`;
     }
   } catch {
     commandFailed = true;
