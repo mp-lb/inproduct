@@ -5,12 +5,9 @@
   "packageManager": "pnpm@11.1.3",
   "scripts": {
     "build": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present build",
-    "changeset": "changeset",
     "dev": "zap task myshop",
     "lint": "python3 scripts/run_validation.py --profile lint -- eslint .",
-    "release": "changeset publish",
     "typecheck": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present typecheck",
-    "version-packages": "changeset version",
     "test": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present test",
     "docs:gen": "python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-docs build",
     "docs:check": "pnpm docs:gen",
@@ -19,7 +16,6 @@
     "secrets:check": "arcnet env check"
   },
   "devDependencies": {
-    "@changesets/cli": "2.31.0",
     "@mp-lb/arcnet": "0.5.5",
     "@mp-lb/fssstack-config": "0.3.1",
     "@mp-lb/fssstack-testing": "0.1.0",

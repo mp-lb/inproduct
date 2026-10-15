@@ -14,6 +14,7 @@ Node.js 22.13+; ESM only. TypeScript declarations and declaration maps are inclu
 ```js
 import { slugify } from '@mp-lb/inproduct';
 console.log(slugify('  Everyday Mug! ')); // everyday-mug
+console.log(slugify('Café')); // caf
 ```
 
 Slugs use lowercase ASCII letters and digits. Other character runs become hyphens.

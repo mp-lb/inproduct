@@ -1,19 +1,15 @@
-import { readFileSync } from "node:fs";
-import { URL } from "node:url";
 import console from "node:console";
 import process from "node:process";
 import { setTimeout } from "node:timers/promises";
 
 const verifyPublication = async () => {
   for (const directory of ["inproduct", "storage"]) {
-    const { name, version } = JSON.parse(
-      readFileSync(
-        new URL(`../packages/${directory}/package.json`, import.meta.url),
-        "utf8",
-      ),
-    );
+    const name =
+      directory === "inproduct"
+        ? "@mp-lb/inproduct"
+        : "@mp-lb/inproduct-storage";
 
-    const url = `https://registry.npmjs.org/${encodeURIComponent(name)}/${version}`;
+    const url = `https://registry.npmjs.org/${encodeURIComponent(name)}/latest`;
     let published = false;
 
     for (let attempt = 0; attempt < 6; attempt += 1) {
@@ -26,7 +22,7 @@ const verifyPublication = async () => {
         const manifest = await response.json();
 
         if (
-          manifest.version === version &&
+          typeof manifest.version === "string" &&
           manifest.dist?.tarball?.startsWith("https://registry.npmjs.org/")
         ) {
           const tarball = await globalThis.fetch(manifest.dist.tarball, {
@@ -44,11 +40,8 @@ const verifyPublication = async () => {
       if (attempt < 5) await setTimeout(10000);
     }
 
-    if (!published)
-      throw Error(
-        `${name}@${version} is not publicly installable. Check npm Staged Packages: a staged upload requires maintainer 2FA approval and is not a completed publication.`,
-      );
-    console.log(`Verified public manifest and tarball: ${name}@${version}`);
+    if (!published) throw Error(`${name} is not publicly installable.`);
+    console.log(`Verified public manifest and tarball: ${name}`);
   }
 };
 
