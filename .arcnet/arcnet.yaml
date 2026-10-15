@@ -1,8 +1,23 @@
 version: 1
 project: inproduct
-repository: mp-lb/inproduct
 environment: mp-lb
-approved: false
+repository: mp-lb/inproduct
+approved: true
+vercel:
+  account:
+    type: team
+    id: team_1w5PsP1pNWCex9vAwF4PqvTs
+  sites:
+    landing-page:
+      mode: existing
+      projectId: prj_13lbm1msiUiSi8Alar1FSzX9qSoh
+      projectName: arcnet.inproduct.landing-page
+      root: apps/landing-page
+    docs:
+      mode: existing
+      projectName: arcnet.inproduct.docs
+      root: apps/docs
+      projectId: prj_S2aT8kUKhjWbBbeLvoDS7dyxoepW
 secrets:
   sources:
     - key: SECRETS_KEY
@@ -12,6 +27,8 @@ secrets:
       store: mp-lb/mp-lb
       path: /projects/inproduct/secrets.json.enc
   consumers:
+    deploy:
+      VERCEL_TOKEN: VERCEL_API_TOKEN
     publish:
       NPM_TOKEN:
         - NPM_TOKEN
