@@ -16,6 +16,7 @@ apps/docs/.source
 
 .arcnet/*.tmp
 /secrets.json
+.fssstack-release-result.json
 
 test-results/
 playwright-report/

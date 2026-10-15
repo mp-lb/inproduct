@@ -1,51 +1,45 @@
+import { readFileSync } from "node:fs";
+import { URL } from "node:url";
 import console from "node:console";
-import process from "node:process";
 import { setTimeout } from "node:timers/promises";
 
-const verifyPublication = async () => {
-  for (const directory of ["inproduct", "storage"]) {
-    const name =
-      directory === "inproduct"
-        ? "@mp-lb/inproduct"
-        : "@mp-lb/inproduct-storage";
+const report = JSON.parse(
+  readFileSync(
+    new URL("../.fssstack-release-result.json", import.meta.url),
+    "utf8",
+  ),
+);
 
-    const url = `https://registry.npmjs.org/${encodeURIComponent(name)}/latest`;
-    let published = false;
+for (const { name, version, action } of report) {
+  const url = `https://registry.npmjs.org/${encodeURIComponent(name)}/${version}`;
+  let published = false;
 
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      const response = await globalThis.fetch(url, {
-        signal: globalThis.AbortSignal.timeout(30000),
-        headers: { "Cache-Control": "no-cache" },
-      });
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const response = await globalThis.fetch(url, {
+      signal: globalThis.AbortSignal.timeout(30000),
+      headers: { "Cache-Control": "no-cache" },
+    });
 
-      if (response.ok) {
-        const manifest = await response.json();
+    if (response.ok) {
+      const manifest = await response.json();
 
-        if (
-          typeof manifest.version === "string" &&
-          manifest.dist?.tarball?.startsWith("https://registry.npmjs.org/")
-        ) {
-          const tarball = await globalThis.fetch(manifest.dist.tarball, {
-            method: "HEAD",
-            signal: globalThis.AbortSignal.timeout(30000),
-          });
+      if (manifest.version === version && manifest.dist?.tarball) {
+        const tarball = await globalThis.fetch(manifest.dist.tarball, {
+          method: "HEAD",
+          signal: globalThis.AbortSignal.timeout(30000),
+        });
 
-          published = tarball.ok;
-        }
-      } else if (response.status !== 404) {
-        throw Error(`Registry verification returned HTTP ${response.status}.`);
+        published = tarball.ok;
       }
-
-      if (published) break;
-      if (attempt < 5) await setTimeout(10000);
+    } else if (response.status !== 404) {
+      throw Error(`Registry verification returned HTTP ${response.status}.`);
     }
 
-    if (!published) throw Error(`${name} is not publicly installable.`);
-    console.log(`Verified public manifest and tarball: ${name}`);
+    if (published) break;
+    if (attempt < 29) await setTimeout(10000);
   }
-};
 
-verifyPublication().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+  if (!published)
+    throw Error(`${name}@${version} (${action}) is not publicly installable.`);
+  console.log(`Verified public package: ${name}@${version} (${action})`);
+}
