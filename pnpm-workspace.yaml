@@ -6,6 +6,9 @@ allowBuilds:
   esbuild: true
   msw: true
 
+minimumReleaseAge: 5
 minimumReleaseAgeExclude:
   - lucide-react@1.47.0
   - '@mp-lb/arcnet@0.2.0'
+  - '@mp-lb/arcnet@0.4.0'
+  - '@mp-lb/zapper@0.21.4'
