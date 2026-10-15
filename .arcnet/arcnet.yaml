@@ -21,6 +21,8 @@ vercel:
       projectName: arcnet.inproduct.docs
       root: apps/docs
       projectId: prj_S2aT8kUKhjWbBbeLvoDS7dyxoepW
+variables:
+  VITE_DOCS_URL: https://docs.inproduct.mp-lb.dev
 secrets:
   sources:
     - key: SECRETS_KEY
