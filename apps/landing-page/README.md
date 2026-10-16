@@ -3,7 +3,8 @@
 The public React/Vite marketing site, separate from the local MyShop demo.
 
 Run `zap up landing-page` from the repository root. Zap supplies `LANDING_PAGE_PORT`.
-The optional Docs navigation link uses `VITE_DOCS_URL`.
+The Docs navigation link uses `VITE_DOCS_URL`. Its production value is declared in
+`.arcnet/arcnet.yaml` and passed to the ArcNet site build.
 
 The app folder and package were renamed from `apps/frontend` and
 `@mp-lb/inproduct-frontend`. Its Vercel project Root Directory must be
