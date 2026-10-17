@@ -11,8 +11,8 @@ vercel:
   sites:
     landing-page:
       domain: inproduct.mp-lb.dev
-      mode: existing
-      projectId: prj_13lbm1msiUiSi8Alar1FSzX9qSoh
+      mode: new
+      creationApproved: true
       projectName: arcnet.inproduct.landing-page
       root: apps/landing-page
     docs:

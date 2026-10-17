@@ -40,7 +40,6 @@ jobs:
       - name: Deploy referenced static sites
         run: pnpm exec arcnet deploy
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
           INPRODUCT_SECRETS_KEY: ${{ secrets.INPRODUCT_SECRETS_KEY }}
       - name: Verify public domains
