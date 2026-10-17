@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@mp-lb/arcnet':
-        specifier: 0.5.8
-        version: 0.5.8
+        specifier: 0.5.9
+        version: 0.5.9
       '@mp-lb/fssstack-config':
         specifier: 0.3.1
         version: 0.3.1(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(prettier@3.8.3)(typescript@5.9.3)
@@ -1161,8 +1161,8 @@ packages:
       '@cfworker/json-schema':
         optional: true
 
-  '@mp-lb/arcnet@0.5.8':
-    resolution: {integrity: sha512-BRudiFv1ouOYPJ/UACh9p8FZc5NQxTtwDCnALj7kJzp7SelTbwPnFyv2Cd6vQCIq/yEDsxo1lymTu03i5lqmmw==}
+  '@mp-lb/arcnet@0.5.9':
+    resolution: {integrity: sha512-TcMwZtbB90SXjMu8sY5dLMvbNA+rCkzpj4l0CxESvEUYZV8v0bgPNPzdjMQK0YxaUIaA1ewmRH4JFsFOuMlLQw==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -6188,7 +6188,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mp-lb/arcnet@0.5.8':
+  '@mp-lb/arcnet@0.5.9':
     dependencies:
       '@mp-lb/forum-secrets': 0.2.1
       '@mp-lb/zapper': 0.21.4
