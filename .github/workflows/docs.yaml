@@ -2,9 +2,9 @@ name: Documentation
 on:
   push:
     branches: [main]
-    paths: ["apps/docs/**", "tests/docs/**", "docs/public/**", "docs/agents-md/**", "etc/tsconfig.frontend.json", "packages/inproduct/src/**", "scripts/check-docs.mjs", "scripts/prepare-docs-preview.mjs", "package.json", "pnpm-lock.yaml", ".github/workflows/docs.yaml"]
+    paths: ["apps/docs/**", "tests/docs/**", "docs/public/**", "context/**", "etc/tsconfig.frontend.json", "packages/inproduct/src/**", "scripts/check-docs.mjs", "scripts/prepare-docs-preview.mjs", "package.json", "pnpm-lock.yaml", ".github/workflows/docs.yaml"]
   pull_request:
-    paths: ["apps/docs/**", "tests/docs/**", "docs/public/**", "docs/agents-md/**", "etc/tsconfig.frontend.json", "packages/inproduct/src/**", "scripts/check-docs.mjs", "scripts/prepare-docs-preview.mjs", "package.json", "pnpm-lock.yaml", ".github/workflows/docs.yaml"]
+    paths: ["apps/docs/**", "tests/docs/**", "docs/public/**", "context/**", "etc/tsconfig.frontend.json", "packages/inproduct/src/**", "scripts/check-docs.mjs", "scripts/prepare-docs-preview.mjs", "package.json", "pnpm-lock.yaml", ".github/workflows/docs.yaml"]
 permissions:
   contents: read
 jobs:

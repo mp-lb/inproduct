@@ -39,10 +39,8 @@ tasks:
       - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop-frontend build:local
   context-build:
     cmds:
-      - node scripts/context-files.mjs build {{REST}}
-  context-copy:
-    cmds:
-      - node scripts/context-files.mjs copy {{REST}}
+      - npx -y @mp-lb/mdcompile context/index.md --optional --silent | fm compile --stdin -o AGENTS.md
+      - npx -y @mp-lb/mdcompile context/index.md --optional --silent | fm compile --stdin -o CLAUDE.md
   compile-agents:
     cmds:
       - zap task context-build -- {{REST}}
@@ -74,5 +72,4 @@ tasks:
     cmds:
       - python3 scripts/run_validation.py -- pnpm install
       - cp "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.env" . 2>/dev/null || true
-      - '[ ! -f AGENTS.base.md ] || zap task context-copy'
-      - grep -qxF '@AGENTS_WORKTREE.md' AGENTS.md || printf '\n@AGENTS_WORKTREE.md\n' >> AGENTS.md
+      - zap task context-build

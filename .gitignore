@@ -6,8 +6,10 @@ coverage
 *.tsbuildinfo
 AGENTS.local.md
 AGENTS_WORKTREE.md
-AGENTS.md
-CLAUDE.md
+**/AGENTS.md
+**/CLAUDE.md
+!/AGENTS.md
+!/CLAUDE.md
 .forum/
 
 apps/docs/build

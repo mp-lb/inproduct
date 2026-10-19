@@ -8,7 +8,10 @@ Read docs/standards/style-guide.md for code changes, docs/standards/errors.md fo
 
 Central standards and examples sync from mp-lb/fssstack using doctrine.yaml. Read them with `dx read` or pull updates with `dx pull`.
 
-Edit source context in agents-md/ and regenerate with `zap task context-build`. Commit agents-md/ and AGENTS.base.md. AGENTS.md and CLAUDE.md are generated, ignored local files. Use `zap task context-copy` after cloning.
+Project-specific context source lives in `context/`; shared blocks are Forum
+file references from `mp-lb/fssstack/agents-md`. Regenerate with
+`zap task context-build`. Commit the generated `AGENTS.md` and `CLAUDE.md`
+alongside their source changes.
 
 Release the library with Changesets and the release workflow. The GitHub CLI is available for pushes and CI checks.
 

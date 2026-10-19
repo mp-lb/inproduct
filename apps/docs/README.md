@@ -45,8 +45,9 @@ the docs CI workflow runs this check.
   the lockfile is committed. `serve@14.2.6` supplies the recipe's static start command.
 - Public content comes only from `docs/public/`; HTML, Orama local search and raw Markdown
   are prerendered into `apps/docs/build/client`.
-- Conditional documentation guidance lives in `docs/agents-md/docs-website.md` and is
-  explicitly included by this repository's `agents-md/index.md` compiler entry.
+- Conditional documentation guidance comes from the shared FSSstack
+  `agents-md/docs-website.md` Forum file, included by this repository's
+  `context/index.md` compiler entry.
 
 ## Version-dependent exceptions
 
