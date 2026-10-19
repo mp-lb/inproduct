@@ -28,7 +28,7 @@ variables:
     - /projects/inproduct/variables.json
 secrets:
   sources:
-    - key: SECRETS_KEY
+    - key: ARCNET_STANDARD_SECRETS_KEY
       store: mp-lb/mp-lb
       path: /admin/standard-secrets.json.enc
     - key: INPRODUCT_SECRETS_KEY

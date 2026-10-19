@@ -1,7 +1,7 @@
 name: Deploy ArcNet static sites
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,7 +26,8 @@ jobs:
 
   deploy:
     needs: configuration
-    if: needs.configuration.outputs.approved == 'true' && github.ref == 'refs/heads/main'
+    if: needs.configuration.outputs.approved == 'true' && github.ref ==
+      'refs/heads/main'
     environment: arcnet-production
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -40,8 +41,8 @@ jobs:
       - name: Deploy referenced static sites
         run: pnpm exec arcnet deploy
         env:
-          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
           INPRODUCT_SECRETS_KEY: ${{ secrets.INPRODUCT_SECRETS_KEY }}
+          ARCNET_STANDARD_SECRETS_KEY: ${{ secrets.ARCNET_STANDARD_SECRETS_KEY }}
       - name: Verify public domains
         run: |
           curl --fail --silent --show-error --location --max-time 15 --retry 12 --retry-delay 5 --retry-all-errors --output /dev/null https://inproduct.mp-lb.dev/

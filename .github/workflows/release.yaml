@@ -2,8 +2,9 @@ name: Release npm packages
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
+
 
 permissions:
   contents: read
@@ -27,9 +28,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint && pnpm typecheck && pnpm test && pnpm build
       - name: Publish changed package builds
-        run: pnpm exec arcnet env run --consumer publish -- node scripts/auto-publish.mjs
+        run: pnpm exec arcnet env run --consumer publish -- node
+          scripts/auto-publish.mjs
         env:
-          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
           INPRODUCT_SECRETS_KEY: ${{ secrets.INPRODUCT_SECRETS_KEY }}
+          ARCNET_STANDARD_SECRETS_KEY: ${{ secrets.ARCNET_STANDARD_SECRETS_KEY }}
       - name: Verify public registry packages
         run: node scripts/verifyPublication.mjs
