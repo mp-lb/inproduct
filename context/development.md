@@ -6,7 +6,7 @@ Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before handing 
 
 Read docs/standards/style-guide.md for code changes, docs/standards/errors.md for error handling, docs/standards/trpc.md for API work, and docs/standards/logging.md and event-schema.md for logging/events. Follow docs/standards/libs.md and lib-release.md for publishable library changes.
 
-Central standards and examples sync from mp-lb/fssstack using doctrine.yaml. Read them with `dx read` or pull updates with `dx pull`.
+Central standards and examples sync from mp-lb/fssstack using forum.yaml. Read them with `dx read` or pull updates with `dx pull`.
 
 Project-specific context source lives in `context/`; shared blocks are Forum
 file references from `mp-lb/fssstack/agents-md`. Regenerate with
