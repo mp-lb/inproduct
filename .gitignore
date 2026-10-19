@@ -11,6 +11,7 @@ AGENTS_WORKTREE.md
 !/AGENTS.md
 !/CLAUDE.md
 .forum/
+tmp/
 
 apps/docs/build
 apps/docs/.react-router
