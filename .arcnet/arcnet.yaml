@@ -22,7 +22,10 @@ vercel:
       root: apps/docs
       projectId: prj_S2aT8kUKhjWbBbeLvoDS7dyxoepW
 variables:
-  VITE_DOCS_URL: https://docs.inproduct.mp-lb.dev
+  store: mp-lb/mp-lb
+  paths:
+    - /admin/standard-variables.json
+    - /projects/inproduct/variables.json
 secrets:
   sources:
     - key: SECRETS_KEY
