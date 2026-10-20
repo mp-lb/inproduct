@@ -7,6 +7,22 @@ description: Initialize storage in your application with a local memory adapter 
 It requires Node.js 22.13 or newer. It does not require the InProduct backend scaffold,
 an account, environment variables, or a hosted runtime. React is optional for the headless hook.
 
+## Connect an existing tRPC router
+
+The `/trpc` entry point adapts a host's authorized tRPC file router to the
+transport-independent client used by the headless React hook. It expects
+`list`, `upload`, `edit`, `remove`, and `download` procedures. The host remains
+responsible for authentication, size limits, and storage policies.
+
+```ts
+import { createFileStorageTRPCClient } from '@mp-lb/inproduct-storage/trpc';
+
+const files = createFileStorageTRPCClient(trpcClient.storedFiles);
+```
+
+Binary data crosses the tRPC JSON boundary as base64. Set the host request body
+limit accordingly and use a direct upload transport for larger files.
+
 ## Install and initialize
 
 Install the published package into your application:

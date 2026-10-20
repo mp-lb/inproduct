@@ -82,6 +82,22 @@ The client uses same-origin credentials; supply a custom fetch implementation fo
 other authentication. Keep the Node entry point and credentials out of the frontend.
 MyShop demonstrates this complete flow with a loopback-only backend and Vite proxy.
 
+### Using an existing tRPC API
+
+`@mp-lb/inproduct-storage/trpc` exports `createFileStorageTRPCClient`. Pass it
+the authorized file router from your application's tRPC client, then pass the
+result to `useFileStorage`. The adapter maps the router's `list`, `upload`,
+`edit`, `remove` and `download` procedures to the transport-independent client.
+Uploads and downloads carry base64 bytes in tRPC JSON, so the host must set a
+matching request size limit. Keep authorization and file size enforcement on the
+server. This is a client transport adapter, not a router or an auth policy.
+
+```ts
+import { createFileStorageTRPCClient } from "@mp-lb/inproduct-storage/trpc";
+
+const client = createFileStorageTRPCClient(trpcClient.storedFiles);
+```
+
 ### MongoDB persistence
 
 If your application already has a MongoDB `Db`, choose a collection name for either
