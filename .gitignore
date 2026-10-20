@@ -10,7 +10,8 @@ AGENTS_WORKTREE.md
 **/CLAUDE.md
 !/AGENTS.md
 !/CLAUDE.md
-.forum/
+/.forum/*
+!/.forum/sync.yaml
 tmp/
 
 apps/docs/build
