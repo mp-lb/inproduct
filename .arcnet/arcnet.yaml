@@ -2,14 +2,12 @@ version: 1
 project: inproduct
 environment: mp-lb
 repository: mp-lb/inproduct
-approved: true
 vercel:
   dnsZone: mp-lb.dev
   sites:
     landing-page:
       domain: inproduct.mp-lb.dev
       mode: new
-      creationApproved: true
       projectName: arcnet.inproduct.landing-page
       root: apps/landing-page
     docs:
