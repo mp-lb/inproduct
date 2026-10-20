@@ -7,10 +7,18 @@ links:
   - name: MyShop
     url: http://127.0.0.1:${MYSHOP_FRONTEND_PORT}
 ports:
+  - MONGO_PORT
   - MYSHOP_BACKEND_PORT
   - LANDING_PAGE_PORT
   - DOCS_PORT
   - MYSHOP_FRONTEND_PORT
+docker:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - /data/db
 native:
   docs:
     cmd: CHOKIDAR_USEPOLLING=1 pnpm --filter @mp-lb/inproduct-docs dev
@@ -25,6 +33,10 @@ native:
     cmd: pnpm --filter @mp-lb/inproduct-myshop-backend dev
     env: "*"
 tasks:
+  mongo-test:
+    env: "*"
+    cmds:
+      - INPRODUCT_MONGO_TEST_URI="mongodb://127.0.0.1:${MONGO_PORT}/?directConnection=true" pnpm --filter @mp-lb/inproduct-storage exec vitest run src/mongoAdapters.test.ts
   docs-preview:
     env: "*"
     cmds:

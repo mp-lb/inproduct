@@ -18,6 +18,11 @@ jobs:
   release:
     if: github.repository == 'mp-lb/inproduct'
     runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -27,6 +32,8 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint && pnpm typecheck && pnpm test && pnpm build
+        env:
+          INPRODUCT_MONGO_TEST_URI: mongodb://127.0.0.1:27017/?directConnection=true
       - name: Publish changed package builds
         run: pnpm exec arcnet env run --consumer publish -- node
           scripts/auto-publish.mjs

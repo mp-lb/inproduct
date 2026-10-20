@@ -1,5 +1,9 @@
 # @mp-lb/inproduct-storage
 
+## Unreleased
+
+- Add MongoDB adapters for object storage and file management. Consumers supply their existing `Db` and choose collection names.
+
 ## 0.1.0
 
 ### Minor Changes

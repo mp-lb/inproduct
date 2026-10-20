@@ -46,6 +46,8 @@ for (const marker of [
   "useFileStorage",
   "maxBytes",
   "Memory storage is ephemeral",
+  "createMongoFileStorageAdapter",
+  "createMongoStorageAdapter",
 ]) {
   assert.ok(
     storageMarkdown.includes(marker),

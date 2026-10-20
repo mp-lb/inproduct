@@ -133,6 +133,31 @@ The hook handles refresh, stale responses, pagination and browser transfers. Rea
 or Node built-ins. Import `/node` only on the backend. Operations return a success
 boolean and expose failures through `error`; no repeated event-handler catches needed.
 
+## MongoDB persistence
+
+Use your application's existing MongoDB `Db` and specify the collection name:
+
+```ts
+import { createFileStorage, createStorage } from '@mp-lb/inproduct-storage';
+import { createMongoFileStorageAdapter, createMongoStorageAdapter } from '@mp-lb/inproduct-storage/node';
+
+const files = createFileStorage({
+  adapter: createMongoFileStorageAdapter(db, 'productFiles'),
+});
+const objects = createStorage({
+  adapter: createMongoStorageAdapter(db, 'productObjects'),
+});
+```
+
+The adapters store bytes and metadata in MongoDB documents. Use a separate
+collection for each adapter format. A single file or object operation is atomic;
+file listings and usage totals are separate reads and may observe concurrent
+changes at different moments. MongoDB's document size limit applies because bytes
+are stored in one document. Your application owns database connection management,
+tenant scope, authorization, entity relations, validation, retention and backups.
+Deletion removes the document immediately. These adapters do not supply S3
+versioning, signed URLs or malware scanning.
+
 ## Durable local files
 
 The disk adapter keeps bytes and metadata in the configured directory across browser

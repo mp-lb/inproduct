@@ -82,6 +82,35 @@ The client uses same-origin credentials; supply a custom fetch implementation fo
 other authentication. Keep the Node entry point and credentials out of the frontend.
 MyShop demonstrates this complete flow with a loopback-only backend and Vite proxy.
 
+### MongoDB persistence
+
+If your application already has a MongoDB `Db`, choose a collection name for either
+storage API. The adapters use that collection for both bytes and metadata; the
+application retains control of its database connection, access rules and relations.
+
+```ts
+import { createFileStorage, createStorage } from "@mp-lb/inproduct-storage";
+import {
+  createMongoFileStorageAdapter,
+  createMongoStorageAdapter,
+} from "@mp-lb/inproduct-storage/node";
+
+const files = createFileStorage({
+  adapter: createMongoFileStorageAdapter(db, "productFiles"),
+});
+const objects = createStorage({
+  adapter: createMongoStorageAdapter(db, "productObjects"),
+});
+```
+
+Each adapter uses one document per object or file, with MongoDB's `_id` as the key
+or file ID. Use separate collections for the two document formats. Writes and file
+metadata edits are atomic per document. File listing reads metadata, while downloads
+read bytes. The adapters buffer whole objects, so MongoDB's document size limit
+applies. They do not create application relations, infer a tenant, scan bytes,
+version objects, or implement soft deletion. Bind a suitably scoped `Db` and
+collection behind your application's authorization boundary.
+
 Install React 18 or 19 for the optional `/react` entry point. The base entry point
 does not import React or Node built-ins. The hook owns loading, errors, refresh after
 mutations, search/category/tag filters, pagination and browser upload/download.
