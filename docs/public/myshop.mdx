@@ -58,7 +58,7 @@ in File storage. Files are not malware-scanned; no production storage is accesse
 
 ## Local-only boundary
 
-Both MyShop packages are private, excluded from Changesets and ordinary builds, and
+Both MyShop packages are private, excluded from automatic publishing and ordinary builds, and
 have no production start script. `zap task myshop-check` builds both explicitly for
 local verification. Both services bind to loopback. The backend checks request hosts
 and origins, but has no production login or multi-user authorization.

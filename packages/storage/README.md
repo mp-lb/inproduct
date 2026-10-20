@@ -166,4 +166,4 @@ naming convenience, not tenant isolation: authorize access before calling storag
 
 This is a Tier 0 library: this README and shipped declarations are the reference.
 See the [repository](https://github.com/mp-lb/inproduct) for contribution and release
-instructions. The package is released independently through Changesets.
+instructions. Changed package builds are published automatically on pushes to `main`.
