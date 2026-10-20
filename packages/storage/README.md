@@ -87,6 +87,7 @@ MyShop demonstrates this complete flow with a loopback-only backend and Vite pro
 If your application already has a MongoDB `Db`, choose a collection name for either
 storage API. The adapters use that collection for both bytes and metadata; the
 application retains control of its database connection, access rules and relations.
+Install `mongodb@^7.2.0` in the host application; the adapter uses the host's driver.
 
 ```ts
 import { createFileStorage, createStorage } from "@mp-lb/inproduct-storage";

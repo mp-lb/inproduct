@@ -16,7 +16,7 @@ importers:
         version: 0.3.1(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(prettier@3.8.3)(typescript@5.9.3)
       '@mp-lb/fssstack-testing':
         specifier: 0.1.0
-        version: 0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.7.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))
+        version: 0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.2.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))
       '@playwright/test':
         specifier: 1.64.0
         version: 1.64.0
@@ -147,7 +147,7 @@ importers:
         version: 0.3.1(@typescript-eslint/parser@8.59.3(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(prettier@3.9.7)(typescript@5.9.3)
       '@mp-lb/fssstack-testing':
         specifier: 0.1.0
-        version: 0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.7.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))
+        version: 0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.2.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))
       '@testing-library/jest-dom':
         specifier: ^7.0.1
         version: 7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))
@@ -262,9 +262,6 @@ importers:
 
   packages/storage:
     dependencies:
-      mongodb:
-        specifier: ^7.7.0
-        version: 7.7.0(socks@2.8.10)
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -278,6 +275,9 @@ importers:
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
+      mongodb:
+        specifier: 7.2.0
+        version: 7.2.0(socks@2.8.10)
       react:
         specifier: ^19.2.8
         version: 19.3.0
@@ -4084,15 +4084,15 @@ packages:
     resolution: {integrity: sha512-ZoS07RoFqpKYQwAk59qmrx8+jJHNHU30UjlU96QktiGn1ltvDr+vCznLX5DiUBLEpMAHatHNWV1nM/74ul66kA==}
     engines: {node: '>=20.19.0'}
 
-  mongodb@7.7.0:
-    resolution: {integrity: sha512-XG1xXEqyouAV8GCb3PuRaujofeXKpAJAPvXYWZgHl6Dz4QHSJ1nRLl0+GpqaLTwKvC0RFE9truOur34RNFY1nw==}
+  mongodb@7.2.0:
+    resolution: {integrity: sha512-F/2+BMZtLVhY30ioZp0dAmZ+IRZMBqI+nrv6t5+9/1AIwCa8sMRC3jBf81lpxMhnZgqq8CoUD503Z1oZWq1/sw==}
     engines: {node: '>=20.19.0'}
     peerDependencies:
       '@aws-sdk/credential-providers': ^3.806.0
       '@mongodb-js/zstd': ^7.0.0
       gcp-metadata: ^7.0.1
       kerberos: ^7.0.0
-      mongodb-client-encryption: ^7.2.0
+      mongodb-client-encryption: '>=7.0.0 <7.1.0'
       snappy: ^7.3.2
       socks: ^2.8.6
     peerDependenciesMeta:
@@ -6316,11 +6316,11 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@mp-lb/fssstack-testing@0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.7.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))':
+  '@mp-lb/fssstack-testing@0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.2.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))':
     optionalDependencies:
       '@playwright/test': 1.64.0
       '@testing-library/jest-dom': 7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))
-      mongodb: 7.7.0(socks@2.8.10)
+      mongodb: 7.2.0(socks@2.8.10)
       vitest: 4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)
 
   '@mp-lb/zapper-sdk@0.20.1':
@@ -9426,7 +9426,7 @@ snapshots:
       '@types/whatwg-url': 13.0.0
       whatwg-url: 14.2.0
 
-  mongodb@7.7.0(socks@2.8.10):
+  mongodb@7.2.0(socks@2.8.10):
     dependencies:
       '@mongodb-js/saslprep': 1.6.1
       bson: 7.3.3

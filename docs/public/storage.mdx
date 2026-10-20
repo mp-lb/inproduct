@@ -136,6 +136,7 @@ boolean and expose failures through `error`; no repeated event-handler catches n
 ## MongoDB persistence
 
 Use your application's existing MongoDB `Db` and specify the collection name:
+Install `mongodb@^7.2.0` in the host application if it is not already present.
 
 ```ts
 import { createFileStorage, createStorage } from '@mp-lb/inproduct-storage';

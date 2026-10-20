@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Resolve MongoDB through the host application's driver so `Db` types match across package boundaries.
 - Add MongoDB adapters for object storage and file management. Consumers supply their existing `Db` and choose collection names.
 
 ## 0.1.0
