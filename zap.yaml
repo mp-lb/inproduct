@@ -8,11 +8,18 @@ links:
     url: http://127.0.0.1:${MYSHOP_FRONTEND_PORT}
 ports:
   - MONGO_PORT
+  - FILE_MONGO_PORT
   - MYSHOP_BACKEND_PORT
   - LANDING_PAGE_PORT
   - DOCS_PORT
   - MYSHOP_FRONTEND_PORT
 docker:
+  file-mongodb:
+    image: mongodb/mongodb-atlas-local:latest
+    ports:
+      - "127.0.0.1:${FILE_MONGO_PORT}:27017"
+    volumes:
+      - /data/db
   mongodb:
     image: mongo:latest
     ports:
@@ -37,6 +44,10 @@ tasks:
     env: "*"
     cmds:
       - INPRODUCT_MONGO_TEST_URI="mongodb://127.0.0.1:${MONGO_PORT}/?directConnection=true" pnpm --filter @mp-lb/inproduct-storage exec vitest run src/mongoAdapters.test.ts
+  file-metadata-test:
+    env: "*"
+    cmds:
+      - cd packages/storage && INPRODUCT_MONGO_FILE_TEST_URI="mongodb://127.0.0.1:${FILE_MONGO_PORT}/?directConnection=true" ../../node_modules/.bin/vitest run src/createMongoFileMetadataRepository.test.ts --maxWorkers=1
   docs-preview:
     env: "*"
     cmds:

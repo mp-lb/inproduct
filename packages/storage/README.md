@@ -11,7 +11,10 @@ Install with `pnpm add @mp-lb/inproduct-storage`. Workspace contributors can use
 `pnpm --filter @mp-lb/inproduct-storage build`.
 
 ```ts
-import { createStorage, createMemoryStorageAdapter } from "@mp-lb/inproduct-storage";
+import {
+  createStorage,
+  createMemoryStorageAdapter,
+} from "@mp-lb/inproduct-storage";
 
 const storage = createStorage({
   adapter: createMemoryStorageAdapter(),
@@ -30,6 +33,29 @@ await storage.delete("2026/order-123.txt");
 
 ## Backend-backed file management
 
+### Metadata for externally stored files
+
+For applications that keep bytes in S3 or another object store, use
+`createMongoFileMetadataRepository` from the Node entry point. Pass the MongoDB
+database and the name of the single files collection. Each file is a separate
+document containing its ID, tenant ID, object key, and your metadata. The
+repository never stores file bytes. It keeps revision, quota, and audit control
+state in a separate `<collectionName>Settings` collection and uses MongoDB
+replica-set transactions for consistent updates.
+
+```ts
+import { createMongoFileMetadataRepository } from "@mp-lb/inproduct-storage/node";
+
+const repository = createMongoFileMetadataRepository(db, "files");
+// Supply this repository to your authorized file lifecycle and tRPC router.
+```
+
+The existing `createMongoFileStorageAdapter` is for the older small-file API
+that stores bytes inside MongoDB. Use the metadata repository for central
+S3-backed files.
+
+### Small-file API
+
 The Node entry point supplies a disk adapter and HTTP handler; the frontend only
 needs the client, hook and your markup. No separate hosted service is required.
 
@@ -37,13 +63,20 @@ needs the client, hook and your markup. No separate hosted service is required.
 // Your existing Node backend
 import { createServer } from "node:http";
 import { createFileStorage } from "@mp-lb/inproduct-storage";
-import { createDiskFileStorageAdapter, createFileStorageHandler } from "@mp-lb/inproduct-storage/node";
+import {
+  createDiskFileStorageAdapter,
+  createFileStorageHandler,
+} from "@mp-lb/inproduct-storage/node";
 
-const storage = createFileStorage({ adapter: createDiskFileStorageAdapter({ directory: "./data/files" }) });
-const server = createServer(createFileStorageHandler({
-  storage,
-  authorize: (request) => yourExistingAdminCheck(request),
-}));
+const storage = createFileStorage({
+  adapter: createDiskFileStorageAdapter({ directory: "./data/files" }),
+});
+const server = createServer(
+  createFileStorageHandler({
+    storage,
+    authorize: (request) => yourExistingAdminCheck(request),
+  }),
+);
 // Listen using your application's configured port.
 ```
 
@@ -52,23 +85,35 @@ const server = createServer(createFileStorageHandler({
 import { createFileStorageClient } from "@mp-lb/inproduct-storage";
 import { useFileStorage } from "@mp-lb/inproduct-storage/react";
 
-const client = createFileStorageClient('/api/files');
+const client = createFileStorageClient("/api/files");
 
 export const Files = () => {
   const files = useFileStorage(client);
   return (
     <section>
-      <input type="file" disabled={files.busy} onChange={(event) => {
-        const file = event.target.files?.[0];
-        if (file) void files.uploadFile(file);
-        event.target.value = '';
-      }} />
+      <input
+        type="file"
+        disabled={files.busy}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void files.uploadFile(file);
+          event.target.value = "";
+        }}
+      />
       {files.error && <p role="alert">{files.error}</p>}
-      {files.loading ? <p>Loading…</p> : files.files.map((file) => (
-        <button key={file.id} disabled={files.busy} onClick={() => void files.download(file.id)}>
-          {file.name}
-        </button>
-      ))}
+      {files.loading ? (
+        <p>Loading…</p>
+      ) : (
+        files.files.map((file) => (
+          <button
+            key={file.id}
+            disabled={files.busy}
+            onClick={() => void files.download(file.id)}
+          >
+            {file.name}
+          </button>
+        ))
+      )}
     </section>
   );
 };
