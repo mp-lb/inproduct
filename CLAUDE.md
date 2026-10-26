@@ -23,7 +23,7 @@ A few conventions about these instruction files themselves:
 
 - **The source is `context/` building blocks; the agent files are compiled from them.** `context/index.md` composes project-specific `@<block>.md` imports and standalone Forum links for shared blocks. Edit the project blocks and index, not the generated files.
 - **`CLAUDE.md` and `AGENTS.md` are generated and committed outputs.** The context task first resolves local imports with [`@mp-lb/mdcompile`](https://www.npmjs.com/package/@mp-lb/mdcompile), then pipes that Markdown through `fm compile --stdin` to expand Forum links. Regenerate both files with the project’s context task and commit them with their source changes.
-- **The compiled agent file is small on purpose.** It carries the always-true essentials and *points* at the detailed `docs/standards/*` for the rest — read those on demand rather than expecting everything to be in context.
+- **The compiled agent file is small on purpose.** It carries the always-true essentials. Read relevant shared standards directly from `mp-lb/dev` on demand with `fm read <file>.md --store mp-lb/dev`.
 
 ## Tools you can expect to be authenticated
 
@@ -33,11 +33,11 @@ A handful of CLI tools are installed and already authenticated on this machine �
 - **Google Cloud CLI (`gcloud`)**
 - **AWS CLI (`aws`)**
 - **Zapper** — our process manager and task runner.
-- **Doctrine** — our document sync system.
+- **Forum** — our document system.
 
 ## Git
 
-Some projects use git and some use Doctrine, so be aware of which kind you're in.
+Some projects also sync project documentation with Forum; check the project's documentation instructions before editing docs.
 
 **Local-first.** Work happens locally. Branches isolate a piece of work before it merges to `main`. We **rarely push to GitHub — only to deploy**, from `main`, as a separate step. We never use PRs.
 
@@ -49,9 +49,9 @@ Some projects use git and some use Doctrine, so be aware of which kind you're in
 
 Many projects deploy via CI when you push `main`. To confirm a deploy landed, lean on `gh`: glance at how long recent runs took, then schedule a recheck on a fitting cadence rather than polling tightly. Specifics vary by project.
 
-## Doctrine
+## Forum
 
-Unlike GitHub there are no branches — there's always a single source of truth. **Sync before you edit:** the source lives in the cloud, so the local copy can be stale, and editing stale is how you get conflicts. Pull latest first. After syncing, we commit the synced files to git too, so they always live in the repo.
+Projects with a dedicated Forum store run `fm sync` before and after editing their mapped docs. Projects without one read shared material directly from Forum and do not need a sync configuration. Follow the project's documentation block for its actual store and layout.
 
 ## Task running
 
@@ -100,10 +100,6 @@ You are expected to check logs, check which services are running, update env var
 Use pnpm for dependencies and Zap for service orchestration. Run `zap status`, `zap up`, and `zap logs <service> --no-follow` to manage local services. Ports are allocated by Zap through zap.yaml; do not commit numeric local ports. Non-secret defaults live in .env.local; secrets belong in the ignored .env.
 
 Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before handing off meaningful changes. Keep tRPC procedure integration tests alongside the router. Use Chrome for manual testing only when the user explicitly asks for it.
-
-Read shared standards directly from Forum with `fm read <file>.md --store mp-lb/dev`. Relevant files include `style-guide.md` for code changes, `errors.md` for error handling, `trpc.md` for API work, `logging.md` and `event-schema.md` for logging and events, and `libs.md` and `lib-release.md` for publishable library changes. List available standards with `fm ls --store mp-lb/dev`.
-
-Shared standards, extensions, examples, and skills are read directly from Forum. InProduct has no dedicated Forum store or sync configuration. Keep only InProduct-specific documentation under `docs/`.
 
 Project-specific context source lives in `context/`; shared blocks are Forum
 file references from `mp-lb/fssstack/agents-md`. Regenerate with
@@ -181,23 +177,18 @@ The frontend uses [shadcn/ui](https://ui.shadcn.com/) for UI components. Add new
 Always use shadcn/ui where possible, including utilities like `cn` for conditional classnames.
 
 
-## Documentation layout
 
-Keep InProduct-specific documentation in `docs/`. `docs/public/` contains the published library guides and `docs/internals/` contains internal engineering notes. Root-level project documents such as `README.md` and `MANIFESTO.md` stay at the repository root. Shared standards, extensions, examples, and skills belong in Forum, not in this repository.
 
 ## Documentation
+
+Keep InProduct-specific documentation in `docs/`. `docs/public/` contains the published library guides and `docs/internals/` contains internal engineering notes. Root-level project documents such as `README.md` and `MANIFESTO.md` stay at the repository root. Shared standards and extensions belong in Forum.
 
 This project publishes docs generated from the source of truth. A library's API reference comes from its types, and a CLI's command reference comes from its command tree. After changing a public API or CLI command, run `docs:gen` and commit the generated reference and agent bundle. CI runs `docs:check` to catch stale output. Keep hand-written guides beside generated references and link to signatures rather than repeating them.
 
 Read `libs.md` from `mp-lb/dev` for the full model (`fm read libs.md --store mp-lb/dev`). For packages with a CLI, also read `clis.md` from that store.
 
-## Shared Forum references
+Read shared standards with `fm read <file>.md --store mp-lb/dev` (list them with `fm ls --store mp-lb/dev`). Read shared extensions with `fm read extensions/<file>.md --store mp-lb/fssstack` (list them with `fm ls extensions --store mp-lb/fssstack`).
 
-Read shared material directly from Forum before applying it:
+Relevant standards include `style-guide.md` for code changes, `errors.md` for error handling, `trpc.md` for API work, `logging.md` and `event-schema.md` for events, and `libs.md` and `lib-release.md` for publishable libraries.
 
-- Standards: `fm ls --store mp-lb/dev` and `fm read <file>.md --store mp-lb/dev`.
-- Extensions: `fm ls extensions --store mp-lb/fssstack` and `fm read extensions/<file>.md --store mp-lb/fssstack`.
-- Examples: `fm ls examples --store mp-lb/fssstack` and `fm read examples/<file> --store mp-lb/fssstack`.
-- Skills: `fm ls skills --store mp-lb/fssstack` and `fm read skills/<file> --store mp-lb/fssstack`.
-
-There is no `.forum/` directory or `fm sync` workflow for InProduct. The `docs/` folder contains only InProduct-specific docs. Any older instruction naming local `docs/standards/`, `docs/extensions/`, `docs/examples/`, or `docs/skills/` paths refers to the Forum material above.
+InProduct has no dedicated Forum store or `.forum/` sync configuration.
