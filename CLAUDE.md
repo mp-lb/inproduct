@@ -101,9 +101,9 @@ Use pnpm for dependencies and Zap for service orchestration. Run `zap status`, `
 
 Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before handing off meaningful changes. Keep tRPC procedure integration tests alongside the router. Use Chrome for manual testing only when the user explicitly asks for it.
 
-Read docs/standards/style-guide.md for code changes, docs/standards/errors.md for error handling, docs/standards/trpc.md for API work, and docs/standards/logging.md and event-schema.md for logging/events. Follow docs/standards/libs.md and lib-release.md for publishable library changes.
+Read shared standards directly from Forum with `fm read <file>.md --store mp-lb/dev`. Relevant files include `style-guide.md` for code changes, `errors.md` for error handling, `trpc.md` for API work, `logging.md` and `event-schema.md` for logging and events, and `libs.md` and `lib-release.md` for publishable library changes. List available standards with `fm ls --store mp-lb/dev`.
 
-Central standards and examples sync from mp-lb/fssstack using `.forum/sync.yaml`. Read them with `dx read` or pull updates with `dx pull`.
+Shared standards, extensions, examples, and skills are read directly from Forum. InProduct has no dedicated Forum store or sync configuration. Keep only InProduct-specific documentation under `docs/`.
 
 Project-specific context source lives in `context/`; shared blocks are Forum
 file references from `mp-lb/fssstack/agents-md`. Regenerate with
@@ -183,39 +183,21 @@ Always use shadcn/ui where possible, including utilities like `cn` for condition
 
 ## Documentation layout
 
-This project's docs live under `docs/` with a fixed layout — keep to it:
-
-- **Root = project surface.** Only top-level, act-on-it files belong at the root
-  of `docs/`: `README.md`, `STORY.md`, the task board (`*.board.json`), and any
-  studies/positioning you want at eye level. Don't drop loose docs here.
-- **`docs/internals/` = this project's own docs.** Every system/engineering doc —
-  feature docs, architecture notes, setup runbooks, how-things-work explainers —
-  lives here. When you write a doc about how something works, it goes in
-  `docs/internals/`, never loose at the root.
-- **`docs/standards/`, `docs/extensions/`, `docs/examples/`, `docs/skills/` =
-  Fssstack store references.** Shared content composed in via the project's
-  Doctrine store. Read-through; don't fork or edit casually.
-- **`docs/public/`** *(libraries only)* — the opt-in published surface the docs
-  site renders (see `standards/libs.md`). Everything else in `docs/` is
-  unpublished by default.
-
-The compiled `CLAUDE.md`/`AGENTS.md` stays deliberately small — it carries the
-always-true essentials and *points* at `docs/standards/*` for the detail. Read
-those on demand rather than expecting everything to be in context.
-
-
-## Doctrine
-
-Central docs are stored in the cloud using doctrine. You can run commands like `pnpm exec fm read some-file.md` and `pnpm exec fm ls`. Relative file paths are likely to be real files on disk.
-
+Keep InProduct-specific documentation in `docs/`. `docs/public/` contains the published library guides and `docs/internals/` contains internal engineering notes. Root-level project documents such as `README.md` and `MANIFESTO.md` stay at the repository root. Shared standards, extensions, examples, and skills belong in Forum, not in this repository.
 
 ## Documentation
 
-This project publishes docs, so they're **generated from the source of truth**, not hand-maintained in parallel — they can't drift:
+This project publishes docs generated from the source of truth. A library's API reference comes from its types, and a CLI's command reference comes from its command tree. After changing a public API or CLI command, run `docs:gen` and commit the generated reference and agent bundle. CI runs `docs:check` to catch stale output. Keep hand-written guides beside generated references and link to signatures rather than repeating them.
 
-- A library's API reference comes from its **types**; a CLI's command reference comes from its **commander tree**. You don't hand-write these.
-- **After changing public API or CLI commands/flags, run `docs:gen`** to regenerate the reference (and the `llms-full.txt` agent bundle), then commit the result.
-- **`docs:check` runs in CI and fails if the committed docs are stale** — regenerating is not optional.
-- Hand-written narrative (README, guides) lives beside the generated reference: update it when behaviour changes, but never restate signatures or flags — link to the reference instead.
+Read `libs.md` from `mp-lb/dev` for the full model (`fm read libs.md --store mp-lb/dev`). For packages with a CLI, also read `clis.md` from that store.
 
-Read `docs/standards/libs.md` for the full model (and `docs/standards/clis.md` if the package ships a `bin`).
+## Shared Forum references
+
+Read shared material directly from Forum before applying it:
+
+- Standards: `fm ls --store mp-lb/dev` and `fm read <file>.md --store mp-lb/dev`.
+- Extensions: `fm ls extensions --store mp-lb/fssstack` and `fm read extensions/<file>.md --store mp-lb/fssstack`.
+- Examples: `fm ls examples --store mp-lb/fssstack` and `fm read examples/<file> --store mp-lb/fssstack`.
+- Skills: `fm ls skills --store mp-lb/fssstack` and `fm read skills/<file> --store mp-lb/fssstack`.
+
+There is no `.forum/` directory or `fm sync` workflow for InProduct. The `docs/` folder contains only InProduct-specific docs. Any older instruction naming local `docs/standards/`, `docs/extensions/`, `docs/examples/`, or `docs/skills/` paths refers to the Forum material above.

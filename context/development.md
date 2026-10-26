@@ -4,9 +4,9 @@ Use pnpm for dependencies and Zap for service orchestration. Run `zap status`, `
 
 Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before handing off meaningful changes. Keep tRPC procedure integration tests alongside the router. Use Chrome for manual testing only when the user explicitly asks for it.
 
-Read docs/standards/style-guide.md for code changes, docs/standards/errors.md for error handling, docs/standards/trpc.md for API work, and docs/standards/logging.md and event-schema.md for logging/events. Follow docs/standards/libs.md and lib-release.md for publishable library changes.
+Read shared standards directly from Forum with `fm read <file>.md --store mp-lb/dev`. Relevant files include `style-guide.md` for code changes, `errors.md` for error handling, `trpc.md` for API work, `logging.md` and `event-schema.md` for logging and events, and `libs.md` and `lib-release.md` for publishable library changes. List available standards with `fm ls --store mp-lb/dev`.
 
-Central standards and examples sync from mp-lb/fssstack using `.forum/sync.yaml`. Read them with `dx read` or pull updates with `dx pull`.
+Shared standards, extensions, examples, and skills are read directly from Forum. InProduct has no dedicated Forum store or sync configuration. Keep only InProduct-specific documentation under `docs/`.
 
 Project-specific context source lives in `context/`; shared blocks are Forum
 file references from `mp-lb/fssstack/agents-md`. Regenerate with

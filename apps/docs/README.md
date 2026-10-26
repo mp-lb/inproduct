@@ -61,7 +61,7 @@ or `source.config.ts`; see also [Vite integration](https://www.fumadocs.dev/docs
 Consequently there is no `fumadocs-mdx` postinstall or typecheck CLI invocation and no
 `collections/*` generated-source alias. Typechecking uses React Router typegen plus TypeScript.
 
-The library remains Tier 0 under `docs/standards/libs.md`: one utility, declarations and README.
+The library remains Tier 0 under the shared `libs.md` standard (`fm read libs.md --store mp-lb/dev`): one utility, declarations and README.
 A separate TypeDoc reference would duplicate a trivially navigable API. `docs:gen` builds the
 site/agent bundle and `docs:check` validates fresh output; a committed-reference drift check
 becomes applicable when a generated Tier 1 reference is introduced.
