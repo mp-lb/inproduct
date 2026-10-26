@@ -2,7 +2,7 @@
 
 A collection of tools to put in your product.
 
-Read MANIFESTO.md for the product philosophy. Setup values live in manifest.json5.
+Read MANIFESTO.md for the product philosophy. Setup values live in fssstack.yaml.
 
 ## Packages
 
