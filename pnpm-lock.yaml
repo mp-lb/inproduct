@@ -18,8 +18,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.2.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))
       '@mp-lb/monolith-mapper':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: 0.1.2
+        version: 0.1.2
       '@playwright/test':
         specifier: 1.64.0
         version: 1.64.0
@@ -1216,8 +1216,8 @@ packages:
       vitest:
         optional: true
 
-  '@mp-lb/monolith-mapper@0.1.1':
-    resolution: {integrity: sha512-j2+pQODM30HMSNuC0Fp3iO9J77mLZLIGgmZyghqgOak1lB2xOH4BAiWTzTg10GJH9pw9IYDINlx5h5IWwk0NdA==}
+  '@mp-lb/monolith-mapper@0.1.2':
+    resolution: {integrity: sha512-AyjdojmS6Iqt+9ao2L4M+r8/2m4N75FTvB7fWFTIN5zwe/Iqe7q1n1wnjkvBrxBLiMubWkPEDQvZG0yBAaKWaQ==}
     hasBin: true
 
   '@mp-lb/zapper-sdk@0.20.1':
@@ -6330,7 +6330,7 @@ snapshots:
       mongodb: 7.2.0(socks@2.8.10)
       vitest: 4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)
 
-  '@mp-lb/monolith-mapper@0.1.1':
+  '@mp-lb/monolith-mapper@0.1.2':
     dependencies:
       commander: 14.0.3
       fast-glob: 3.3.3
