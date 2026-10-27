@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "nodes": [
+    {
+      "name": "@mp-lb/inproduct",
+      "dependencies": []
+    },
+    {
+      "name": "@mp-lb/inproduct-core",
+      "dependencies": []
+    },
+    {
+      "name": "@mp-lb/inproduct-docs",
+      "dependencies": []
+    },
+    {
+      "name": "@mp-lb/inproduct-landing-page",
+      "dependencies": []
+    },
+    {
+      "name": "@mp-lb/inproduct-myshop-backend",
+      "dependencies": [
+        "@mp-lb/inproduct-server",
+        "@mp-lb/inproduct-storage"
+      ]
+    },
+    {
+      "name": "@mp-lb/inproduct-myshop-frontend",
+      "dependencies": [
+        "@mp-lb/inproduct",
+        "@mp-lb/inproduct-storage"
+      ]
+    },
+    {
+      "name": "@mp-lb/inproduct-server",
+      "dependencies": [
+        "@mp-lb/inproduct-core"
+      ]
+    },
+    {
+      "name": "@mp-lb/inproduct-storage",
+      "dependencies": []
+    },
+    {
+      "name": "@mp-lb/inproduct-trpc",
+      "dependencies": [
+        "@mp-lb/inproduct-core",
+        "@mp-lb/inproduct-server"
+      ]
+    }
+  ],
+  "cycles": []
+}

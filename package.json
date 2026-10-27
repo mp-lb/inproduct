@@ -6,7 +6,8 @@
   "scripts": {
     "build": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present build",
     "dev": "zap task myshop",
-    "lint": "python3 scripts/run_validation.py --profile lint -- eslint .",
+    "lint": "python3 scripts/run_validation.py --profile lint -- eslint . && monolith-mapper check",
+    "modules:map": "monolith-mapper map",
     "typecheck": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present typecheck",
     "test": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present test",
     "docs:gen": "python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-docs build",
@@ -19,6 +20,7 @@
     "@mp-lb/arcnet": "0.7.11",
     "@mp-lb/fssstack-config": "0.3.1",
     "@mp-lb/fssstack-testing": "0.1.0",
+    "@mp-lb/monolith-mapper": "0.1.1",
     "@playwright/test": "1.64.0",
     "@types/node": "20.19.39",
     "eslint": "9.39.4",
