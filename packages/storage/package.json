@@ -21,6 +21,22 @@
     "./node": {
       "types": "./dist/node.d.ts",
       "import": "./dist/node.js"
+    },
+    "./file-library": {
+      "types": "./dist/fileLibrary.d.ts",
+      "import": "./dist/fileLibrary.js"
+    },
+    "./file-library/server": {
+      "types": "./dist/fileLibraryServer.d.ts",
+      "import": "./dist/fileLibraryServer.js"
+    },
+    "./file-library/testing": {
+      "types": "./dist/fileLibraryTesting.d.ts",
+      "import": "./dist/fileLibraryTesting.js"
+    },
+    "./s3": {
+      "types": "./dist/s3.d.ts",
+      "import": "./dist/s3.js"
     }
   },
   "files": [
@@ -48,7 +64,9 @@
   "description": "Composable object storage for InProduct applications.",
   "peerDependencies": {
     "mongodb": "^7.2.0",
-    "react": "^18.0.0 || ^19.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "@aws-sdk/client-s3": "^3.1000.0",
+    "@aws-sdk/s3-request-presigner": "^3.1000.0"
   },
   "peerDependenciesMeta": {
     "mongodb": {
@@ -56,9 +74,17 @@
     },
     "react": {
       "optional": true
+    },
+    "@aws-sdk/client-s3": {
+      "optional": true
+    },
+    "@aws-sdk/s3-request-presigner": {
+      "optional": true
     }
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "3.1143.0",
+    "@aws-sdk/s3-request-presigner": "3.1143.0",
     "@testing-library/react": "^16.3.3",
     "@types/react": "^19",
     "jsdom": "^30.0.1",

@@ -1,0 +1,151 @@
+import type { BeginFile, FileCategory, FileView } from "./fileLibraryTypes.js";
+
+/** Trusted identity resolved by the host from its own session, never request JSON. */
+export type Actor = { id: string; tenantId: string };
+
+export type Action =
+  | "upload"
+  | "read"
+  | "write"
+  | "download"
+  | "attach"
+  | "release"
+  | "delete"
+  | "diagnostics"
+  | "configure";
+
+export type MalwarePolicy = "required" | "allow-unscanned";
+
+export type FileHold = {
+  id: string;
+  consumer: string;
+  state: "reserved" | "attached" | "released";
+};
+
+export type FileRecord = Omit<FileView, "holdCount"> & {
+  malwarePolicy?: MalwarePolicy;
+  tenantId: string;
+  operationId: string;
+  requestHash: string;
+  key: string;
+  checksum: string;
+  version: string | null;
+  uploadUntil: number;
+  expiresAt: number;
+  lease: string | null;
+  leaseUntil: number;
+  deletedAt: number | null;
+  holds: FileHold[];
+};
+
+export type FileAudit = {
+  id: string;
+  eventType: string;
+  fileId: string;
+  actorId: string;
+  at: number;
+  timestamp: string;
+  userId: string;
+  details: {
+    version: 1;
+    fileRevision: number;
+    scan?: FileView["scan"];
+    malwarePolicy?: MalwarePolicy;
+    state: FileRecord["state"];
+    usage?: { id: string; consumer: string };
+  };
+};
+
+export type FilePartition = {
+  _id: string;
+  revision: number;
+  quotaBytes?: number;
+  quotaUpdatedAt?: number;
+  quotaUpdatedBy?: string;
+  files: FileRecord[];
+  audit: FileAudit[];
+};
+
+/** Compare-and-swap must be atomic and durably acknowledged. `save` returns
+ * false when `expectedRevision` is stale. No remote work happens in a mutation. */
+export type FileRepository = {
+  read(tenantId: string): Promise<FilePartition>;
+  save(next: FilePartition, expectedRevision: number): Promise<boolean>;
+};
+
+export type ObjectInspection = {
+  version: string;
+  sizeBytes: number;
+  contentType: string;
+  checksum: string;
+};
+
+/** Object-store adapter. Capabilities are declarations the library refuses to run without. */
+export type ObjectDriver = {
+  capabilities: {
+    versioned: boolean;
+    checksum: boolean;
+    conditionalCreate: boolean;
+  };
+  signUpload(input: {
+    key: string;
+    metadata: BeginFile;
+    expiresAt: number;
+    signal?: AbortSignal;
+  }): Promise<{ url: string; headers: Record<string, string> }>;
+  inspect(
+    key: string,
+    version?: string,
+    signal?: AbortSignal,
+  ): Promise<ObjectInspection>;
+  download(input: {
+    key: string;
+    version: string;
+    name: string;
+    expiresAt: number;
+    signal?: AbortSignal;
+  }): Promise<{ url: string }>;
+};
+
+export type ScanInput = {
+  key: string;
+  version: string;
+  checksum: string;
+  contentType: string;
+  signal?: AbortSignal;
+};
+
+/** Must inspect the exact pinned version and detect content, not trust upload MIME. */
+export type Scanner = {
+  scan(input: ScanInput): Promise<"clean" | "rejected">;
+};
+
+export type ByteValidator = {
+  validate(input: ScanInput): Promise<boolean>;
+};
+
+/** Host authorization decision. Return false unless the exact request is allowed. */
+export type AuthorizeFileAction = (input: {
+  actor: Actor;
+  action: Action;
+  file?: FileView;
+  scope?: string;
+  category?: FileCategory;
+  consumer?: string;
+}) => Promise<boolean>;
+
+export type FileLibraryOptions = {
+  malwarePolicy?: MalwarePolicy;
+  byteValidator?: ByteValidator;
+  repository: FileRepository;
+  driver: ObjectDriver;
+  scanner?: Scanner;
+  authorize: AuthorizeFileAction;
+  now?: () => number;
+  uuid?: () => string;
+  /** Provider/scanner deadline. Defaults to 15 seconds, at most 30 seconds. */
+  operationTimeoutMs?: number;
+  quotaBytes: number;
+  /** Lifetime file records per tenant partition. Defaults to and caps at 500. */
+  maxFiles?: number;
+};

@@ -7,3 +7,6 @@ export type {
   FileMetadataPartition,
   FileMetadataRepository,
 } from "./createMongoFileMetadataRepository.js";
+export { createMongoFileLibraryRepository } from "./createMongoFileLibraryRepository.js";
+export { createMongoFileAuditLedger } from "./createMongoFileAuditLedger.js";
+export { createMongoFileReferenceStore } from "./createMongoFileReferenceStore.js";

@@ -50,6 +50,8 @@ export const createFileStorageHandler = ({
             NOT_FOUND: 404,
             TOO_LARGE: 413,
             FORBIDDEN: 403,
+            CONFLICT: 409,
+            PRECONDITION_FAILED: 412,
           }[error.code]
         : 500;
 
