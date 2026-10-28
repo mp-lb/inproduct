@@ -11,6 +11,7 @@ for (const [path, title] of [
   ["installation/", "Installation"],
   ["backend/", "Backend integration"],
   ["storage/", "File storage"],
+  ["file-library/", "Managed file library"],
   ["myshop/", "MyShop local example"],
 ]) {
   assert.ok(
@@ -59,6 +60,38 @@ for (const marker of [
     `agent bundle missing storage content: ${marker}`,
   );
 }
+
+const libraryMarkdown = read("llms.mdx/docs/file-library/content.md");
+
+for (const marker of [
+  "createFileLibrary",
+  "createS3FileDriver",
+  "createMongoFileLibraryRepository",
+  "createFileReferenceCoordinator",
+  "createFileAuditDispatcher",
+  "replica set is required",
+  "Extension contracts",
+]) {
+  assert.ok(
+    libraryMarkdown.includes(marker),
+    `file library Markdown missing: ${marker}`,
+  );
+
+  assert.ok(
+    full.includes(marker),
+    `agent bundle missing file library content: ${marker}`,
+  );
+}
+
+assert.ok(
+  read("api/search").includes("/docs/file-library"),
+  "search index missing file library guide",
+);
+
+assert.ok(
+  read("docs/installation/index.html").includes('href="/docs/file-library"'),
+  "documentation navigation missing file library guide",
+);
 
 assert.ok(
   read("api/search").includes("/docs/storage"),

@@ -1,0 +1,173 @@
+---
+title: Managed file library
+description: Verified uploads to versioned S3, quotas, retention holds and durable audit, with metadata in your own MongoDB.
+---
+
+The managed file library in `@mp-lb/inproduct-storage` hides object keys, version pins,
+upload capabilities, verification, quotas and retention holds behind file UUIDs. Bytes
+stay in a versioned S3 bucket. Metadata lives in a MongoDB database your application
+owns. Your application keeps identity, authorization decisions, domain records,
+configuration and UI.
+
+It is a different API from the [small-file storage](/docs/storage) `createFileStorage`,
+which stores bytes inside its adapter. Use the file library when files are large,
+must be verified before use, or are referenced by other records.
+
+## Installation
+
+The file library ships in `@mp-lb/inproduct-storage` from the release that first
+contains the `/file-library` entry points. Check availability with
+`npm view @mp-lb/inproduct-storage exports` before depending on it. It requires Node.js
+22.13+ and ESM.
+
+```sh
+pnpm add @mp-lb/inproduct-storage mongodb @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+```
+
+MongoDB and the AWS SDK are optional peer dependencies: install them only when you use
+the Mongo or S3 adapters. Each entry point has one job:
+
+| Entry point | Runtime | Contents |
+| --- | --- | --- |
+| `/file-library` | Browser or Node | Zod schemas, `FileView`, `FileExplorerClient`, `formatFileValidationError` |
+| `/file-library/server` | Node | `createFileLibrary`, contracts, `FileStorageError`, `createFileReferenceCoordinator`, `createFileAuditDispatcher`, `createFileByteValidator`, `createClamdScanner`, `scanPrivateFileBytes` |
+| `/file-library/testing` | Node | Memory repository and reference store, synthetic object driver and scanner |
+| `/s3` | Node | `createS3FileDriver`, `createPrivateFileStore`, `createVersionedDocumentStorage` |
+| `/node` | Node | `createMongoFileLibraryRepository`, `createMongoFileAuditLedger`, `createMongoFileReferenceStore` |
+
+Never wire `/file-library/testing` into a production composition. Its scanner is a
+fixture, not malware protection.
+
+## Initialize
+
+```ts
+import { createFileLibrary } from '@mp-lb/inproduct-storage/file-library/server';
+import { createClamdScanner } from '@mp-lb/inproduct-storage/file-library/server';
+import { createS3FileDriver } from '@mp-lb/inproduct-storage/s3';
+import { createMongoFileLibraryRepository } from '@mp-lb/inproduct-storage/node';
+
+const s3 = createS3FileDriver({
+  bucket: config.bucket, // versioning must be enabled
+  region: config.region,
+  prefix: 'app/file-library/',
+});
+
+const library = createFileLibrary({
+  repository: createMongoFileLibraryRepository(db, 'files'),
+  driver: s3.driver,
+  scanner: createClamdScanner({ endpoint: config.clamdUrl, readVersion: s3.readVersion }),
+  quotaBytes: 1024 ** 3,
+  authorize: async ({ actor, action, file, scope, category, consumer }) =>
+    yourPolicy.allows(actor, action, { file, scope, category, consumer }),
+});
+```
+
+`config`, `db` and `yourPolicy` are your application's. Every method takes a trusted
+`actor` (`{ id, tenantId }`) that your server resolves from its session, never from
+request JSON.
+
+## Consumer integration
+
+A host typically exposes the library through its own authorized API:
+
+1. **Begin.** Validate the request with `beginFileSchema` and call
+   `library.begin(actor, input)`. It reserves quota and returns a stable file UUID and
+   a short-lived upload ticket. Retrying with the same `operationId` and identical
+   input returns the same file; changed input conflicts.
+2. **Upload.** The browser PUTs the bytes to `ticket.upload.url` with
+   `ticket.upload.headers`. The S3 signature binds type, length, SHA-256 and a
+   conditional create.
+3. **Finalize.** `library.finalize(actor, fileId)` pins one immutable version, checks
+   size, type and checksum, validates bytes and scans. Retries rescan the pinned version
+   and can never repin it. Scanner or provider failures leave the file retryable.
+4. **Reference.** Attach the file to a domain record with
+   `createFileReferenceCoordinator`, which holds the file against deletion.
+5. **Audit.** A trusted worker drains each tenant's audit outbox with
+   `createFileAuditDispatcher(repository, ledger)`.
+
+The package test `consumerIntegrationExample.test.ts` runs this flow end to end with
+the synthetic adapters.
+
+## Extension contracts
+
+The library calls these host-supplied functions. Each boundary stays in your application.
+
+| Contract | Responsibility |
+| --- | --- |
+| `authorize(input)` | The authorization decision. Return false unless the exact request is allowed. Actions are `upload`, `read`, `write`, `download`, `attach`, `release`, `delete`, `diagnostics` and `configure`. `scope` and `category` are requests, not grants. Verify consumer identities such as `project:P-1`. |
+| `FileRepository` | An atomic, durably acknowledged revision compare-and-swap per tenant partition. |
+| `ObjectDriver` | Upload signing, version inspection and download signing. Must declare `versioned`, `checksum` and `conditionalCreate`; the library refuses to run otherwise. |
+| `Scanner` / `ByteValidator` | Inspect the exact pinned version and detect content rather than trusting the upload MIME type. |
+| `FileReferenceStore` | The authoritative association between a domain record and a file. |
+| `FileAuditLedger` | An idempotent append, keyed by tenant and event ID. |
+
+Storage independently enforces tenant isolation, lifecycle, version immutability and
+hold restrictions. List results are authorized row by row before filtering and
+pagination, so cursors never reveal hidden rows.
+
+## MongoDB configuration
+
+`createMongoFileLibraryRepository(db, collectionName = 'files')` stores one document per
+file in the collection you choose. Revision, quota and the pending audit outbox live in
+`<collectionName>Settings`. Every change runs in a snapshot transaction with majority and
+journal acknowledgment.
+
+**A MongoDB replica set is required.** A single-node replica set works for local
+development, for example `mongodb/mongodb-atlas-local`. Standalone servers are not
+supported, and there is no non-transactional mode.
+
+`createMongoFileAuditLedger(db, collectionName = 'fileStorageAudit')` and
+`createMongoFileReferenceStore(db, collectionName = 'fileStorageReferences')` are
+single-document adapters. Pass a `Db` scoped to your application's database and restrict
+database access to the server.
+
+## Retention holds and references
+
+`reserve`, `attach` and `release` take a hold ID and a consumer. An active hold blocks
+deletion. Unresolved reservations are kept indefinitely. Released hold IDs are permanent
+tombstones and cannot be reused.
+
+`createFileReferenceCoordinator({ storage, references, authorize })` moves each reference
+through `intent → bound → detaching → released`. It never compensates for an uncertain
+outcome; call `reconcile` with the recorded actor to recover. `references.pending(tenantId,
+limit)` returns bounded recovery batches for your worker.
+
+## Audit
+
+Every mutation appends an audit event to the partition outbox in the same transaction.
+`createFileAuditDispatcher` appends pending events to the ledger, then acknowledges only
+those event IDs. A lost acknowledgment is safe to retry. When 2,000 events are pending,
+mutations fail with `PRECONDITION_FAILED` until delivery succeeds. No events are dropped.
+Your application schedules the worker; importing the package starts nothing.
+
+## Private files and versioned documents
+
+- `createPrivateFileStore({ bucket, region, prefix })` supports domains that own their
+  per-file metadata, such as email attachments. It provides an immutable `put`, 60-second
+  attachment downloads and `remove`, which deletes every version and delete marker. It
+  does not use the library's quotas or holds. Pair it with `scanPrivateFileBytes` when
+  your policy requires malware scanning.
+- `createVersionedDocumentStorage` is a compatibility adapter for domains that own their
+  object keys. Its verification checks metadata only: version, size and type.
+
+## Errors
+
+Expected failures throw `FileStorageError` with a `code` of `INVALID_INPUT`,
+`NOT_FOUND`, `TOO_LARGE`, `FORBIDDEN`, `CONFLICT` or `PRECONDITION_FAILED`. Map these to
+your transport. Schema violations throw Zod errors; `formatFileValidationError` turns
+them into safe, field-specific messages. Treat other errors as internal and retryable.
+
+## Limits
+
+- Accepted types are PDF, plain text, PNG and JPEG, up to 50 MiB, because the built-in
+  validator positively identifies only these types.
+- Each tenant partition holds at most 500 lifetime file records, including deleted files.
+  Each file allows 20 lifetime hold IDs, and each partition allows 2,000 pending audit
+  events. These limits reject growth explicitly; they are not production capacity claims.
+- Removal is soft. It hides the file and denies downloads, but it does not erase bytes or
+  release quota. Diagnostics report cleanup candidates without deleting anything. No
+  prune executor exists.
+- Provider and scanner calls have a 15-second default deadline, configurable up to 30
+  seconds. The ClamAV adapter requires a trusted private TCP endpoint and signatures less
+  than 72 hours old.
+- Issued S3 presigned URLs cannot be revoked before they expire.
