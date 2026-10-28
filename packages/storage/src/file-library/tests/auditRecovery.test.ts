@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { createFileAuditDispatcher } from "../createFileAuditDispatcher.js";
-import type { FileAudit } from "../fileLibraryContracts.js";
-import type { FileAuditLedger } from "../fileAuditLedger.js";
-import { maxPendingAudit } from "../maxPendingAudit.js";
-import { createFixture, metadata, owner } from "./fileLibraryFixture.js";
+import { createFileAuditDispatcher } from "../createFileAuditDispatcher";
+import type { FileAudit } from "../fileLibraryContracts";
+import type { FileAuditLedger } from "../fileAuditLedger";
+import { maxPendingAudit } from "../maxPendingAudit";
+import { createFixture, metadata, owner } from "./fileLibraryFixture";
 
 const createLedger = () => {
   const events = new Map<string, FileAudit>();
+
   const ledger: FileAuditLedger = {
     append: async (tenantId, batch) => {
       for (const event of batch)
@@ -14,6 +15,7 @@ const createLedger = () => {
           events.set(`${tenantId}/${event.id}`, event);
     },
   };
+
   return { events, ledger };
 };
 
@@ -22,9 +24,11 @@ describe("file library audit recovery", () => {
     const { options, ready } = createFixture();
     await ready();
     const { events, ledger } = createLedger();
+
     const append = vi
       .spyOn(ledger, "append")
       .mockRejectedValueOnce(new Error("ledger outage"));
+
     const dispatch = createFileAuditDispatcher(options.repository, ledger);
 
     await expect(dispatch(owner.tenantId)).rejects.toThrow("ledger outage");
@@ -42,10 +46,12 @@ describe("file library audit recovery", () => {
     await ready();
     const { events, ledger } = createLedger();
     const original = ledger.append;
+
     ledger.append = async (tenantId, batch) => {
       await original(tenantId, batch);
       await library.begin(owner, metadata());
     };
+
     const dispatch = createFileAuditDispatcher(options.repository, ledger);
     const delivered = await dispatch(owner.tenantId);
 
@@ -61,17 +67,21 @@ describe("file library audit recovery", () => {
     const { ledger } = createLedger();
     const save = options.repository.save;
     let lost = false;
+
     const repository = {
       read: options.repository.read,
       save: async (...args: Parameters<typeof save>) => {
         const saved = await save(...args);
+
         if (!lost) {
           lost = true;
           throw new Error("response lost");
         }
+
         return saved;
       },
     };
+
     const dispatch = createFileAuditDispatcher(repository, ledger);
     await expect(dispatch(owner.tenantId)).rejects.toThrow("response lost");
     expect((await options.repository.read(owner.tenantId)).audit).toEqual([]);
@@ -88,6 +98,7 @@ describe("file library audit recovery", () => {
       ...filler,
       id: `filler-${index}`,
     }));
+
     partition.revision++;
     await options.repository.save(partition, previous);
     const before = await options.repository.read(owner.tenantId);
@@ -100,6 +111,7 @@ describe("file library audit recovery", () => {
         tags: [],
       }),
     ).rejects.toThrow("audit delivery required");
+
     expect(await options.repository.read(owner.tenantId)).toEqual(before);
 
     const { ledger } = createLedger();

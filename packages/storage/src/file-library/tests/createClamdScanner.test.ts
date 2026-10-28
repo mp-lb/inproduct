@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { createServer, type Server } from "node:net";
 import { createHash } from "node:crypto";
-import { createClamdScanner } from "../createClamdScanner.js";
-import { scanPrivateFileBytes } from "../scanPrivateFileBytes.js";
+import { createClamdScanner } from "../createClamdScanner";
+import { scanPrivateFileBytes } from "../scanPrivateFileBytes";
 const servers: Server[] = [];
 afterEach(async () => {
   await Promise.all(
@@ -128,11 +128,14 @@ describe("scanner fail-closed protocol", () => {
       endpoint: await endpoint(fresh, "stream: OK"),
       readVersion: async () => bytes,
     });
+
     expect(await clean.scan(input)).toBe("clean");
+
     const infected = createClamdScanner({
       endpoint: await endpoint(fresh, "stream: Eicar-Test-Signature FOUND"),
       readVersion: async () => bytes,
     });
+
     expect(await infected.scan(input)).toBe("rejected");
   });
 
@@ -143,6 +146,7 @@ describe("scanner fail-closed protocol", () => {
       bytes,
       signal,
     );
+
     await expect(
       scanPrivateFileBytes(
         await endpoint(fresh, "stream: Eicar-Test-Signature FOUND"),

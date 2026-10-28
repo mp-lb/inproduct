@@ -94,6 +94,7 @@ export const createSyntheticObjects = () => {
     const object = versions
       .get(key)
       ?.find((entry) => entry.version === version);
+
     if (!object) throw new Error("synthetic object missing");
     return Buffer.from(object.bytes);
   };

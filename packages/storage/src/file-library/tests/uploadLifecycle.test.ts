@@ -5,20 +5,23 @@ import {
   createFixture,
   metadata,
   owner,
-} from "./fileLibraryFixture.js";
+} from "./fileLibraryFixture";
 
 describe("file library upload lifecycle", () => {
   it("resumes concurrent begin retries without duplicate quota and rejects a changed payload", async () => {
     const { library, options } = createFixture();
     const input = metadata();
+
     const tickets = await Promise.all([
       library.begin(owner, input),
       library.begin(owner, input),
     ]);
+
     expect(tickets[0].file.id).toBe(tickets[1].file.id);
     expect((await options.repository.read(owner.tenantId)).files).toHaveLength(
       1,
     );
+
     await expect(
       library.begin(owner, { ...input, name: "different.txt" }),
     ).rejects.toMatchObject({ code: "CONFLICT" });
@@ -26,10 +29,12 @@ describe("file library upload lifecycle", () => {
 
   it("prevents concurrent quota oversubscription and keeps soft-deleted reservations", async () => {
     const { library } = createFixture({ quotaBytes: bytes.byteLength });
+
     const results = await Promise.allSettled([
       library.begin(owner, metadata()),
       library.begin(owner, metadata()),
     ]);
+
     expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
 
     const [file] = (await library.list(owner, {})).items;
@@ -44,10 +49,12 @@ describe("file library upload lifecycle", () => {
     expect(
       await first.library.setQuota(owner, { quotaBytes: bytes.byteLength }),
     ).toEqual({ quotaBytes: bytes.byteLength });
+
     const restarted = createFixture({ repository: first.options.repository });
     expect((await restarted.library.diagnostics(owner)).quotaBytes).toBe(
       bytes.byteLength,
     );
+
     await restarted.library.begin(owner, metadata());
     await expect(
       restarted.library.begin(owner, metadata()),
@@ -61,6 +68,7 @@ describe("file library upload lifecycle", () => {
     await expect(library.begin(owner, metadata())).rejects.toThrow(
       "storage quota reached",
     );
+
     expect((await library.begin(owner, input)).file.id).toBe(first.file.id);
   });
 
@@ -84,23 +92,29 @@ describe("file library upload lifecycle", () => {
     const { library, objects, options } = createFixture();
     const ticket = await library.begin(owner, metadata());
     objects.upload(ticket.upload!.url, bytes);
+
     const scan = vi
       .spyOn(objects.scanner, "scan")
       .mockRejectedValueOnce(new Error("outage"));
+
     await expect(library.finalize(owner, ticket.file.id)).rejects.toThrow(
       "outage",
     );
+
     const pinned = (await options.repository.read(owner.tenantId)).files[0]
       .version;
+
     expect(pinned).toBeTruthy();
     objects.upload(ticket.upload!.url, new TextEncoder().encode("swap"), true);
 
     expect((await library.finalize(owner, ticket.file.id)).state).toBe(
       "available",
     );
+
     expect(
       (await options.repository.read(owner.tenantId)).files[0].version,
     ).toBe(pinned);
+
     expect(scan).toHaveBeenCalledTimes(2);
   });
 
@@ -110,10 +124,12 @@ describe("file library upload lifecycle", () => {
     await expect(library.finalize(owner, ticket.file.id)).rejects.toThrow(
       "synthetic object missing",
     );
+
     objects.upload(ticket.upload!.url, new TextEncoder().encode("wrong"));
     expect((await library.finalize(owner, ticket.file.id)).state).toBe(
       "quarantined",
     );
+
     await expect(library.download(owner, ticket.file.id)).rejects.toMatchObject(
       { code: "PRECONDITION_FAILED" },
     );
@@ -124,6 +140,7 @@ describe("file library upload lifecycle", () => {
     await expect(
       createFixture({ scanner: undefined }).library.begin(owner, metadata()),
     ).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+
     objects.driver.capabilities.versioned = false;
     await expect(library.begin(owner, metadata())).rejects.toMatchObject({
       code: "PRECONDITION_FAILED",
@@ -150,9 +167,11 @@ describe("file library upload lifecycle", () => {
     await expect(library.remove(owner, ticket.file.id)).rejects.toMatchObject({
       code: "CONFLICT",
     });
+
     await expect(library.finalize(owner, ticket.file.id)).rejects.toThrow(
       "verification in progress",
     );
+
     release();
     expect((await first).state).toBe("available");
   });
@@ -166,9 +185,11 @@ describe("file library upload lifecycle", () => {
       clock.now += 61_000;
       return original(input);
     });
+
     await expect(library.finalize(owner, ticket.file.id)).rejects.toThrow(
       "verification claim changed",
     );
+
     expect((await library.finalize(owner, ticket.file.id)).state).toBe(
       "available",
     );
@@ -181,32 +202,39 @@ describe("file library upload lifecycle", () => {
     vi.spyOn(objects.scanner, "scan").mockImplementationOnce(
       () => new Promise(() => undefined),
     );
+
     await expect(library.finalize(owner, ticket.file.id)).rejects.toThrow(
       "timed out",
     );
+
     expect((await library.finalize(owner, ticket.file.id)).scan).toBe("clean");
   });
 
   it("accepts byte-validated unscanned files only under an explicit policy", async () => {
     const objects = createFixture().objects;
+
     const { createFileByteValidator } =
-      await import("../createFileByteValidator.js");
+      await import("../createFileByteValidator");
+
     const { library } = createFixture({
       driver: objects.driver,
       scanner: undefined,
       malwarePolicy: "allow-unscanned",
       byteValidator: createFileByteValidator(objects.readVersion),
     });
+
     const ticket = await library.begin(owner, metadata());
     objects.upload(ticket.upload!.url, bytes);
     const file = await library.finalize(owner, ticket.file.id);
     expect(file).toMatchObject({ state: "available", scan: "not_scanned" });
 
     const active = new TextEncoder().encode("<script>alert(1)</script>");
+
     const rejected = await library.begin(
       owner,
       metadata({ sizeBytes: active.length, checksum: checksumOf(active) }),
     );
+
     objects.upload(rejected.upload!.url, active);
     expect((await library.finalize(owner, rejected.file.id)).state).toBe(
       "quarantined",

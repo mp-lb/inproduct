@@ -47,6 +47,7 @@ export const createFixture = (
 ) => {
   const clock = { now: 1_800_000_000_000 };
   const objects = createSyntheticObjects();
+
   const options: FileLibraryOptions = {
     repository: createMemoryFileRepository(),
     driver: objects.driver,
@@ -56,6 +57,7 @@ export const createFixture = (
     authorize: ownerPolicy,
     ...overrides,
   };
+
   const library = createFileLibrary(options);
 
   const ready = async (actor = owner, content = bytes) => {
@@ -66,6 +68,7 @@ export const createFixture = (
         checksum: checksumOf(content),
       }),
     );
+
     objects.upload(ticket.upload!.url, content);
     await library.finalize(actor, ticket.file.id);
     return ticket.file.id;

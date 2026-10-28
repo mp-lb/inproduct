@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import type { AuthorizeFileAction } from "../fileLibraryContracts.js";
+import type { AuthorizeFileAction } from "../fileLibraryContracts";
 import {
   createFixture,
   metadata,
   owner,
   ownerPolicy,
   reader,
-} from "./fileLibraryFixture.js";
+} from "./fileLibraryFixture";
 
 describe("file library authorization hooks", () => {
   it("asks the host for each exact action with file, scope, category and consumer context", async () => {
@@ -19,10 +19,12 @@ describe("file library authorization hooks", () => {
       action: "upload",
       ...input,
     });
+
     objects.upload(
       ticket.upload!.url,
       new TextEncoder().encode("Synthetic test document"),
     );
+
     await library.finalize(owner, ticket.file.id);
     await library.reserve(owner, ticket.file.id, "hold-1", "matter:M-1");
     await library.download(owner, ticket.file.id);
@@ -31,6 +33,7 @@ describe("file library authorization hooks", () => {
     expect(actions).toEqual(
       expect.arrayContaining(["upload", "write", "attach", "download"]),
     );
+
     expect(
       authorize.mock.calls.find(([call]) => call.consumer)?.[0],
     ).toMatchObject({
@@ -47,6 +50,7 @@ describe("file library authorization hooks", () => {
     await expect(library.download(reader, id)).rejects.toMatchObject({
       code: "FORBIDDEN",
     });
+
     await expect(
       library.download({ ...owner, tenantId: "tenant-b" }, id),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
@@ -55,6 +59,7 @@ describe("file library authorization hooks", () => {
   it("fills authorized pages without exposing hidden rows through cursors", async () => {
     const authorize: AuthorizeFileAction = async ({ action, file }) =>
       action !== "read" || !file?.name.startsWith("hidden");
+
     const { library } = createFixture({ authorize, quotaBytes: 10_000 });
     for (const name of [
       "a.txt",
@@ -66,10 +71,12 @@ describe("file library authorization hooks", () => {
       await library.begin(owner, metadata({ name }));
 
     const first = await library.list(owner, { limit: 2 });
+
     const second = await library.list(owner, {
       limit: 2,
       cursor: first.nextCursor!,
     });
+
     expect(first.items).toHaveLength(2);
     expect(second.items).toHaveLength(1);
     expect(second.nextCursor).toBeNull();
@@ -83,10 +90,12 @@ describe("file library authorization hooks", () => {
       authorize: async ({ action }) =>
         action !== "diagnostics" && action !== "configure",
     });
+
     await ready();
     await expect(library.diagnostics(owner)).rejects.toMatchObject({
       code: "FORBIDDEN",
     });
+
     await expect(
       library.setQuota(owner, { quotaBytes: 1 }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
@@ -98,6 +107,7 @@ describe("file library authorization hooks", () => {
     await expect(
       library.begin({ id: "", tenantId: "tenant-a" }, metadata()),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
     expect(authorize).not.toHaveBeenCalled();
   });
 

@@ -22,6 +22,7 @@ export const createClamdScanner = (options: {
           (options.now ?? Date.now)(),
           signal,
         );
+
         const bytes = await options.readVersion(key, version, signal);
         if (!verifyFileBytes(bytes, checksum, contentType)) return "rejected";
 

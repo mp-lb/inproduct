@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
-import { createPrivateFileStore } from "../createPrivateFileStore.js";
+import { createPrivateFileStore } from "../createPrivateFileStore";
 
 const mocks = vi.hoisted(() => ({ send: vi.fn(), sign: vi.fn() }));
 vi.mock("@aws-sdk/client-s3", async () => ({

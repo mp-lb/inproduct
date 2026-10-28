@@ -7,16 +7,17 @@ import {
   createFileReferenceCoordinator,
   type Actor,
   type FileAuditLedger,
-} from "../../fileLibraryServer.js";
+} from "../../fileLibraryServer";
 import {
   createMemoryFileReferenceStore,
   createMemoryFileRepository,
   createSyntheticObjects,
-} from "../../fileLibraryTesting.js";
-import { beginFileSchema } from "../../fileLibrary.js";
+} from "../../fileLibraryTesting";
+import { beginFileSchema } from "../../fileLibrary";
 
 // Host-owned pieces: session → actor, and the permission policy.
 type Session = { userId: string; organizationId: string; canEdit: boolean };
+
 const actorFor = (session: Session): Actor => ({
   id: session.userId,
   tenantId: session.organizationId,
@@ -27,6 +28,7 @@ it("composes a host application around the file library", async () => {
   // Mongo repository/ledger/reference store from the /s3 and /node entry points.
   const objects = createSyntheticObjects();
   const repository = createMemoryFileRepository();
+
   const sessions = new Map<string, Session>([
     ["alice", { userId: "alice", organizationId: "org-1", canEdit: true }],
   ]);
@@ -46,6 +48,7 @@ it("composes a host application around the file library", async () => {
   });
 
   const projects = new Map([["P-1", { owner: "alice" }]]);
+
   const references = createFileReferenceCoordinator({
     storage: library,
     references: createMemoryFileReferenceStore(),
@@ -57,6 +60,7 @@ it("composes a host application around the file library", async () => {
   // 1. Browser asks the API to begin; the API validates and returns an upload ticket.
   const actor = actorFor(sessions.get("alice")!);
   const content = new TextEncoder().encode("Quarterly report");
+
   const request = beginFileSchema.parse({
     operationId: randomUUID(),
     scope: "project:P-1",
@@ -66,6 +70,7 @@ it("composes a host application around the file library", async () => {
     sizeBytes: content.byteLength,
     checksum: createHash("sha256").update(content).digest("hex"),
   });
+
   const ticket = await library.begin(actor, request);
 
   // 2. Browser PUTs bytes to ticket.upload.url with ticket.upload.headers.
@@ -82,6 +87,7 @@ it("composes a host application around the file library", async () => {
     fileId: ticket.file.id,
     consumer: "project:P-1",
   });
+
   expect(reference.state).toBe("bound");
   await expect(library.remove(actor, ticket.file.id)).rejects.toThrow(
     "retained",
@@ -89,9 +95,11 @@ it("composes a host application around the file library", async () => {
 
   // 5. A trusted worker drains the audit outbox into the host's ledger.
   const ledger: FileAuditLedger = { append: async () => undefined };
+
   const delivered = await createFileAuditDispatcher(
     repository,
     ledger,
   )(actor.tenantId);
+
   expect(delivered).toBeGreaterThan(0);
 });

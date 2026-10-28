@@ -16,16 +16,19 @@ export const createMongoFileReferenceStore = (
 ): FileReferenceStore => {
   if (!collectionName.trim())
     throw new TypeError("collection name is required");
+
   const rows = db.collection<FileReference & { _id: string }>(collectionName, {
     writeConcern: { w: "majority", j: true },
   });
 
   return {
     read: async (tenant, id) => {
-      const row = await rows.findOne({ _id: JSON.stringify([tenant, id]) });
-      if (!row) return null;
-      const { _id: _ignored, ...reference } = row;
-      return reference;
+      const row = await rows.findOne(
+        { _id: JSON.stringify([tenant, id]) },
+        { projection: { _id: 0 } },
+      );
+
+      return row as FileReference | null;
     },
     save: async (next, previousRevision) => {
       const _id = JSON.stringify([next.actor.tenantId, next.referenceId]);
@@ -46,12 +49,13 @@ export const createMongoFileReferenceStore = (
       );
     },
     pending: async (tenantId, limit) =>
-      (
-        await rows
-          .find({ "actor.tenantId": tenantId, delivered: false })
-          .sort({ _id: 1 })
-          .limit(Math.max(1, Math.min(100, Math.floor(limit) || 1)))
-          .toArray()
-      ).map(({ _id: _ignored, ...reference }) => reference),
+      (await rows
+        .find(
+          { "actor.tenantId": tenantId, delivered: false },
+          { projection: { _id: 0 } },
+        )
+        .sort({ _id: 1 })
+        .limit(Math.max(1, Math.min(100, Math.floor(limit) || 1)))
+        .toArray()) as FileReference[],
   };
 };

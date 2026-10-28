@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFixture, owner } from "./fileLibraryFixture.js";
+import { createFixture, owner } from "./fileLibraryFixture";
 
 describe("file library retention holds", () => {
   it("retains files through matter and email holds and replays usage retries", async () => {
@@ -19,6 +19,7 @@ describe("file library retention holds", () => {
     await expect(library.remove(owner, id)).rejects.toMatchObject({
       code: "CONFLICT",
     });
+
     await library.release(owner, id, "message-1/a-1", "email:message-1");
     expect((await library.remove(owner, id)).state).toBe("deleted");
     await expect(retain()).rejects.toThrow();
@@ -33,6 +34,7 @@ describe("file library retention holds", () => {
     await expect(
       library.attach(owner, id, "save-unknown", "email:other"),
     ).rejects.toThrow("identity changed");
+
     expect((await library.diagnostics(owner)).blocked).toContainEqual({
       fileId: id,
       reason: "retained by consumer",
@@ -45,11 +47,13 @@ describe("file library retention holds", () => {
     await expect(
       library.attach(owner, id, "never-reserved", "matter:M-1"),
     ).rejects.toThrow("reserve usage before confirmation");
+
     await library.reserve(owner, id, "save-1", "matter:M-1");
     await library.release(owner, id, "save-1", "matter:M-1");
     await expect(
       library.reserve(owner, id, "save-1", "matter:M-1"),
     ).rejects.toThrow("usage already released");
+
     expect(
       (await library.release(owner, id, "save-1", "matter:M-1")).holdCount,
     ).toBe(0);
@@ -58,23 +62,28 @@ describe("file library retention holds", () => {
   it("enforces 20 lifetime holds per file but still replays existing ones", async () => {
     const { library, ready } = createFixture();
     const id = await ready();
+
     for (let index = 0; index < 20; index++) {
       await library.reserve(owner, id, `hold-${index}`, "matter:M-1");
       await library.release(owner, id, `hold-${index}`, "matter:M-1");
     }
+
     await expect(
       library.reserve(owner, id, "hold-20", "matter:M-1"),
     ).rejects.toThrow("usage limit reached");
+
     await library.release(owner, id, "hold-3", "matter:M-1");
   });
 
   it("serializes attachment against deletion so exactly one wins safely", async () => {
     const { library, ready, options } = createFixture();
     const id = await ready();
+
     const outcomes = await Promise.allSettled([
       library.reserve(owner, id, "race", "matter:M-1"),
       library.remove(owner, id),
     ]);
+
     expect(outcomes.filter((r) => r.status === "fulfilled")).toHaveLength(1);
     const [row] = (await options.repository.read(owner.tenantId)).files;
     expect(
@@ -90,9 +99,11 @@ describe("file library retention holds", () => {
     expect((await library.list(owner, {})).items.map((f) => f.id)).toEqual([
       kept,
     ]);
+
     expect(
       (await library.list(owner, { state: "deleted" })).items.map((f) => f.id),
     ).toEqual([removed]);
+
     await expect(library.download(owner, removed)).rejects.toMatchObject({
       code: "PRECONDITION_FAILED",
     });
@@ -100,6 +111,7 @@ describe("file library retention holds", () => {
 
   it("reports expired uploads as review-only candidates without mutating storage", async () => {
     const { library, clock, options } = createFixture();
+
     const ticket = await library.begin(owner, {
       operationId: crypto.randomUUID(),
       scope: "matter:M-1",
@@ -110,12 +122,14 @@ describe("file library retention holds", () => {
       sizeBytes: 3,
       checksum: "a".repeat(64),
     });
+
     clock.now += 3 * 86_400_000;
     const before = await options.repository.read(owner.tenantId);
     const report = await library.diagnostics(owner);
     expect(report.candidates).toEqual([
       { fileId: ticket.file.id, reason: "expired upload; review only" },
     ]);
+
     expect(report.mode).toBe("report-only");
     expect(await options.repository.read(owner.tenantId)).toEqual(before);
   });

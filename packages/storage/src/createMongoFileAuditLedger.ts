@@ -10,6 +10,7 @@ export const createMongoFileAuditLedger = (
 ): FileAuditLedger => {
   if (!collectionName.trim())
     throw new TypeError("collection name is required");
+
   const events = db.collection<FileAudit & { _id: string; tenantId: string }>(
     collectionName,
     { writeConcern: { w: "majority", j: true } },

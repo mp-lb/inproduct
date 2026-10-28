@@ -1,22 +1,25 @@
 import { describe, expect, it, vi } from "vitest";
-import { createFileReferenceCoordinator } from "../createFileReferenceCoordinator.js";
-import { createMemoryFileReferenceStore } from "../createMemoryFileReferenceStore.js";
-import type { FileReferenceStore } from "../fileReferences.js";
-import { createFixture, owner } from "./fileLibraryFixture.js";
+import { createFileReferenceCoordinator } from "../createFileReferenceCoordinator";
+import { createMemoryFileReferenceStore } from "../createMemoryFileReferenceStore";
+import type { FileReferenceStore } from "../fileReferences";
+import { createFixture, owner } from "./fileLibraryFixture";
 
 const setup = async (
   references: FileReferenceStore = createMemoryFileReferenceStore(),
 ) => {
   const fixture = createFixture();
   const fileId = await fixture.ready();
+
   const coordinator = createFileReferenceCoordinator({
     storage: fixture.library,
     references,
     authorize: async (actor, reference) =>
       actor.id === "owner" && reference.consumer.startsWith("matter:"),
   });
+
   const holds = async () =>
     (await fixture.options.repository.read(owner.tenantId)).files[0].holds;
+
   return { ...fixture, fileId, coordinator, references, holds };
 };
 
@@ -39,22 +42,27 @@ describe("file reference coordination", () => {
 
   it("recovers an uncertain bind without releasing the hold, then an uncertain detach", async () => {
     const { coordinator, fileId, library, references, holds } = await setup();
+
     const attach = vi
       .spyOn(library, "attach")
       .mockRejectedValueOnce(new Error("response lost"));
+
     const input = { referenceId: "ref-1", fileId, consumer: "matter:M-1" };
     await expect(coordinator.attach(owner, input)).rejects.toThrow(
       "response lost",
     );
+
     expect(await references.pending(owner.tenantId, 10)).toMatchObject([
       { referenceId: "ref-1", state: "bound", delivered: false },
     ]);
+
     expect((await holds())[0].state).toBe("reserved");
 
     expect(await coordinator.reconcile(owner, "ref-1")).toMatchObject({
       state: "bound",
       delivered: true,
     });
+
     attach.mockRestore();
 
     vi.spyOn(library, "release").mockRejectedValueOnce(new Error("lost"));
@@ -63,6 +71,7 @@ describe("file reference coordination", () => {
     expect(await coordinator.reconcile(owner, "ref-1")).toMatchObject({
       state: "released",
     });
+
     expect(await references.pending(owner.tenantId, 10)).toEqual([]);
   });
 
@@ -73,6 +82,7 @@ describe("file reference coordination", () => {
       fileId,
       consumer: "matter:M-1",
     });
+
     await expect(
       coordinator.attach(owner, {
         referenceId: "ref-1",
@@ -98,6 +108,7 @@ describe("file reference coordination", () => {
     const slow = coordinator
       .attach(owner, { referenceId: "ref-1", fileId, consumer: "matter:M-1" })
       .catch((error: unknown) => error);
+
     await started;
     const detached = coordinator.detach(owner, "ref-1");
     resume();
@@ -117,11 +128,13 @@ describe("file reference coordination", () => {
         consumer: "billing:1",
       }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
     await coordinator.attach(owner, {
       referenceId: "ref-2",
       fileId,
       consumer: "matter:M-1",
     });
+
     await expect(
       coordinator.detach({ id: "reader", tenantId: owner.tenantId }, "ref-2"),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });

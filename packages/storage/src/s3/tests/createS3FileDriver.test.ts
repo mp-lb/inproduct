@@ -5,7 +5,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { createS3FileDriver } from "../createS3FileDriver.js";
+import { createS3FileDriver } from "../createS3FileDriver";
 
 vi.mock("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: vi.fn().mockResolvedValue("https://storage.example/signed"),
@@ -18,6 +18,7 @@ afterEach(() => {
 
 const id = "d7ea777e-af81-4a54-a6a2-b60b7c8faf12";
 const checksum = "ab".repeat(32);
+
 const config = {
   bucket: "library",
   region: "ap-southeast-2",
@@ -41,17 +42,21 @@ describe("S3 file driver", () => {
     expect(() =>
       createS3FileDriver({ ...config, endpoint: "http://s3.example" }),
     ).toThrow("secure storage endpoint required");
+
     expect(() =>
       createS3FileDriver({ ...config, endpoint: "http://127.0.0.1:9000" }),
     ).toThrow("secure storage endpoint required");
+
     createS3FileDriver({
       ...config,
       endpoint: "http://127.0.0.1:9000",
       allowLocalHttpForTests: true,
     });
+
     expect(() => createS3FileDriver({ ...config, prefix: "../" })).toThrow(
       "invalid storage prefix",
     );
+
     await expect(
       createS3FileDriver(config).driver.inspect("../admin"),
     ).rejects.toThrow("invalid file object key");
@@ -61,12 +66,15 @@ describe("S3 file driver", () => {
     const send = vi
       .spyOn(S3Client.prototype, "send")
       .mockImplementation(async () => ({ Status: "Enabled" }));
+
     const { driver } = createS3FileDriver(config);
+
     const upload = await driver.signUpload({
       key: `files/${id}`,
       metadata,
       expiresAt: Date.now() + 60_000,
     });
+
     expect(send.mock.calls[0][0]).toBeInstanceOf(GetBucketVersioningCommand);
     const [, command, options] = vi.mocked(getSignedUrl).mock.calls[0];
     expect(command.input).toMatchObject({
@@ -77,6 +85,7 @@ describe("S3 file driver", () => {
       IfNoneMatch: "*",
       ChecksumSHA256: Buffer.from(checksum, "hex").toString("base64"),
     });
+
     expect(options?.expiresIn).toBeLessThanOrEqual(60);
     expect(upload.headers["If-None-Match"]).toBe("*");
 
@@ -93,6 +102,7 @@ describe("S3 file driver", () => {
   it("requires an immutable version and full-object checksum on inspection", async () => {
     const send = vi.spyOn(S3Client.prototype, "send");
     const { driver } = createS3FileDriver(config);
+
     const head = {
       VersionId: "v1",
       ContentLength: 10,
@@ -100,6 +110,7 @@ describe("S3 file driver", () => {
       ChecksumSHA256: Buffer.from(checksum, "hex").toString("base64"),
       ChecksumType: "FULL_OBJECT",
     };
+
     send.mockImplementationOnce(async () => head);
     expect(await driver.inspect(`files/${id}`)).toEqual({
       version: "v1",
@@ -107,6 +118,7 @@ describe("S3 file driver", () => {
       contentType: "application/pdf",
       checksum,
     });
+
     expect(send.mock.calls[0][0]).toBeInstanceOf(HeadObjectCommand);
 
     for (const bad of [
@@ -129,12 +141,14 @@ describe("S3 file driver", () => {
       name: "a\r\nb.html",
       expiresAt: Date.now() + 60_000,
     });
+
     expect(vi.mocked(getSignedUrl).mock.calls[0][1].input).toMatchObject({
       VersionId: "v1",
       ResponseContentType: "application/octet-stream",
       ResponseCacheControl: "private, no-store",
       ResponseContentDisposition: "attachment; filename*=UTF-8''a%0D%0Ab.html",
     });
+
     await expect(
       driver.download({
         key: `files/${id}`,
@@ -148,17 +162,20 @@ describe("S3 file driver", () => {
   it("reads exactly the requested version and rejects truncated bodies", async () => {
     const send = vi.spyOn(S3Client.prototype, "send");
     const { readVersion } = createS3FileDriver(config);
+
     const body = (chunks: string[]) => ({
       async *[Symbol.asyncIterator]() {
         for (const chunk of chunks) yield Buffer.from(chunk);
       },
       destroy: vi.fn(),
     });
+
     send.mockImplementationOnce(async () => ({
       Body: body(["ab", "cd"]),
       VersionId: "v1",
       ContentLength: 4,
     }));
+
     expect((await readVersion(`files/${id}`, "v1")).toString()).toBe("abcd");
 
     send.mockImplementationOnce(async () => ({
@@ -166,6 +183,7 @@ describe("S3 file driver", () => {
       VersionId: "v1",
       ContentLength: 4,
     }));
+
     await expect(readVersion(`files/${id}`, "v1")).rejects.toThrow(
       "incomplete scan source",
     );
@@ -175,6 +193,7 @@ describe("S3 file driver", () => {
       VersionId: "v2",
       ContentLength: 2,
     }));
+
     await expect(readVersion(`files/${id}`, "v1")).rejects.toThrow(
       "invalid immutable scan source",
     );
