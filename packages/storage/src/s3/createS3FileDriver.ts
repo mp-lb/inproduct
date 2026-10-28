@@ -67,7 +67,7 @@ export const createS3FileDriver = (
         },
       };
     },
-    inspect: (key, version, signal) =>
+    inspect: async (key, version, signal) =>
       inspectS3Object(client, config.bucket, keyFor(key), version, signal),
     download: async ({ key, version, name, expiresAt }) => ({
       url: await getSignedUrl(
@@ -87,7 +87,7 @@ export const createS3FileDriver = (
 
   return {
     driver,
-    readVersion: (key: string, version: string, signal?: AbortSignal) =>
+    readVersion: async (key: string, version: string, signal?: AbortSignal) =>
       readS3ObjectVersion(client, config.bucket, keyFor(key), version, signal),
     close: () => client.destroy(),
   };

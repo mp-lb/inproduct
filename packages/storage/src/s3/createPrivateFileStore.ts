@@ -29,9 +29,9 @@ export const createPrivateFileStore = (
   };
 
   return {
-    put: (id, bytes, signal) =>
+    put: async (id, bytes, signal) =>
       putImmutablePrivateObject(client, input.bucket, key(id), bytes, signal),
-    remove: (id, signal) =>
+    remove: async (id, signal) =>
       removeAllObjectVersions(client, input.bucket, key(id), signal),
     download: async (id, name) => ({
       url: await getSignedUrl(

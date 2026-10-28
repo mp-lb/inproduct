@@ -84,7 +84,10 @@ export const createFileReferenceCoordinator = (options: {
           actor.tenantId,
         ].some((value) => !value || value.length > 160)
       )
-        throw new FileStorageError("INVALID_INPUT", "invalid reference identity");
+        throw new FileStorageError(
+          "INVALID_INPUT",
+          "invalid reference identity",
+        );
 
       const desired: FileReference = {
         ...input,

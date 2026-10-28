@@ -47,7 +47,7 @@ tasks:
   file-metadata-test:
     env: "*"
     cmds:
-      - cd packages/storage && INPRODUCT_MONGO_FILE_TEST_URI="mongodb://127.0.0.1:${FILE_MONGO_PORT}/?directConnection=true" ../../node_modules/.bin/vitest run src/createMongoFileMetadataRepository.test.ts --maxWorkers=1
+      - cd packages/storage && INPRODUCT_MONGO_FILE_TEST_URI="mongodb://127.0.0.1:${FILE_MONGO_PORT}/?directConnection=true" ../../node_modules/.bin/vitest run src/createMongoFileMetadataRepository.test.ts src/file-library/tests/mongoFileLibrary.test.ts --maxWorkers=1
   docs-preview:
     env: "*"
     cmds:

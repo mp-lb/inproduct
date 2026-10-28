@@ -43,7 +43,8 @@
     "dist",
     "README.md",
     "src/**/*.ts",
-    "!src/**/*.test.ts"
+    "!src/**/*.test.ts",
+    "!src/**/tests/**"
   ],
   "publishConfig": {
     "access": "public"

@@ -41,12 +41,8 @@ export const createMongoFileReferenceStore = (
       }
 
       return (
-        (
-          await rows.replaceOne(
-            { _id, revision: previousRevision },
-            next,
-          )
-        ).matchedCount === 1
+        (await rows.replaceOne({ _id, revision: previousRevision }, next))
+          .matchedCount === 1
       );
     },
     pending: async (tenantId, limit) =>
