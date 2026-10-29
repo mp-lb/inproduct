@@ -21,7 +21,7 @@ export const metadata = (overrides: Partial<BeginFile> = {}): BeginFile => ({
   operationId: randomUUID(),
   scope: "matter:M-1",
   name: "example.txt",
-  category: "user",
+
   tags: [],
   contentType: "text/plain",
   sizeBytes: bytes.byteLength,

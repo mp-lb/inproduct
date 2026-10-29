@@ -5,7 +5,6 @@ const upload = {
   name: "notes.txt",
   body: new Uint8Array([1, 2]),
   tags: ["demo"],
-  category: "admin",
 };
 
 describe("file storage", () => {
@@ -16,7 +15,6 @@ describe("file storage", () => {
     const second = await storage.upload({
       ...upload,
       name: "image.png",
-      category: "product",
     });
 
     const page = await storage.list({ limit: 1 });
@@ -32,20 +30,20 @@ describe("file storage", () => {
     );
 
     expect(
-      (await storage.list({ search: "NOTES", category: "admin", tag: "demo" }))
-        .items,
+      (await storage.list({ search: "NOTES", tag: "demo" })).items,
     ).toHaveLength(1);
 
     expect((await storage.list({ tag: "missing" })).items).toHaveLength(0);
     await storage.edit(first.id, {
       name: " renamed.txt ",
-      category: " guide ",
+
       tags: [" one ", "one", ""],
     });
 
-    expect(
-      (await storage.list({ category: "guide", tag: "one" })).items[0],
-    ).toMatchObject({ name: "renamed.txt", tags: ["one"] });
+    expect((await storage.list({ tag: "one" })).items[0]).toMatchObject({
+      name: "renamed.txt",
+      tags: ["one"],
+    });
 
     expect(await storage.download(first.id)).toMatchObject({
       body: upload.body,
@@ -57,7 +55,7 @@ describe("file storage", () => {
     expect((await storage.list()).usage).toEqual({ count: 1, bytes: 2 });
     await expect(storage.download(first.id)).rejects.toThrow("file not found");
     await expect(
-      storage.edit(first.id, { name: "gone", category: "admin", tags: [] }),
+      storage.edit(first.id, { name: "gone", tags: [] }),
     ).rejects.toThrow("file not found");
   });
 
@@ -95,7 +93,11 @@ describe("file storage", () => {
     }
 
     await expect(
-      storage.upload({ name: "ok", category: "", body: new Uint8Array() }),
+      storage.upload({
+        name: "ok",
+        tags: ["x".repeat(81)],
+        body: new Uint8Array(),
+      }),
     ).rejects.toThrow();
 
     await expect(storage.list({ limit: 0 })).rejects.toThrow();

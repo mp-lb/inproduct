@@ -159,3 +159,11 @@ private file store and versioned document storage use it too.
 - Ambiguous extensions resolve by evidence, then preference. A client that reports a wrong type
   for an ambiguous extension can still get the less likely type. Bytes, when checked, catch
   the mismatch.
+
+## File categories
+
+Every registry entry has a read-only `category`: `image`, `video`, `audio`, `document`, or `other`. Image, video and audio media types follow their MIME families. Text and known office/document formats are documents; archives, executables and unknown formats default to other. Custom registry entries can explicitly override the category. Aliases share their canonical entry's category.
+
+The managed file library exposes this as `file.type.category`, derived on read rather than persisted per file. It describes format, not ownership, access or browser preview support. For example, PDF and Word are both documents, while only PDFs support native previews.
+
+The previous editable application grouping named `category` has been removed from upload/edit inputs, file metadata, and authorization callbacks (including the older unverified storage API). Remove those arguments and policy checks when upgrading; use scope and application links for access and relationships. The managed list query accepts `category` only for the new format classification; old values such as `admin` are rejected. Existing stored values are ignored by the managed file view and need no backfill. Existing uploads can still be finalized by ID; start a fresh operation ID when beginning an upload with the changed input shape.

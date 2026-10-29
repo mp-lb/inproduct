@@ -58,8 +58,8 @@ const library = createFileLibrary({
   driver: s3.driver,
   scanner: createClamdScanner({ endpoint: config.clamdUrl, readVersion: s3.readVersion }),
   quotaBytes: 1024 ** 3,
-  authorize: async ({ actor, action, file, scope, category, consumer }) =>
-    yourPolicy.allows(actor, action, { file, scope, category, consumer }),
+  authorize: async ({ actor, action, file, scope, consumer }) =>
+    yourPolicy.allows(actor, action, { file, scope, consumer }),
 });
 ```
 
@@ -195,7 +195,7 @@ The library calls these host-supplied functions. Each boundary stays in your app
 
 | Contract | Responsibility |
 | --- | --- |
-| `authorize(input)` | The authorization decision. Return false unless the exact request is allowed. Actions are `upload`, `read`, `write`, `download`, `attach`, `release`, `delete`, `diagnostics` and `configure`. `scope` and `category` are requests, not grants. Verify consumer identities such as `project:P-1`. |
+| `authorize(input)` | The authorization decision. Return false unless the exact request is allowed. Actions are `upload`, `read`, `write`, `download`, `attach`, `release`, `delete`, `diagnostics` and `configure`. `scope` is a request, not a grant. Verify consumer identities such as `project:P-1`. |
 | `FileRepository` | An atomic, durably acknowledged revision compare-and-swap per tenant partition. |
 | `ObjectDriver` | Upload signing, version inspection and download signing. Must declare `versioned`, `checksum` and `conditionalCreate`; the library refuses to run otherwise. |
 | `Scanner` / `ByteValidator` | Inspect the exact pinned version and detect content rather than trusting the upload MIME type. |

@@ -10,7 +10,6 @@ type Props = {
 
 export const FileEditor = ({ file, busy, save, close }: Props) => {
   const [name, setName] = useState(file.name);
-  const [category, setCategory] = useState(file.category);
   const [tags, setTags] = useState(file.tags.join(", "));
   return (
     <form
@@ -18,7 +17,7 @@ export const FileEditor = ({ file, busy, save, close }: Props) => {
       aria-label="Edit file"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (await save({ name, category, tags: tags.split(",") })) close();
+        if (await save({ name, tags: tags.split(",") })) close();
       }}
     >
       <h3>Edit file details</h3>
@@ -29,15 +28,6 @@ export const FileEditor = ({ file, busy, save, close }: Props) => {
           maxLength={255}
           required
           onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-      <label>
-        Category
-        <input
-          value={category}
-          maxLength={80}
-          required
-          onChange={(event) => setCategory(event.target.value)}
         />
       </label>
       <label>

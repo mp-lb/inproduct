@@ -18,12 +18,13 @@ export const fileView = (
     extension,
     fileName: downloadFileName(name, extension),
     scope: row.scope,
-    category: row.category,
+
     tags: row.tags,
     ownerId: row.ownerId,
     sizeBytes: row.sizeBytes,
     contentType: type?.id ?? row.contentType,
     type: {
+      category: type?.category ?? "other",
       id: type?.id ?? row.contentType,
       label:
         row.contentType === "application/octet-stream"

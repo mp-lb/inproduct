@@ -1,3 +1,4 @@
+import { fileTypeCategorySchema } from "../file-types/fileTypeCategory.js";
 import { z } from "zod";
 import { fileLinkTargetSchema } from "./fileLinks.js";
 
@@ -11,13 +12,6 @@ export const libraryContentTypes = [
   "image/png",
   "image/jpeg",
 ] as const;
-
-export const fileCategorySchema = z.enum([
-  "user",
-  "application",
-  "admin",
-  "shareable",
-]);
 
 export const fileStateSchema = z.enum([
   "pending",
@@ -67,7 +61,7 @@ export const beginFileSchema = z
     contentType: z.string().trim().max(255).optional(),
     sizeBytes: z.number().int().positive().max(maxLibraryFileBytes),
     checksum: z.string().regex(/^[a-f0-9]{64}$/),
-    category: fileCategorySchema,
+
     tags: fileTagsSchema.default([]),
   })
   .strict();
@@ -92,9 +86,10 @@ export const editFileSchema = fileIdSchema
 export const listFilesSchema = z
   .object({
     linkedTo: fileLinkTargetSchema.optional(),
+    category: fileTypeCategorySchema.optional(),
     scope: z.string().max(160).optional(),
     search: z.string().max(100).default(""),
-    category: fileCategorySchema.optional(),
+
     state: fileStateSchema.optional(),
     tag: z.string().max(40).optional(),
     cursor: z.uuid().optional(),

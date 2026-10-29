@@ -14,7 +14,7 @@ describe("createFileStorageTRPCClient", () => {
       upload: {
         mutate: (input: {
           name: string;
-          category: string;
+
           tags: string[];
           contentType: string;
           base64: string;
@@ -30,7 +30,7 @@ describe("createFileStorageTRPCClient", () => {
         mutate: (input: {
           id: string;
           name: string;
-          category: string;
+
           tags: string[];
         }) => storage.edit(input.id, input),
       },
@@ -53,14 +53,14 @@ describe("createFileStorageTRPCClient", () => {
       bytes[index] = index % 256;
 
     const uploaded = await client.upload({ name: "binary.bin", body: bytes });
-    expect(uploaded.category).toBe("general");
+    expect(uploaded).not.toHaveProperty("category");
     expect((await client.download(uploaded.id)).body).toEqual(bytes);
     expect((await client.list()).usage.bytes).toBe(bytes.length);
     expect(
       (
         await client.edit(uploaded.id, {
           name: "renamed.bin",
-          category: "admin",
+
           tags: [],
         })
       ).name,

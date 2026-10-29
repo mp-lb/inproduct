@@ -1,3 +1,5 @@
+import { classifyFileType } from "./classifyFileType.js";
+import { fileTypeCategorySchema } from "./fileTypeCategory.js";
 import type {
   ExtensionLookup,
   FileType,
@@ -39,6 +41,9 @@ const customType = (input: FileTypeInput, existing?: FileType): FileType => {
 
   return {
     id,
+    category: fileTypeCategorySchema.parse(
+      input.category ?? existing?.category ?? classifyFileType(id),
+    ),
     label: label ?? fallbackFileTypeLabel(id, extensions),
     extensions: [...new Set(extensions)],
     aliases: [

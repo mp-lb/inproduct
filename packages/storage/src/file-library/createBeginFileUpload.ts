@@ -45,7 +45,7 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
       name: resolved.name,
       extension: resolved.extension,
       scope: input.scope,
-      category: input.category,
+
       tags: input.tags,
       sizeBytes: input.sizeBytes,
       contentType: resolved.type.id,

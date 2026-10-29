@@ -40,7 +40,12 @@ export const createListFiles =
         )
       )
         continue;
-      if (matchesFileQuery(file, input)) visible.push({ ...view(file), links });
+      const projected = view(file);
+      if (
+        (!input.category || projected.type.category === input.category) &&
+        matchesFileQuery(file, input)
+      )
+        visible.push({ ...projected, links });
     }
 
     visible.sort((a, b) => a.id.localeCompare(b.id));

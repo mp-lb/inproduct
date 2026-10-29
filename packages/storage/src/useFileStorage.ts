@@ -102,7 +102,7 @@ export const useFileStorage = (
     error,
     query,
     refresh,
-    setFilters: (filters: Pick<FileQuery, "search" | "category" | "tag">) => {
+    setFilters: (filters: Pick<FileQuery, "search" | "tag">) => {
       sequence.current++;
       setQuery((value) => ({ ...value, ...filters, offset: 0 }));
     },

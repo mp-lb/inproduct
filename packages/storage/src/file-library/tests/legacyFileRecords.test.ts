@@ -1,3 +1,4 @@
+import { defaultFileTypeRegistry } from "../../file-types/defaultFileTypeRegistry";
 import { describe, expect, it, vi } from "vitest";
 import type { FileRecord } from "../fileLibraryContracts";
 import { createFixture, owner } from "./fileLibraryFixture";
@@ -17,6 +18,7 @@ const legacy = async (
     const row = file as Partial<FileRecord>;
     delete row.extension;
     delete row.typeStatus;
+    Object.assign(file, { category: "admin" }); // Old metadata must not become the type category.
     file.name = rows[index]!.name;
     file.contentType = rows[index]!.contentType;
   });
@@ -40,6 +42,12 @@ describe("file records written by 0.1.6", () => {
     ]);
 
     const { items } = await setup.library.list(owner, {});
+    expect(items.every((file) => !("category" in file))).toBe(true);
+    expect(
+      (await setup.library.list(owner, { category: "image" })).items.map(
+        (file) => file.fileName,
+      ),
+    ).toEqual(["Photo.jpg"]);
 
     expect(
       items
@@ -81,7 +89,12 @@ describe("file records written by 0.1.6", () => {
           name,
           extension,
           fileName,
-          type: { id, label, status: "inferred" },
+          type: {
+            id,
+            label,
+            category: defaultFileTypeRegistry().get(id!)?.category ?? "other",
+            status: "inferred",
+          },
         })),
     );
   });
@@ -109,6 +122,12 @@ describe("file records written by 0.1.6", () => {
     ]);
 
     const { items } = await setup.library.list(owner, {});
+    expect(items.every((file) => !("category" in file))).toBe(true);
+    expect(
+      (await setup.library.list(owner, { category: "document" })).items.map(
+        (file) => file.fileName,
+      ),
+    ).toEqual(["report.v2.pdf"]);
 
     const renamed = await setup.library.edit(owner, {
       fileId: id!,

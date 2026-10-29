@@ -116,7 +116,7 @@ describe("file library retention holds", () => {
       operationId: crypto.randomUUID(),
       scope: "matter:M-1",
       name: "abandoned.txt",
-      category: "user",
+
       tags: [],
       contentType: "text/plain",
       sizeBytes: 3,

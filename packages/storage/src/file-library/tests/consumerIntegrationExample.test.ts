@@ -65,7 +65,7 @@ it("composes a host application around the file library", async () => {
     operationId: randomUUID(),
     scope: "project:P-1",
     name: "report.txt",
-    category: "user",
+
     contentType: "text/plain",
     sizeBytes: content.byteLength,
     checksum: createHash("sha256").update(content).digest("hex"),

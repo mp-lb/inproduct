@@ -2,7 +2,7 @@ import type { StoredObject } from "./types.js";
 
 export type FileMetadata = {
   name: string;
-  category: string;
+
   tags: string[];
 };
 export type StorageFile = FileMetadata & {
@@ -14,12 +14,12 @@ export type StorageFile = FileMetadata & {
 };
 export type FileUpload = StoredObject & {
   name: string;
-  category?: string;
+
   tags?: string[];
 };
 export type FileQuery = {
   search?: string;
-  category?: string;
+
   tag?: string;
   offset?: number;
   limit?: number;

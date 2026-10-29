@@ -13,9 +13,9 @@ type FileDocument = {
   body: Binary;
 };
 
-const filterFiles = ({ search, category, tag }: Required<FileQuery>) => {
+const filterFiles = ({ search, tag }: Required<FileQuery>) => {
   const filter: Filter<FileDocument> = {};
-  if (category) filter["file.category"] = category;
+
   if (tag) filter["file.tags"] = tag;
 
   if (search) {
@@ -64,7 +64,7 @@ export const createMongoFileStorageAdapter = (
         {
           $set: {
             "file.name": metadata.name,
-            "file.category": metadata.category,
+
             "file.tags": [...metadata.tags],
             "file.updatedAt": updatedAt,
           },

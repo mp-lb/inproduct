@@ -47,7 +47,7 @@ export const createFileStorageTRPCClient = (
   upload: (input) =>
     router.upload.mutate({
       name: input.name,
-      category: input.category ?? "general",
+
       tags: input.tags ?? [],
       contentType: input.contentType ?? "application/octet-stream",
       base64: encodeBytes(input.body),

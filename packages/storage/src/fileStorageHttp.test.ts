@@ -47,13 +47,13 @@ describe("file API and durable storage", () => {
         name: "receipt.txt",
         body: bytes,
         contentType: "text/plain",
-        category: "admin",
+
         tags: ["receipt"],
       });
 
       await first.edit(file.id, {
         name: "注文.txt",
-        category: "orders",
+
         tags: ["order"],
       });
 
@@ -62,7 +62,6 @@ describe("file API and durable storage", () => {
       const second = createFileStorageClient(await listen(server));
 
       const page = await second.list({
-        category: "orders",
         tag: "order",
         search: "注文",
       });
@@ -167,7 +166,7 @@ describe("file API and durable storage", () => {
       await expect(
         client.edit(file.id, {
           name: "../secret",
-          category: "general",
+
           tags: [],
         }),
       ).rejects.toThrow("file name");
@@ -201,7 +200,7 @@ describe("file API and durable storage", () => {
 
       const edit = storage.edit(file.id, {
         name: "changed",
-        category: "general",
+
         tags: [],
       });
 

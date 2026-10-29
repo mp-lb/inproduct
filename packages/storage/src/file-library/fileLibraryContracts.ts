@@ -1,5 +1,5 @@
 import type { FileLink, FileLinkTarget } from "./fileLinks.js";
-import type { BeginFile, FileCategory, FileView } from "./fileLibraryTypes.js";
+import type { BeginFile, FileView } from "./fileLibraryTypes.js";
 import type {
   ContentCheck,
   FileTypeRegistry,
@@ -174,7 +174,7 @@ export type AuthorizeFileAction = (input: {
   action: Action;
   file?: FileView;
   scope?: string;
-  category?: FileCategory;
+
   consumer?: string;
   link?: FileLinkTarget;
 }) => Promise<boolean>;

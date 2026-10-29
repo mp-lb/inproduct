@@ -1,16 +1,15 @@
+import type { FileTypeCategory } from "../file-types/fileTypeCategory.js";
 import type { FileLinkTarget } from "./fileLinks.js";
 import type { z } from "zod";
 import type { FileTypeStatus } from "../file-types/fileTypeContracts.js";
 import type {
   beginFileSchema,
   editFileSchema,
-  fileCategorySchema,
   fileStateSchema,
   listFilesSchema,
 } from "./fileLibrarySchemas.js";
 
 export type BeginFile = z.infer<typeof beginFileSchema>;
-export type FileCategory = z.infer<typeof fileCategorySchema>;
 export type FileState = z.infer<typeof fileStateSchema>;
 export type ScanState =
   | "pending"
@@ -22,6 +21,7 @@ export type ScanState =
 /** The library's type information for a file. `status` says how the type was
  * established; it is never a validity or safety verdict. */
 export type FileTypeView = {
+  category: FileTypeCategory;
   id: string;
   label: string;
   status: FileTypeStatus;
@@ -39,7 +39,7 @@ export type FileView = {
   /** Safe download file name: `name` plus `extension`. */
   fileName: string;
   scope: string;
-  category: FileCategory;
+
   tags: string[];
   ownerId: string;
   sizeBytes: number;

@@ -38,7 +38,7 @@ export const createFileStorageClient = (
     upload: async ({
       body,
       name,
-      category = "general",
+
       tags = [],
       contentType,
     }) => {
@@ -49,7 +49,6 @@ export const createFileStorageClient = (
         name,
       );
 
-      form.set("category", category);
       form.set("tags", JSON.stringify(tags));
       return (
         await request("", { method: "POST", body: form })

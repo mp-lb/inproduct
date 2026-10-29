@@ -2,13 +2,12 @@ import type { FilePage, FileQuery, StorageFile } from "./fileTypes.js";
 
 export const listFiles = (
   files: StorageFile[],
-  { search, category, tag, offset, limit }: Required<FileQuery>,
+  { search, tag, offset, limit }: Required<FileQuery>,
 ): FilePage => {
   const needle = search.toLowerCase();
 
   const matches = files.filter(
     (file) =>
-      (!category || file.category === category) &&
       (!tag || file.tags.includes(tag)) &&
       (!needle ||
         [file.name, ...file.tags].some((value) =>

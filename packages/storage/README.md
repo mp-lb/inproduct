@@ -192,7 +192,7 @@ collection behind your application's authorization boundary.
 
 Install React 18 or 19 for the optional `/react` entry point. The base entry point
 does not import React or Node built-ins. The hook owns loading, errors, refresh after
-mutations, search/category/tag filters, pagination and browser upload/download.
+mutations, search/tag filters, pagination and browser upload/download.
 You render the table, forms and deletion confirmation. Operations return a success
 boolean; failures are exposed in `error`. A failed refresh after a successful write
 is reported in `error`, while the write still counts as successful.
@@ -220,13 +220,13 @@ durability or provide backups. Keep the directory outside your public/static roo
 client for tests and prototypes. Its files disappear when the instance is discarded.
 MyShop deliberately uses the disk adapter on its backend instead.
 
-Uploads get unique IDs even for duplicate names. Edits change name, category and
+Uploads get unique IDs even for duplicate names. Edits change name and
 tags without changing bytes. Deletion immediately removes a file and is idempotent.
 Names cannot contain path separators or control characters; tags are trimmed and
 deduplicated. Content types are caller-supplied, not verified. There is no total
 quota, malware scanning, audit ledger, retention or sharing policy.
 
-Listing searches names/tags case-insensitively, combines exact category/tag filters,
+Listing searches names/tags case-insensitively, combines exact tag filters,
 and returns newest uploads first. Usage totals include all files regardless of
 filters. Pages default to 25 entries (maximum 100). Offset pages reflect current
 data, so concurrent changes can shift entries between pages.

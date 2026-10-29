@@ -33,7 +33,6 @@ const metadata = {
   contentType: "application/pdf" as const,
   sizeBytes: 10,
   checksum,
-  category: "admin" as const,
   tags: [],
 };
 

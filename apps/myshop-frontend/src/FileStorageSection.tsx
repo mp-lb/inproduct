@@ -60,16 +60,6 @@ export const FileStorageSection = ({
           />
         </label>
         <label>
-          Filter category
-          <input
-            placeholder="All categories"
-            value={storage.query.category ?? ""}
-            onChange={(event) =>
-              storage.setFilters({ category: event.target.value })
-            }
-          />
-        </label>
-        <label>
           Filter tag
           <input
             placeholder="All tags"
@@ -88,7 +78,7 @@ export const FileStorageSection = ({
             disabled={storage.busy}
             onChange={(event) => {
               const file = event.target.files?.[0];
-              if (file) void storage.uploadFile(file, { category: "admin" });
+              if (file) void storage.uploadFile(file);
               event.target.value = "";
             }}
           />
@@ -103,7 +93,6 @@ export const FileStorageSection = ({
                 "MyShop synthetic file example.\n",
               ),
               contentType: "text/plain",
-              category: "admin",
               tags: ["demo"],
             })
           }
@@ -162,18 +151,13 @@ export const FileStorageSection = ({
             <caption className="muted">{storage.total} matching files</caption>
             <thead>
               <tr>
-                {[
-                  "Name",
-                  "Category / tags",
-                  "Status",
-                  "Size",
-                  "Updated",
-                  "Actions",
-                ].map((heading) => (
-                  <th scope="col" key={heading}>
-                    {heading}
-                  </th>
-                ))}
+                {["Name", "Tags", "Status", "Size", "Updated", "Actions"].map(
+                  (heading) => (
+                    <th scope="col" key={heading}>
+                      {heading}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
             <tbody>
@@ -190,7 +174,6 @@ export const FileStorageSection = ({
                     <small>{file.contentType}</small>
                   </td>
                   <td>
-                    {file.category}
                     <small>{file.tags.join(", ") || "No tags"}</small>
                   </td>
                   <td>
@@ -223,9 +206,7 @@ export const FileStorageSection = ({
           </table>
           {!storage.files.length && (
             <p className="empty-files">
-              {storage.query.search ||
-              storage.query.category ||
-              storage.query.tag
+              {storage.query.search || storage.query.tag
                 ? "No files match these filters."
                 : "No files yet. Upload a file or add an example to get started."}
             </p>

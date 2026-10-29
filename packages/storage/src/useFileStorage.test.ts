@@ -159,7 +159,6 @@ describe("useFileStorage", () => {
     await client.edit(file.id, {
       name: "renamed.txt",
       tags: [],
-      category: "admin",
     });
 
     const createObjectURL = vi

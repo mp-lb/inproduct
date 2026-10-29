@@ -8,7 +8,6 @@ import type {
   FilePartition,
   FileRecord,
 } from "./fileLibraryContracts.js";
-import type { FileCategory } from "./fileLibraryTypes.js";
 import { fileView } from "./fileView.js";
 import { recordFileEvent } from "./recordFileEvent.js";
 import { isAcceptedFile } from "./isAcceptedFile.js";
@@ -44,7 +43,7 @@ export const createFileLibraryContext = (options: FileLibraryOptions) => {
     file?: FileRecord,
     extra?: {
       scope?: string;
-      category?: FileCategory;
+
       consumer?: string;
       link?: FileLinkTarget;
     },

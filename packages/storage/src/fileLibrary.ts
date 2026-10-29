@@ -6,7 +6,6 @@ export type { FileLink, FileLinkTarget } from "./file-library/fileLinks.js";
 export {
   beginFileSchema,
   editFileSchema,
-  fileCategorySchema,
   fileIdSchema,
   fileNameSchema,
   fileQuotaSchema,
@@ -18,7 +17,6 @@ export {
 } from "./file-library/fileLibrarySchemas.js";
 export type {
   BeginFile,
-  FileCategory,
   FileDiagnostics,
   FileExplorerClient,
   FileList,
@@ -31,3 +29,8 @@ export type {
 export { formatFileValidationError } from "./file-library/formatFileValidationError.js";
 
 export { canPreviewFile } from "./file-library/canPreviewFile.js";
+
+export {
+  fileTypeCategorySchema,
+  type FileTypeCategory,
+} from "./file-types/fileTypeCategory.js";

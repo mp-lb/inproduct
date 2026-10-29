@@ -1,3 +1,4 @@
+import type { FileTypeCategory } from "./fileTypeCategory.js";
 /** Where a type definition came from. `mime-db` covers entries without a recorded source. */
 export type FileTypeSource =
   | "iana"
@@ -12,6 +13,7 @@ export type FileTypeSource =
 export type FileType = {
   id: string;
   label: string;
+  category: FileTypeCategory;
   /** Compatible extensions, lowercase without a leading dot. The first is preferred. */
   extensions: string[];
   /** Other media types that mean this type, such as `image/jpg`. */
@@ -27,6 +29,7 @@ export type FileType = {
 export type FileTypeInput = {
   id: string;
   label?: string;
+  category?: FileTypeCategory;
   extensions?: string[];
   aliases?: string[];
   textual?: boolean;

@@ -23,7 +23,7 @@ export const createFileStorage = (
         offset = 0,
         limit = 25,
         search = "",
-        category = "",
+
         tag = "",
       } = query;
 
@@ -42,7 +42,7 @@ export const createFileStorage = (
         offset,
         limit,
         search: search.trim(),
-        category,
+
         tag: tag.trim(),
       });
     },
@@ -55,7 +55,7 @@ export const createFileStorage = (
 
       const metadata = normalizeFileMetadata({
         name: input.name,
-        category: input.category ?? "general",
+
         tags: input.tags ?? [],
       });
 

@@ -28,3 +28,8 @@ export type {
   FileTypeSource,
   FileTypeStatus,
 } from "./file-types/fileTypeContracts.js";
+
+export {
+  fileTypeCategorySchema,
+  type FileTypeCategory,
+} from "./file-types/fileTypeCategory.js";

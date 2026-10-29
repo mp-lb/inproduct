@@ -188,6 +188,7 @@ describe("file library type handling", () => {
     expect((await upload(setup, "totals.csv", fixture.csv)).file.type).toEqual({
       id: "text/csv",
       label: "CSV spreadsheet",
+      category: "document",
       status: "compatible",
     });
 

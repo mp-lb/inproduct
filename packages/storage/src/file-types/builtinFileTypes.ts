@@ -1,3 +1,4 @@
+import { classifyFileType } from "./classifyFileType.js";
 import mimeDb from "mime-db";
 import type { FileType, FileTypeSource } from "./fileTypeContracts.js";
 import { builtinFileTypeOverlay } from "./builtinFileTypeOverlay.js";
@@ -20,6 +21,7 @@ export const builtinFileTypes = (): FileType[] => {
     types.set(id, {
       id,
       label: "",
+      category: classifyFileType(id),
       extensions: [...extensions],
       aliases: [],
       textual: isTextualMediaType(id, charset),

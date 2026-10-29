@@ -61,7 +61,7 @@ export const dispatchFileRequest = async (
 
     const metadata = parseFileRequest(fileMetadataSchema, {
       name: file.name,
-      category: form.get("category") ?? "general",
+
       tags,
     });
 

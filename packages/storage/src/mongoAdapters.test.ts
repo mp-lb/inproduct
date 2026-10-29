@@ -48,14 +48,13 @@ describe.skipIf(!uri)("MongoDB adapters", () => {
     const first = await storage.upload({
       name: "report[1].txt",
       body: new Uint8Array([1, 2]),
-      category: "admin",
+
       tags: ["billing"],
     });
 
     await storage.upload({
       name: "report2.txt",
       body: new Uint8Array([3]),
-      category: "user",
     });
 
     const fresh = createFileStorage({
@@ -66,9 +65,7 @@ describe.skipIf(!uri)("MongoDB adapters", () => {
       (await fresh.list({ search: "[1]" })).items.map((file) => file.id),
     ).toEqual([first.id]);
 
-    expect(
-      (await fresh.list({ category: "admin", tag: "billing" })).total,
-    ).toBe(1);
+    expect((await fresh.list({ tag: "billing" })).total).toBe(1);
 
     expect((await fresh.list({ search: "none" })).usage).toEqual({
       count: 2,
@@ -77,7 +74,7 @@ describe.skipIf(!uri)("MongoDB adapters", () => {
 
     await fresh.edit(first.id, {
       name: "updated",
-      category: "admin",
+
       tags: [],
     });
 
@@ -89,7 +86,7 @@ describe.skipIf(!uri)("MongoDB adapters", () => {
     await storage.remove(first.id);
     expect((await fresh.list()).usage).toEqual({ count: 1, bytes: 1 });
     await expect(
-      fresh.edit(first.id, { name: "gone", category: "admin", tags: [] }),
+      fresh.edit(first.id, { name: "gone", tags: [] }),
     ).rejects.toThrow("file not found");
   });
 });
