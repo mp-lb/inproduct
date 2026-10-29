@@ -106,7 +106,6 @@ file references from `mp-lb/fssstack/agents-md`. Regenerate with
 `zap task context-build`. Commit the generated `AGENTS.md` and `CLAUDE.md`
 alongside their source changes.
 
-The release workflow publishes changed library builds on pushes to `main`. The GitHub CLI is available for pushes and CI checks.
 
 Docs live in `docs/public/` and are rendered by `apps/docs` (Fumadocs). No docs hosting is configured by this repository. MyShop (`apps/myshop-frontend` and `apps/myshop-backend`) is private and local-only; never publish or deploy it. Run `zap task myshop` for the seeded demo and `zap task myshop-check` for its explicit local build. Ordinary builds exclude both MyShop apps. Uploaded files persist in ignored `apps/myshop-backend/.data/files`; reset only affects the catalog/cart. Root validations use `scripts/run_validation.py` and share the per-user heavy-task lock; do not nest wrapped commands or remove the lock.
 
