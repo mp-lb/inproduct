@@ -81,3 +81,56 @@ matter/email consumer facades (`createMatterFileConsumer`, `createMatterFileRefe
 - Optional peers in the host: `mongodb@^7.2.0`, `@aws-sdk/client-s3@^3.1000.0`,
   `@aws-sdk/s3-request-presigner@^3.1000.0`.
 - ClamAV over trusted private TCP when `malwarePolicy` is `required` (the default).
+
+## Upgrading Nexus from 0.1.6 to file types and names
+
+Nexus pins `@mp-lb/inproduct-storage@0.1.6`, which stores the full uploaded file name in
+`name` and one of four content types in `contentType`. The next release separates the
+editable name from a library-managed extension and type. See `docs/public/file-types.mdx`
+and the "File types and names" section of `docs/public/file-library.mdx`. This change does
+not modify or deploy Nexus.
+
+### What changes for Nexus
+
+| Area | 0.1.6 | Next release | Nexus action |
+| --- | --- | --- | --- |
+| `FileView.name` | Full file name, such as `report.pdf` | Editable name, such as `report` | Show `file.fileName` where the full name is expected (table cell `title`, download `anchor.download`, toasts). Keep `file.name` in the rename form. |
+| New view fields | none | `extension`, `fileName`, `type { id, label, status }` | Show `file.type.label` in the Type column instead of `file.contentType`. |
+| `beginFileSchema.contentType` | `z.enum(libraryContentTypes)`, required | Optional string, used only as evidence | `uploadFile` can keep sending `file.type`. An unsupported type now fails at `begin` with `FileStorageError("INVALID_INPUT")` instead of a client-side Zod error, so map it to `BAD_REQUEST` (the existing mapping). |
+| Upload headers | `Content-Type` was the client's type | `Content-Type` is the resolved canonical type | No change, because `uploadFile` already sends `ticket.upload.headers`. |
+| `editFileSchema.name` | Replaced the full file name | Sets the editable name. A trailing extension the file already has is stripped. | None. Old clients that send `report.pdf` still store `report`. |
+| Downloads | Octet-stream, `filename*` only | Attachment with an ASCII fallback, sanitized name and the canonical type only for recognized passive content | None. |
+| `ByteValidator.validate` | `Promise<boolean>` | `Promise<boolean \| { valid, typeStatus }>` | Only relevant to custom validators. Callers of `validate` must handle the object. |
+| `ObjectDriver.download` input | `name` | `name` (sanitized download name) plus optional `contentType` | Only relevant to custom drivers. `createS3FileDriver` handles it. |
+| `verifyFileBytes` | `(bytes, checksum, contentType)` | Optional `contentCheck` and `registry` parameters | None. |
+
+### Persisted records
+
+No data migration is required. Records written by 0.1.6 lack `extension` and `typeStatus`.
+On read, the library splits the stored name against the stored type (for example,
+`report.v2.pdf` becomes `report.v2` + `pdf`, and `notes` as plain text becomes
+`notes` + `txt`). Names that do not match their type keep their full text, and the type's
+extension is appended on download (`report.pdf` stored as text downloads as
+`report.pdf.txt`). Unregistered types keep the whole name with no extension. Legacy files
+report `inferred` status and download as octet-stream. The first rename writes the new shape.
+
+To backfill instead, read each partition, set `name` and `extension` from
+`fileRecordName(record, registry)`, and save through the repository's revision compare and
+swap. Leave `typeStatus` unset unless you re-run byte validation. The Mongo documents keep the
+same collection and shape otherwise.
+
+### Steps
+
+1. Bump `@mp-lb/inproduct-storage` in `packages/file-storage` once a release containing
+   `/file-types` is published, and confirm with `npm view @mp-lb/inproduct-storage exports`.
+2. In `FileExplorer.tsx`, use `file.fileName` for the name cell title and download name, and
+   `file.type.label` for the Type column. Keep the rename form bound to `file.name`.
+3. Optionally derive the file input's `accept` from
+   `fileTypeAccept(fileTypePresets.library, defaultFileTypeRegistry())` instead of the
+   hard-coded `.pdf,.txt,.png,.jpg,.jpeg`. This adds mime-db to the browser bundle.
+4. Optionally add `byteValidator: createFileByteValidator(s3.readVersion)` so new files show
+   `recognized` and download with their real type. This reads each object once more during
+   finalize.
+5. To accept more types, set `fileTypes` in the composition. Do not widen the accepted set
+   without a byte check or an explicit `unchecked` decision.
+6. Update Nexus tests that assert `name` equals the full file name.

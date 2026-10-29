@@ -39,6 +39,15 @@ retention holds, durable reference coordination and audit dispatch. Metadata sta
 in your MongoDB replica set; identity, authorization and domain records stay in your
 application. See the [managed file library guide](../../docs/public/file-library.mdx).
 
+## File types and names
+
+`/file-types` is a browser-safe file type registry backed by mime-db. It covers about 2,500
+media types with labels, aliases and preferred and multi-part extensions. It identifies types
+from the file name, the client-reported type and the bytes, keeps conflicts and uncertainty
+explicit, and builds safe download names and headers. The file library uses it, so each file
+has an editable `name` and one library-managed type and extension. See the
+[file types guide](../../docs/public/file-types.mdx).
+
 ## Backend-backed file management
 
 ### Metadata for externally stored files

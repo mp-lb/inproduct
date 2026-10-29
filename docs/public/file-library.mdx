@@ -30,6 +30,7 @@ the Mongo or S3 adapters. Each entry point has one job:
 | Entry point | Runtime | Contents |
 | --- | --- | --- |
 | `/file-library` | Browser or Node | Zod schemas, `FileView`, `FileExplorerClient`, `formatFileValidationError` |
+| `/file-types` | Browser or Node | [File type registry, identification, names and download policy](/docs/file-types) |
 | `/file-library/server` | Node | `createFileLibrary`, contracts, `FileStorageError`, `createFileReferenceCoordinator`, `createFileAuditDispatcher`, `createFileByteValidator`, `createClamdScanner`, `scanPrivateFileBytes` |
 | `/file-library/testing` | Node | Memory repository and reference store, synthetic object driver and scanner |
 | `/s3` | Node | `createS3FileDriver`, `createPrivateFileStore`, `createVersionedDocumentStorage` |
@@ -71,11 +72,14 @@ request JSON.
 A host typically exposes the library through its own authorized API:
 
 1. **Begin.** Validate the request with `beginFileSchema` and call
-   `library.begin(actor, input)`. It reserves quota and returns a stable file UUID and
-   a short-lived upload ticket. Retrying with the same `operationId` and identical
+   `library.begin(actor, input)`. Send the uploaded file name as `name` and, optionally,
+   the browser's `File.type` as `contentType`. The library resolves the canonical type. You
+   do not map extensions or MIME types yourself. It reserves quota and returns a stable file
+   UUID and a short-lived upload ticket. Retrying with the same `operationId` and identical
    input returns the same file; changed input conflicts.
 2. **Upload.** The browser PUTs the bytes to `ticket.upload.url` with
-   `ticket.upload.headers`. The S3 signature binds type, length, SHA-256 and a
+   `ticket.upload.headers`. Use the ticket's `Content-Type`, which is the resolved type, not
+   `File.type`. The S3 signature binds type, length, SHA-256 and a
    conditional create.
 3. **Finalize.** `library.finalize(actor, fileId)` pins one immutable version, checks
    size, type and checksum, validates bytes and scans. Retries rescan the pinned version
@@ -87,6 +91,101 @@ A host typically exposes the library through its own authorized API:
 
 The package test `consumerIntegrationExample.test.ts` runs this flow end to end with
 the synthetic adapters.
+
+## File types and names
+
+Each file has an editable `name` and one library-managed type. `FileView` carries:
+
+| Field | Meaning |
+| --- | --- |
+| `name` | The editable name without its extension, such as `Q3 report.v2`. |
+| `extension` | The extension compatible with the type, such as `pdf`. Renames never change it. |
+| `fileName` | The safe download name, `name` plus `extension`. Show it wherever the full name is expected. |
+| `contentType` | The canonical media type. It equals `type.id`. |
+| `type` | `{ id, label, status }`, such as `{ id: 'application/pdf', label: 'PDF document', status: 'recognized' }`. |
+
+Renaming with `edit` changes only `name`. A trailing extension the file already has is removed,
+so sending `Q3.pdf` for a PDF stores `Q3`. Any other suffix stays in the name: `Q3.html`
+downloads as `Q3.html.pdf`. The bytes, version, type and extension never change.
+
+### Type policy
+
+`createFileLibrary({ fileTypes })` sets which types uploads may have and the evidence each one
+needs. With no `fileTypes`, behavior matches earlier releases: PDF, plain text, PNG and JPEG,
+each positively identified from its bytes.
+
+```ts
+import { createFileTypeRegistry } from '@mp-lb/inproduct-storage/file-types';
+import { createFileByteValidator } from '@mp-lb/inproduct-storage/file-library/server';
+
+const registry = createFileTypeRegistry({
+  types: [{ id: 'application/vnd.acme.board+json', label: 'Acme board', extensions: ['acmeboard'] }],
+});
+
+const library = createFileLibrary({
+  // …repository, driver, scanner, quota, authorize
+  byteValidator: createFileByteValidator(s3.readVersion, registry),
+  fileTypes: {
+    registry,
+    accept: ['application/pdf', 'text/csv', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.acme.board+json'],
+    contentCheck: 'compatible',
+    contentChecks: { 'application/pdf': 'exact' },
+    onConflict: 'reject',
+  },
+});
+```
+
+| Option | Default | Behavior |
+| --- | --- | --- |
+| `registry` | built-in | The registry used for resolution, labels and names. Pass the same registry to `createFileByteValidator` and `createClamdScanner`. |
+| `accept` | `libraryContentTypes` | Type ids or aliases. Uploads that resolve to anything else fail with `INVALID_INPUT` before quota is reserved. Unknown files are accepted only if you list `application/octet-stream`. |
+| `contentCheck` | `exact` | `exact` needs a positive byte identification. `compatible` also accepts a matching container or text family. |
+| `contentChecks` | none | Per-type overrides. `unchecked` accepts a type without content matching. Size, checksum, version pinning and malware scanning still apply. |
+| `onConflict` | `reject` | What happens when the file name and the reported type disagree: `reject`, `prefer-extension` or `prefer-declared`. |
+
+The policy is validated at construction. `createFileLibrary` throws if an accepted type is
+unknown, or if the built-in detector cannot enforce its check, for example legacy `.doc` under
+`exact`. Choose `compatible`, or opt in with `unchecked` and enforce the format in your own
+`byteValidator`.
+
+**Begin infers, finalize checks.** `begin` resolves the type from the name and reported type
+only, so new files start as `inferred`. `finalize` passes the type and its `contentCheck` to the
+byte validator and scanner. Bytes that do not satisfy the check quarantine the file. When a
+`byteValidator` runs, the status becomes `recognized` or `compatible`. A validator can return
+`{ valid, typeStatus }` to report exactly what it saw, and a plain `true` implies the status of
+the check. Without a byte validator the status stays `inferred`, even when the ClamAV scanner
+also checks bytes, because the library cannot see the scanner's evidence. Configure
+`createFileByteValidator` when you want recognized types shown and served.
+
+A broad registry does not weaken any other guarantee. Authorization, tenant isolation, quota,
+checksums, immutable version pins, malware policy and holds are unchanged, and type evidence
+is never a safety verdict.
+
+### Downloads
+
+`library.download` signs the pinned version with `fileName` and a served type chosen by
+[`describeFileDownload`](/docs/file-types#download-responses). The response is always an
+attachment. The canonical type is served only for `recognized`, non-active types; everything
+else is served as `application/octet-stream`. Custom `ObjectDriver`s receive `name` and
+`contentType` and must respond as an attachment.
+
+### Records from 0.1.6 and earlier
+
+Earlier records stored the full uploaded file name in `name` and have no `extension` or
+`typeStatus`. They need no backfill. On read, the library splits the stored name against the
+stored type with the same rules as new uploads:
+
+- `report.v2.pdf` as PDF becomes `report.v2` + `pdf`.
+- `scan.jpeg.pdf` as PDF becomes `scan.jpeg` + `pdf`.
+- `notes` as plain text becomes `notes` + `txt`, and downloads as `notes.txt`.
+- A name that does not match its type keeps its full name: `report.pdf` stored as plain text
+  downloads as `report.pdf.txt`.
+- A type the registry does not know keeps the full name with no extension, and its label
+  comes from the media type.
+
+Legacy files report `inferred` status and download as `application/octet-stream`. The first
+`edit` writes the record in the new shape. `fileRecordName(record, registry)` in
+`/file-library/server` gives the same split, if you want to backfill or migrate references.
 
 ## Extension contracts
 
@@ -159,8 +258,9 @@ them into safe, field-specific messages. Treat other errors as internal and retr
 
 ## Limits
 
-- Accepted types are PDF, plain text, PNG and JPEG, up to 50 MiB, because the built-in
-  validator positively identifies only these types.
+- By default, accepted types are PDF, plain text, PNG and JPEG, up to 50 MiB. Other types
+  need an explicit `fileTypes` policy. The type is resolved at `begin`. A file whose bytes
+  turn out to be another accepted type is quarantined, not retyped.
 - Each tenant partition holds at most 500 lifetime file records, including deleted files.
   Each file allows 20 lifetime hold IDs, and each partition allows 2,000 pending audit
   events. These limits reject growth explicitly; they are not production capacity claims.

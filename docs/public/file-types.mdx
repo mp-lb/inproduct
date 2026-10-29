@@ -1,0 +1,161 @@
+---
+title: File types and names
+description: A broad file type registry, evidence-based type identification, editable names with library-managed extensions, and safe download responses.
+---
+
+`@mp-lb/inproduct-storage/file-types` lets an application treat a file as two things: a
+**name** people can edit and one **file type** the library manages. You do not keep your own
+MIME or extension tables. The [managed file library](/docs/file-library) uses this module for
+every upload, rename and download, and you can use it directly.
+
+## Installation
+
+The entry point ships in `@mp-lb/inproduct-storage` from the first release after 0.1.6. Check
+availability with `npm view @mp-lb/inproduct-storage exports` before depending on it.
+
+```sh
+pnpm add @mp-lb/inproduct-storage
+```
+
+The module is browser-safe. It depends on [`mime-db`](https://github.com/jshttp/mime-db)
+(MIT, no dependencies), which adds about 200 KB of uncompressed JSON to a browser bundle.
+`/file-library` does not import it, so a browser that only renders `FileView`s does not pay for
+it. `FileView` already carries the label, extension and download name.
+
+## The registry
+
+`defaultFileTypeRegistry()` holds every mime-db media type (about 2,500) with InProduct's
+curated overlay:
+
+- **Stable ids.** A type's `id` is its canonical lowercase media type, such as
+  `application/pdf`. That is what the file library stores as `contentType`.
+- **Aliases.** Duplicate media types fold into one id, so `image/jpg`, `image/pjpeg` and
+  `IMAGE/JPEG; q=1` all resolve to `image/jpeg`, and `text/xml` resolves to `application/xml`.
+- **Friendly labels**, such as `Word document` and `PNG image`. Types without a curated label
+  get one from their extension, such as `KML file`.
+- **Extensions.** Each type lists its compatible extensions with the preferred one first.
+  Multi-part extensions are supported: `tar.gz` and `tgz` belong to `application/gzip`.
+- **Ambiguous extensions.** `byExtension('mp4')` returns every type that lists `.mp4`, the
+  preferred type and `ambiguous: true`. Preferences are deterministic: a curated choice, then
+  custom types, then the type whose preferred extension it is, then IANA over Apache over
+  nginx sources.
+
+```ts
+import { defaultFileTypeRegistry } from '@mp-lb/inproduct-storage/file-types';
+
+const registry = defaultFileTypeRegistry();
+registry.get('image/jpg'); // { id: 'image/jpeg', label: 'JPEG image', extensions: ['jpg', 'jpeg', 'jpe'], … }
+registry.byExtension('ts').types.map((type) => type.id); // ['video/mp2t', 'text/x-typescript']
+```
+
+### Custom types and overrides
+
+`createFileTypeRegistry` builds a registry with your additions. An entry with a new `id` adds a
+type. An entry with an existing `id` overrides only the fields you give. `extensionPreferences`
+settles ambiguous extensions. Invalid ids, unsafe extensions, alias collisions and preferences
+for a type that does not list the extension throw when the registry is created.
+
+```ts
+import { createFileTypeRegistry } from '@mp-lb/inproduct-storage/file-types';
+
+const registry = createFileTypeRegistry({
+  types: [
+    { id: 'application/vnd.acme.board+json', label: 'Acme board', extensions: ['acmeboard'] },
+    { id: 'application/pdf', label: 'Portable document' },
+  ],
+  extensionPreferences: { ts: 'text/x-typescript' },
+});
+```
+
+Pass `builtins: false` for a registry that contains only your types. A type is `textual` when
+its bytes are text, and `active` when a browser could run script from it, such as HTML, SVG,
+XML and JavaScript. Both are derived from the media type and can be set explicitly.
+
+## Names and extensions
+
+`deriveFileName(fileName, type, registry)` splits an uploaded file name into an editable name
+and an extension compatible with the type:
+
+| Uploaded name | Type | Name | Extension |
+| --- | --- | --- | --- |
+| `Q3 report.v2.final.PDF` | PDF | `Q3 report.v2.final` | `pdf` |
+| `backup.2026.tar.gz` | Gzip | `backup.2026` | `tar.gz` |
+| `README` | Plain text | `README` | `txt` |
+| `scan.png` | PDF | `scan.png` | `pdf` |
+| `capture.dat3` | Unknown | `capture` | `dat3` |
+
+Dots stay in the name. A suffix the type does not list stays in the name too, so nothing the
+user typed is lost. When the name has no compatible extension, the type's preferred extension
+is used.
+
+`downloadFileName(name, extension)` always appends the stored extension. Renaming a PDF to
+`invoice.html` downloads as `invoice.html.pdf`. A rename can never change the bytes, the type
+or the apparent format. `stripTypeExtension(name, extensions)` removes a trailing extension the
+file already has, so a rename to `Q3.pdf` stores `Q3`.
+
+`sanitizeFileName` makes untrusted names safe to offer for download. It applies Unicode NFC
+normalization and removes bidirectional-override characters, such as the one that makes
+`gpj.exe` look like `exe.jpg`. It replaces control, path and reserved characters, trims leading
+and trailing dots and spaces, prefixes Windows device names and limits the name to 200 UTF-8
+bytes.
+
+## Identifying a type
+
+`identifyFileType({ fileName, declaredType, bytes }, registry)` weighs three kinds of evidence:
+the file name's extension, the client-reported type (such as `File.type`) and, when you have
+them on the server, the bytes. It returns a `status`, the best `type`, all `candidates`, the
+`evidence` it used and any `conflicts`.
+
+| Status | Meaning |
+| --- | --- |
+| `recognized` | The bytes positively identify a claimed type, such as a PNG signature. |
+| `compatible` | The bytes fit the type's container or text family but do not pin it down, such as a ZIP for an `.xlsx`, or UTF-8 text for `.csv`. |
+| `inferred` | Name and reported type agree, or only one exists. No bytes were checked. |
+| `unknown` | There is no usable evidence. `application/octet-stream` and an empty reported type count as no evidence. |
+| `conflict` | The claims disagree with each other or with the bytes. `type` is the content's type when bytes identified one, and otherwise `null`. |
+
+Bytes can resolve ambiguity. A `server.ts` reported as `video/mp2t` whose bytes are text
+becomes `text/x-typescript`, with `compatible` status and a `content-declared` conflict on
+record.
+
+**Recognition is not validation.** Content detection reads leading bytes and container
+markers. It recognizes PDF, common images, audio and video, archives, Office Open XML,
+OpenDocument and EPUB, OLE (legacy Office), fonts, WebAssembly, executables and UTF-8 text. It
+never proves a file is well formed, complete or safe. Text containing HTML, SVG or script
+markup is identified as that active format rather than plain text. `detectFileContent` and
+`matchFileContent` expose the detector directly. `canCheckContent(type, check)` tells you
+whether the built-in detector can enforce a check for a type.
+
+## Download responses
+
+`describeFileDownload({ name, extension, type, status })` is the one download policy that the
+library and its S3 drivers use:
+
+- Always `Content-Disposition: attachment`, with an ASCII `filename` fallback and an RFC 5987
+  `filename*`. Names are sanitized, so CR/LF can never reach the header.
+- `Cache-Control: private, no-store` and `X-Content-Type-Options: nosniff`.
+- The canonical type is served only when the bytes were `recognized` as that type and the type
+  is not active. Otherwise the response is `application/octet-stream`. An inferred type, or an
+  uploaded HTML or SVG file, is never served as renderable content.
+
+`contentDisposition(fileName)` gives you only the header. The small-file HTTP handler, the
+private file store and versioned document storage use it too.
+
+## Other helpers
+
+- `fileTypeAccept(ids, registry)` builds an `<input accept>` value, such as
+  `application/pdf,.pdf`.
+- `fileTypePresets` lists ready-made accept sets: `library` (the file library default),
+  `images` and `documents`.
+- `normalizeMediaType` and `findFileExtension` expose the parsing steps.
+
+## Limitations
+
+- mime-db is a snapshot. Updating the pinned version is a dependency bump in this package.
+- Detection covers the formats listed above. Other formats can be `compatible` only through
+  their container or text family, or not at all. Use a `custom` type and a host byte validator
+  for proprietary formats.
+- Labels are English only.
+- Ambiguous extensions resolve by evidence, then preference. A client that reports a wrong type
+  for an ambiguous extension can still get the less likely type. Bytes, when checked, catch
+  the mismatch.

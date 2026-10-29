@@ -12,6 +12,7 @@ for (const [path, title] of [
   ["backend/", "Backend integration"],
   ["storage/", "File storage"],
   ["file-library/", "Managed file library"],
+  ["file-types/", "File types and names"],
   ["myshop/", "MyShop local example"],
 ]) {
   assert.ok(
@@ -82,6 +83,42 @@ for (const marker of [
     `agent bundle missing file library content: ${marker}`,
   );
 }
+
+const typesMarkdown = read("llms.mdx/docs/file-types/content.md");
+
+for (const marker of [
+  "defaultFileTypeRegistry",
+  "createFileTypeRegistry",
+  "identifyFileType",
+  "describeFileDownload",
+  "Recognition is not validation",
+]) {
+  assert.ok(
+    typesMarkdown.includes(marker),
+    `file types Markdown missing: ${marker}`,
+  );
+
+  assert.ok(
+    full.includes(marker),
+    `agent bundle missing file types content: ${marker}`,
+  );
+}
+
+for (const marker of ["Type policy", "Records from 0.1.6 and earlier"])
+  assert.ok(
+    libraryMarkdown.includes(marker),
+    `file library Markdown missing: ${marker}`,
+  );
+
+assert.ok(
+  read("api/search").includes("/docs/file-types"),
+  "search index missing file types guide",
+);
+
+assert.ok(
+  read("docs/installation/index.html").includes('href="/docs/file-types"'),
+  "documentation navigation missing file types guide",
+);
 
 assert.ok(
   read("api/search").includes("/docs/file-library"),
