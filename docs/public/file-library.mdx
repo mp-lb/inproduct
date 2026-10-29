@@ -111,8 +111,10 @@ downloads as `Q3.html.pdf`. The bytes, version, type and extension never change.
 ### Type policy
 
 `createFileLibrary({ fileTypes })` sets which types uploads may have and the evidence each one
-needs. With no `fileTypes`, behavior matches earlier releases: PDF, plain text, PNG and JPEG,
-each positively identified from its bytes.
+needs. By default all types, including unknown types, are accepted. The library uses an exact
+content check where available, otherwise a compatible family check, otherwise no format check.
+Unchecked content remains inferred or unknown and is downloaded as a generic attachment.
+Checksums, version pinning and any configured malware scanner still apply.
 
 ```ts
 import { createFileTypeRegistry } from '@mp-lb/inproduct-storage/file-types';
@@ -138,8 +140,8 @@ const library = createFileLibrary({
 | Option | Default | Behavior |
 | --- | --- | --- |
 | `registry` | built-in | The registry used for resolution, labels and names. Pass the same registry to `createFileByteValidator` and `createClamdScanner`. |
-| `accept` | `libraryContentTypes` | Type ids or aliases. Uploads that resolve to anything else fail with `INVALID_INPUT` before quota is reserved. Unknown files are accepted only if you list `application/octet-stream`. |
-| `contentCheck` | `exact` | `exact` needs a positive byte identification. `compatible` also accepts a matching container or text family. |
+| `accept` | all types | Optional type ids or aliases. With a list, other types fail with `INVALID_INPUT` before quota is reserved. Include `application/octet-stream` to allow unknown types. |
+| `contentCheck` | automatic; `exact` with an allowlist | `exact` needs a positive byte identification. `compatible` also accepts a matching container or text family. Automatic uses the strongest check supported for each type, or `unchecked` if none is available. |
 | `contentChecks` | none | Per-type overrides. `unchecked` accepts a type without content matching. Size, checksum, version pinning and malware scanning still apply. |
 | `onConflict` | `reject` | What happens when the file name and the reported type disagree: `reject`, `prefer-extension` or `prefer-declared`. |
 
@@ -258,8 +260,7 @@ them into safe, field-specific messages. Treat other errors as internal and retr
 
 ## Limits
 
-- By default, accepted types are PDF, plain text, PNG and JPEG, up to 50 MiB. Other types
-  need an explicit `fileTypes` policy. The type is resolved at `begin`. A file whose bytes
+- Files are limited to 50 MiB. The type is resolved at `begin`. A file whose bytes
   turn out to be another accepted type is quarantined, not retyped.
 - Each tenant partition holds at most 500 lifetime file records, including deleted files.
   Each file allows 20 lifetime hold IDs, and each partition allows 2,000 pending audit

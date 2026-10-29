@@ -5,13 +5,12 @@ import type {
 } from "../file-types/fileTypeContracts.js";
 import { canCheckContent } from "../file-types/canCheckContent.js";
 import { defaultFileTypeRegistry } from "../file-types/defaultFileTypeRegistry.js";
-import { libraryContentTypes } from "./fileLibrarySchemas.js";
 
 /** Validates the type policy once, at construction. Every accepted type must be
  * registered and enforceable by the built-in detector under its byte check. */
 export const resolveFileTypePolicy = (policy: FileTypePolicy = {}) => {
   const registry = policy.registry ?? defaultFileTypeRegistry();
-  const fallback = policy.contentCheck ?? "exact";
+  const fallback = policy.contentCheck ?? (policy.accept ? "exact" : undefined);
   const accepted = new Map<string, FileType>();
 
   const checks = new Map(
@@ -23,9 +22,15 @@ export const resolveFileTypePolicy = (policy: FileTypePolicy = {}) => {
   );
 
   const contentCheck = (type: FileType): ContentCheck =>
-    checks.get(type.id) ?? fallback;
+    checks.get(type.id) ??
+    fallback ??
+    (canCheckContent(type, "exact")
+      ? "exact"
+      : canCheckContent(type, "compatible")
+        ? "compatible"
+        : "unchecked");
 
-  for (const id of policy.accept ?? libraryContentTypes) {
+  for (const id of policy.accept ?? []) {
     const type = registry.get(id);
     if (!type) throw new Error(`unknown file type ${id}`);
     if (!canCheckContent(type, contentCheck(type)))
@@ -38,6 +43,7 @@ export const resolveFileTypePolicy = (policy: FileTypePolicy = {}) => {
   return {
     registry,
     accepted,
+    unrestricted: policy.accept === undefined,
     contentCheck,
     onConflict: policy.onConflict ?? "reject",
   };

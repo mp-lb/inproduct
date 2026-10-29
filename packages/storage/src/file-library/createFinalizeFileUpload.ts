@@ -142,6 +142,8 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
             typeof validation === "boolean"
               ? checkedTypeStatus(contentCheck)
               : validation.typeStatus;
+        if (claimed.contentType === "application/octet-stream")
+          typeStatus = "unknown";
         return options.scanner
           ? options.scanner.scan({ ...scanInput, signal })
           : ("not_scanned" as const);

@@ -3,8 +3,7 @@ import { z } from "zod";
 /** Largest object the managed file library accepts, verifies or scans. */
 export const maxLibraryFileBytes = 50 * 1024 * 1024;
 
-/** The file library's default accepted types. Configure `fileTypes.accept` to
- * accept others; uploads are checked against the configured list, not this one. */
+/** Common types for consumers that want an explicit restricted policy. */
 export const libraryContentTypes = [
   "application/pdf",
   "text/plain",

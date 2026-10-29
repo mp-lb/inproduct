@@ -69,8 +69,18 @@ describe("file names", () => {
     });
 
     expect(derive("notes.html", "application/octet-stream")).toEqual({
-      name: "notes.html",
-      extension: "bin",
+      name: "notes",
+      extension: "html",
+    });
+
+    expect(derive("survey", "application/octet-stream")).toEqual({
+      name: "survey",
+      extension: null,
+    });
+
+    expect(derive("survey.123", "application/octet-stream")).toEqual({
+      name: "survey",
+      extension: "123",
     });
   });
 

@@ -25,7 +25,10 @@ export const fileView = (
     contentType: type?.id ?? row.contentType,
     type: {
       id: type?.id ?? row.contentType,
-      label: type?.label ?? fallbackFileTypeLabel(row.contentType, []),
+      label:
+        row.contentType === "application/octet-stream"
+          ? "Unknown file type"
+          : (type?.label ?? fallbackFileTypeLabel(row.contentType, [])),
       status: row.typeStatus ?? "inferred",
     },
     state: row.state,

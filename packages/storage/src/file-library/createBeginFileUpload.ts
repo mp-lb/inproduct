@@ -82,7 +82,10 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
         tags: input.tags,
         sizeBytes: input.sizeBytes,
         contentType: resolved.type.id,
-        typeStatus: "inferred",
+        typeStatus:
+          resolved.type.id === "application/octet-stream"
+            ? "unknown"
+            : "inferred",
         checksum: input.checksum,
         version: null,
         state: "pending",

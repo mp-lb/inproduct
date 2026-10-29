@@ -80,8 +80,10 @@ describe("file library type handling", () => {
     });
   });
 
-  it("rejects unaccepted types and name/type conflicts before reserving anything", async () => {
-    const { library, options } = createFixture();
+  it("rejects explicitly unaccepted types and name/type conflicts before reserving anything", async () => {
+    const { library, options } = createFixture({
+      fileTypes: { accept: ["text/plain", "image/jpeg"] },
+    });
 
     for (const input of [
       { name: "Plan.docx", contentType: docx },
@@ -92,6 +94,50 @@ describe("file library type handling", () => {
         { code: "INVALID_INPUT" },
       );
     expect((await options.repository.read(owner.tenantId)).files).toEqual([]);
+  });
+
+  it("accepts unknown types by default and preserves their extension on download", async () => {
+    const setup = validated();
+    const download = vi.spyOn(setup.options.driver, "download");
+    const { file } = await upload(setup, "survey.zzz9", fixture.binary);
+    expect(file).toMatchObject({
+      name: "survey",
+      extension: "zzz9",
+      fileName: "survey.zzz9",
+      state: "available",
+      type: { label: "Unknown file type", status: "unknown" },
+    });
+
+    await setup.library.download(owner, file.id);
+    expect(download).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "survey.zzz9",
+        contentType: "application/octet-stream",
+      }),
+    );
+  });
+
+  it("accepts known formats beyond the former default and checks their content", async () => {
+    const setup = validated();
+    expect((await upload(setup, "Plan.docx", fixture.docx)).file).toMatchObject(
+      {
+        state: "available",
+        type: { id: docx, status: "recognized" },
+      },
+    );
+
+    expect((await upload(setup, "Other.docx", fixture.pdf)).file.state).toBe(
+      "quarantined",
+    );
+  });
+
+  it("keeps an extensionless unknown file extensionless", async () => {
+    const { file } = await upload(validated(), "survey", fixture.binary);
+    expect(file).toMatchObject({
+      fileName: "survey",
+      extension: null,
+      type: { status: "unknown" },
+    });
   });
 
   it("follows a configured conflict preference", async () => {

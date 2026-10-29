@@ -13,7 +13,7 @@ export const resolveUploadType = (
   declaredType: string | undefined,
   policy: ResolvedFileTypePolicy,
 ) => {
-  const { registry, accepted, onConflict } = policy;
+  const { registry, accepted, unrestricted, onConflict } = policy;
 
   const identified = identifyFileType({ fileName, declaredType }, registry);
 
@@ -35,7 +35,7 @@ export const resolveUploadType = (
 
   type ??= registry.get("application/octet-stream") ?? null;
 
-  if (!type || !accepted.has(type.id))
+  if (!type || (!unrestricted && !accepted.has(type.id)))
     throw new FileStorageError(
       "INVALID_INPUT",
       "This file type is not supported.",

@@ -1,6 +1,7 @@
 import type { FileType, FileTypeRegistry } from "./fileTypeContracts.js";
 import { findFileExtension } from "./findFileExtension.js";
 import { splitFileNameSuffixes } from "./splitFileNameSuffixes.js";
+import { fileExtensionPattern } from "./fileExtensionPattern.js";
 
 const unknownType = "application/octet-stream";
 
@@ -24,8 +25,11 @@ export const deriveFileName = (
 
   if (type.id === unknownType) {
     const found = findFileExtension(fileName, registry);
-    if (found && !found.registered)
-      return { name: found.stem, extension: found.extension };
+    if (found) return { name: found.stem, extension: found.extension };
+    const suffix = splitFileNameSuffixes(fileName).at(-1);
+    if (suffix && fileExtensionPattern.test(suffix.extension))
+      return { name: suffix.stem, extension: suffix.extension };
+    return { name: fileName.trim(), extension: null };
   }
 
   return { name: fileName.trim(), extension: type.extensions[0] ?? null };

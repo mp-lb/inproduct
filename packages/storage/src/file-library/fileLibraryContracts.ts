@@ -151,9 +151,9 @@ export type ByteValidator = {
 export type FileTypePolicy = {
   /** Defaults to the built-in registry. */
   registry?: FileTypeRegistry;
-  /** Accepted type ids or aliases. Defaults to `libraryContentTypes`. */
+  /** Accepted type ids or aliases. Omit to accept all types, including unknown. */
   accept?: readonly string[];
-  /** Byte check for accepted types. Defaults to `exact`. */
+  /** Defaults to exact with an allowlist; otherwise uses the strongest available check. */
   contentCheck?: "exact" | "compatible";
   /** Per-type checks. `unchecked` accepts a type without content matching. */
   contentChecks?: Record<string, ContentCheck>;
