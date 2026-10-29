@@ -26,7 +26,7 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
     const input = beginFileSchema.parse(raw);
     const resolved = resolveUploadType(input.name, input.contentType, types);
     checkProvider();
-    await allow(actor, "upload", undefined, input);
+    await allow(actor, "upload");
 
     const hash = createHash("sha256")
       .update(JSON.stringify(input))
@@ -44,15 +44,11 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
       key: `files/${id}`,
       name: resolved.name,
       extension: resolved.extension,
-      scope: input.scope,
 
       tags: input.tags,
       sizeBytes: input.sizeBytes,
-      contentType: resolved.type.id,
-      typeStatus:
-        resolved.type.id === "application/octet-stream"
-          ? "unknown"
-          : "inferred",
+      typeId: resolved.type.id,
+      typeStatus: resolved.type.id === "unknown" ? "unknown" : "inferred",
       checksum: input.checksum,
       version: null,
       state: "pending",
@@ -140,7 +136,7 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
       (signal) =>
         options.driver.signUpload({
           key: file.key,
-          metadata: { ...input, contentType: resolved.type.id },
+          metadata: { ...input, contentType: resolved.type.mediaType },
           expiresAt: until,
           signal,
         }),

@@ -114,7 +114,7 @@ describe("file library retention holds", () => {
 
     const ticket = await library.begin(owner, {
       operationId: crypto.randomUUID(),
-      scope: "matter:M-1",
+
       name: "abandoned.txt",
 
       tags: [],

@@ -9,15 +9,14 @@ import {
 } from "./fileLibraryFixture";
 
 describe("file library authorization hooks", () => {
-  it("asks the host for each exact action with file, scope and consumer context", async () => {
+  it("asks the host for each exact action with file and consumer context", async () => {
     const authorize = vi.fn<AuthorizeFileAction>(ownerPolicy);
     const { library, objects } = createFixture({ authorize });
-    const input = metadata({ scope: "admin:files" });
+    const input = metadata();
     const ticket = await library.begin(owner, input);
     expect(authorize).toHaveBeenCalledWith({
       actor: owner,
       action: "upload",
-      ...input,
     });
 
     objects.upload(

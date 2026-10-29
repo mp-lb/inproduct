@@ -42,8 +42,6 @@ export const createFileLibraryContext = (options: FileLibraryOptions) => {
     action: Action,
     file?: FileRecord,
     extra?: {
-      scope?: string;
-
       consumer?: string;
       link?: FileLinkTarget;
     },

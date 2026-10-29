@@ -12,20 +12,23 @@ describe("file type identification", () => {
   it("infers from the name or the reported type alone", () => {
     expect(identify({ fileName: "Board pack.pdf" })).toMatchObject({
       status: "inferred",
-      type: { id: "application/pdf" },
+      type: { id: "pdf", mediaType: "application/pdf" },
       conflicts: [],
     });
 
     expect(identify({ declaredType: "image/jpg" })).toMatchObject({
       status: "inferred",
-      type: { id: "image/jpeg" },
+      type: { id: "jpeg", mediaType: "image/jpeg" },
     });
   });
 
   it("treats octet-stream and empty reported types as no evidence", () => {
     expect(
       identify({ fileName: "a.pdf", declaredType: "application/octet-stream" }),
-    ).toMatchObject({ status: "inferred", type: { id: "application/pdf" } });
+    ).toMatchObject({
+      status: "inferred",
+      type: { id: "pdf", mediaType: "application/pdf" },
+    });
 
     expect(identify({ fileName: "a.pdf", declaredType: "" }).status).toBe(
       "inferred",
@@ -55,10 +58,7 @@ describe("file type identification", () => {
       conflicts: ["extension-declared"],
     });
 
-    expect(result.candidates.map((type) => type.id)).toEqual([
-      "image/jpeg",
-      "image/png",
-    ]);
+    expect(result.candidates.map((type) => type.id)).toEqual(["jpeg", "png"]);
   });
 
   it("lets bytes settle a conflict but keeps it on record", () => {
@@ -70,7 +70,7 @@ describe("file type identification", () => {
       }),
     ).toMatchObject({
       status: "recognized",
-      type: { id: "image/jpeg" },
+      type: { id: "jpeg", mediaType: "image/jpeg" },
       conflicts: ["extension-declared", "content-extension"],
     });
   });
@@ -78,7 +78,10 @@ describe("file type identification", () => {
   it("separates recognition from compatibility", () => {
     expect(
       identify({ fileName: "totals.csv", bytes: fixture.csv }),
-    ).toMatchObject({ status: "compatible", type: { id: "text/csv" } });
+    ).toMatchObject({
+      status: "compatible",
+      type: { id: "csv", mediaType: "text/csv" },
+    });
 
     expect(identify({ fileName: "a.png", bytes: fixture.png }).status).toBe(
       "recognized",
@@ -94,7 +97,10 @@ describe("file type identification", () => {
       }),
     ).toMatchObject({
       status: "compatible",
-      type: { id: "text/x-typescript" },
+      type: {
+        id: "format-text-2f-x-2d-typescript",
+        mediaType: "text/x-typescript",
+      },
       conflicts: ["content-declared"],
     });
   });
@@ -104,7 +110,7 @@ describe("file type identification", () => {
       identify({ fileName: "notes.txt", bytes: fixture.html }),
     ).toMatchObject({
       status: "conflict",
-      type: { id: "text/html" },
+      type: { id: "html", mediaType: "text/html" },
       conflicts: ["content-extension"],
     });
   });
@@ -112,7 +118,7 @@ describe("file type identification", () => {
   it("identifies from content when nothing is claimed", () => {
     expect(identify({ bytes: fixture.pdf })).toMatchObject({
       status: "recognized",
-      type: { id: "application/pdf" },
+      type: { id: "pdf", mediaType: "application/pdf" },
     });
   });
 
@@ -120,8 +126,8 @@ describe("file type identification", () => {
     expect(
       identify({ fileName: "x.JPG", declaredType: "image/pjpeg" }).evidence,
     ).toEqual({
-      extension: { value: "jpg", types: ["image/jpeg"] },
-      declared: { value: "image/pjpeg", type: "image/jpeg" },
+      extension: { value: "jpg", types: ["jpeg"] },
+      declared: { value: "image/pjpeg", type: "jpeg" },
       content: null,
     });
   });

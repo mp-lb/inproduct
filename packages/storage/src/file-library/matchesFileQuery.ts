@@ -7,7 +7,6 @@ export const matchesFileQuery = (
   file: FileRecord,
   input: z.output<typeof listFilesSchema>,
 ) =>
-  (!input.scope || file.scope === input.scope) &&
   (input.state ? file.state === input.state : file.state !== "deleted") &&
   (!input.tag || file.tags.includes(input.tag)) &&
   `${file.name} ${file.tags.join(" ")}`

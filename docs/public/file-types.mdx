@@ -27,10 +27,9 @@ it. `FileView` already carries the label, extension and download name.
 `defaultFileTypeRegistry()` holds every mime-db media type (about 2,500) with InProduct's
 curated overlay:
 
-- **Stable ids.** A type's `id` is its canonical lowercase media type, such as
-  `application/pdf`. That is what the file library stores as `contentType`.
+- **Stable format IDs.** A type's `id` is a format identifier such as `pdf`, `jpeg`, or `png`. The file library stores only this ID as `typeId`. Unknown files use `unknown`. Less common formats have deterministic escaped IDs prefixed with `format-`. A registry entry's `mediaType` supplies HTTP headers; it is not duplicated on file records.
 - **Aliases.** Duplicate media types fold into one id, so `image/jpg`, `image/pjpeg` and
-  `IMAGE/JPEG; q=1` all resolve to `image/jpeg`, and `text/xml` resolves to `application/xml`.
+  `IMAGE/JPEG; q=1` all resolve to `jpeg`, and `text/xml` resolves to `xml`.
 - **Friendly labels**, such as `Word document` and `PNG image`. Types without a curated label
   get one from their extension, such as `KML file`.
 - **Extensions.** Each type lists its compatible extensions with the preferred one first.
@@ -44,8 +43,8 @@ curated overlay:
 import { defaultFileTypeRegistry } from '@mp-lb/inproduct-storage/file-types';
 
 const registry = defaultFileTypeRegistry();
-registry.get('image/jpg'); // { id: 'image/jpeg', label: 'JPEG image', extensions: ['jpg', 'jpeg', 'jpe'], … }
-registry.byExtension('ts').types.map((type) => type.id); // ['video/mp2t', 'text/x-typescript']
+registry.get('image/jpg'); // { id: 'jpeg', label: 'JPEG image', extensions: ['jpg', 'jpeg', 'jpe'], … }
+registry.get('pdf'); // Same entry as registry.get('application/pdf')
 ```
 
 ### Custom types and overrides
@@ -60,8 +59,8 @@ import { createFileTypeRegistry } from '@mp-lb/inproduct-storage/file-types';
 
 const registry = createFileTypeRegistry({
   types: [
-    { id: 'application/vnd.acme.board+json', label: 'Acme board', extensions: ['acmeboard'] },
-    { id: 'application/pdf', label: 'Portable document' },
+    { id: 'acme-board', mediaType: 'application/vnd.acme.board+json', label: 'Acme board', extensions: ['acmeboard'] },
+    { id: 'pdf', label: 'Portable document' },
   ],
   extensionPreferences: { ts: 'text/x-typescript' },
 });
@@ -166,4 +165,11 @@ Every registry entry has a read-only `category`: `image`, `video`, `audio`, `doc
 
 The managed file library exposes this as `file.type.category`, derived on read rather than persisted per file. It describes format, not ownership, access or browser preview support. For example, PDF and Word are both documents, while only PDFs support native previews.
 
-The previous editable application grouping named `category` has been removed from upload/edit inputs, file metadata, and authorization callbacks (including the older unverified storage API). Remove those arguments and policy checks when upgrading; use scope and application links for access and relationships. The managed list query accepts `category` only for the new format classification; old values such as `admin` are rejected. Existing stored values are ignored by the managed file view and need no backfill. Existing uploads can still be finalized by ID; start a fresh operation ID when beginning an upload with the changed input shape.
+The previous editable application grouping named `category` has been removed from upload/edit inputs, file metadata, and authorization callbacks (including the older unverified storage API). Remove those arguments and policy checks when upgrading; use application authorization and links for access and relationships. The managed list query accepts `category` only for the new format classification; old values such as `admin` are rejected. Existing stored values are ignored by the managed file view and need no backfill. Existing uploads can still be finalized by ID; start a fresh operation ID when beginning an upload with the changed input shape.
+
+
+## Simplified managed metadata
+
+Managed files no longer have `scope`, duplicate `contentType`, or a public type-detection status. Upload `contentType` is an optional browser hint only. Persisted new files use `typeId`; views expose `type: { id, label, category }` and a derived `previewable` capability. Tags remain an array of strings. Verification evidence stays internal so an inferred or active format never gains inline preview privileges.
+
+Registry lookup and policy accept lists still accept MIME aliases for compatibility; use format IDs in new code. Custom formats use a stable ID and a registry-level `mediaType`. Existing records with only `contentType` remain readable and downloadable without backfilling. Existing scope values are ignored: hosts must replace scope-based authorization with explicit identity/link checks before upgrading. Old scope inputs are rejected. Start a fresh operation ID when retrying a begin request whose shape has changed; existing intents can still be finalized by ID.

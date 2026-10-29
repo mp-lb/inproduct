@@ -1,3 +1,4 @@
+import { fileRecordType } from "./fileRecordType.js";
 import type { z } from "zod";
 import { FileStorageError } from "../FileStorageError.js";
 import { editFileSchema } from "./fileLibrarySchemas.js";
@@ -21,7 +22,7 @@ export const createEditFile =
       const { extension } = fileRecordName(file, types.registry);
 
       const compatible = [
-        ...(types.registry.get(file.contentType)?.extensions ?? []),
+        ...(fileRecordType(file, types.registry)?.extensions ?? []),
         ...(extension ? [extension] : []),
       ];
 

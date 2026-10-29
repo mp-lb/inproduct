@@ -1,5 +1,6 @@
 import type { FileView } from "./fileLibraryTypes.js";
 import { withStorageDeadline } from "./withStorageDeadline.js";
+import { fileRecordType } from "./fileRecordType.js";
 import { FileStorageError } from "../FileStorageError.js";
 import type { Actor } from "./fileLibraryContracts.js";
 import type { FileLibraryContext } from "./createFileLibraryContext.js";
@@ -97,10 +98,13 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
       )
         throw new Error("provider returned no immutable version");
 
+      const type = fileRecordType(claimed, types.registry);
+      const mediaType = type?.mediaType ?? "application/octet-stream";
+
       const valid =
         inspection.sizeBytes === claimed.sizeBytes &&
         inspection.checksum === claimed.checksum &&
-        inspection.contentType === claimed.contentType;
+        inspection.contentType === mediaType;
 
       await mutate(actor, (partition) => {
         const file = find(partition, id);
@@ -114,14 +118,13 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
         return file.id;
       });
 
-      const type = types.registry.get(claimed.contentType);
       const contentCheck = type ? types.contentCheck(type) : "exact";
 
       const scanInput = {
         key: claimed.key,
         version: inspection.version,
         checksum: claimed.checksum,
-        contentType: claimed.contentType,
+        contentType: mediaType,
         contentCheck,
       };
 
@@ -142,8 +145,7 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
             typeof validation === "boolean"
               ? checkedTypeStatus(contentCheck)
               : validation.typeStatus;
-        if (claimed.contentType === "application/octet-stream")
-          typeStatus = "unknown";
+        if (type?.id === "unknown") typeStatus = "unknown";
         return options.scanner
           ? options.scanner.scan({ ...scanInput, signal })
           : ("not_scanned" as const);

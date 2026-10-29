@@ -20,6 +20,7 @@ const legacy = async (
     delete row.typeStatus;
     Object.assign(file, { category: "admin" }); // Old metadata must not become the type category.
     file.name = rows[index]!.name;
+    delete file.typeId;
     file.contentType = rows[index]!.contentType;
   });
 
@@ -81,7 +82,7 @@ describe("file records written by 0.1.6", () => {
           null,
           "export.dat",
           "application/x-legacy-export",
-          "LEGACY-EXPORT file",
+          "Unknown file type",
         ],
       ]
         .sort((a, b) => a[2]!.localeCompare(b[2]!))
@@ -90,10 +91,9 @@ describe("file records written by 0.1.6", () => {
           extension,
           fileName,
           type: {
-            id,
+            id: defaultFileTypeRegistry().get(id!)?.id ?? "unknown",
             label,
             category: defaultFileTypeRegistry().get(id!)?.category ?? "other",
-            status: "inferred",
           },
         })),
     );

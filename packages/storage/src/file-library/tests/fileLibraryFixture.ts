@@ -19,7 +19,7 @@ export const checksumOf = (value: Uint8Array) =>
 
 export const metadata = (overrides: Partial<BeginFile> = {}): BeginFile => ({
   operationId: randomUUID(),
-  scope: "matter:M-1",
+
   name: "example.txt",
 
   tags: [],

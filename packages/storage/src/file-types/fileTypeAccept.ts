@@ -11,7 +11,7 @@ export const fileTypeAccept = (
         const type = registry.get(id);
         if (!type) throw new Error(`unknown file type ${id}`);
         return [
-          type.id,
+          type.mediaType,
           ...type.extensions.map((extension) => `.${extension}`),
         ];
       }),

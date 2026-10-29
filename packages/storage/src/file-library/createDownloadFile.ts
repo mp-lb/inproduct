@@ -1,3 +1,4 @@
+import { fileRecordType } from "./fileRecordType.js";
 import { FileStorageError } from "../FileStorageError.js";
 import type { Actor } from "./fileLibraryContracts.js";
 import type { FileLibraryContext } from "./createFileLibraryContext.js";
@@ -41,7 +42,7 @@ export const createDownloadFile =
 
     const download = describeFileDownload({
       ...fileRecordName(file, types.registry),
-      type: types.registry.get(file.contentType),
+      type: fileRecordType(file, types.registry),
       status: file.typeStatus ?? "inferred",
     });
 

@@ -20,7 +20,7 @@ export const rankExtensionTypes = (
     type.id === preferred ? 0 : 1,
     type.source === "custom" ? 0 : 1,
     type.extensions[0] === extension ? 0 : 1,
-    type.id === "application/octet-stream" ? 1 : 0,
+    type.id === "unknown" ? 1 : 0,
     sourceRank[type.source],
   ];
 

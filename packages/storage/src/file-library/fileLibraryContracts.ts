@@ -35,8 +35,12 @@ export type FileHold = {
  * and keep the full uploaded file name in `name`; views derive both on read. */
 export type FileRecord = Omit<
   FileView,
-  "holdCount" | "extension" | "fileName" | "type" | "links"
+  "holdCount" | "extension" | "fileName" | "type" | "links" | "previewable"
 > & {
+  /** New records persist only a registry format ID. */
+  typeId?: string;
+  /** Read compatibility for records written before format IDs. Never written for new uploads. */
+  contentType?: string;
   extension?: string | null;
   typeStatus?: FileTypeStatus;
   malwarePolicy?: MalwarePolicy;
@@ -173,7 +177,6 @@ export type AuthorizeFileAction = (input: {
   actor: Actor;
   action: Action;
   file?: FileView;
-  scope?: string;
 
   consumer?: string;
   link?: FileLinkTarget;

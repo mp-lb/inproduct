@@ -3,7 +3,7 @@ import { findFileExtension } from "./findFileExtension.js";
 import { splitFileNameSuffixes } from "./splitFileNameSuffixes.js";
 import { fileExtensionPattern } from "./fileExtensionPattern.js";
 
-const unknownType = "application/octet-stream";
+const unknownType = "unknown";
 
 /**
  * Splits an uploaded or legacy file name into an editable name and an extension

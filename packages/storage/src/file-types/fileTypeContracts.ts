@@ -9,9 +9,11 @@ export type FileTypeSource =
   | "custom";
 
 /** A file format the library can name, label and match against bytes. `id` is the
- * canonical lowercase media type and is what file records persist as `contentType`. */
+ * stable format identifier, independent of transport headers. */
 export type FileType = {
   id: string;
+  /** Used only at HTTP/object-storage boundaries. */
+  mediaType: string;
   label: string;
   category: FileTypeCategory;
   /** Compatible extensions, lowercase without a leading dot. The first is preferred. */
@@ -28,6 +30,7 @@ export type FileType = {
 /** Adds a type, or overrides the named fields of an existing one with the same `id`. */
 export type FileTypeInput = {
   id: string;
+  mediaType?: string;
   label?: string;
   category?: FileTypeCategory;
   extensions?: string[];

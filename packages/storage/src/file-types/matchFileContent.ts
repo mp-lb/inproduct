@@ -11,7 +11,7 @@ export const matchFileContent = (
   detection: ContentDetection,
   type: FileType,
 ): ContentMatch => {
-  const ids = [type.id, ...type.aliases];
+  const ids = [type.mediaType, ...type.aliases];
   if (detection.types.some((id) => ids.includes(id))) return "exact";
 
   const container =
@@ -21,7 +21,7 @@ export const matchFileContent = (
     const member =
       detection.container === "text"
         ? type.textual
-        : container.members.includes(type.id);
+        : container.members.includes(type.mediaType);
 
     if (member && detection.types.every((id) => container.generic.includes(id)))
       return "compatible";

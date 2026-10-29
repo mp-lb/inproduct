@@ -54,7 +54,6 @@ export const beginFileSchema = z
     operationId: z.uuid(),
     /** Initial links, authorized and saved atomically with the upload intent. */
     links: z.array(fileLinkTargetSchema).max(100).optional(),
-    scope: z.string().min(1).max(160),
     /** The uploaded file name, including its extension. */
     name: fileNameSchema,
     /** The client-reported type, such as `File.type`. Optional evidence only. */
@@ -87,7 +86,6 @@ export const listFilesSchema = z
   .object({
     linkedTo: fileLinkTargetSchema.optional(),
     category: fileTypeCategorySchema.optional(),
-    scope: z.string().max(160).optional(),
     search: z.string().max(100).default(""),
 
     state: fileStateSchema.optional(),

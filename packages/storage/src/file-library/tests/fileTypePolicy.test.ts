@@ -60,8 +60,7 @@ describe("file library type handling", () => {
       name: "Minutes.2026",
       extension: "txt",
       fileName: "Minutes.2026.txt",
-      contentType: "text/plain",
-      type: { id: "text/plain", label: "Plain text", status: "inferred" },
+      type: { id: "txt", label: "Plain text" },
     });
   });
 
@@ -74,9 +73,9 @@ describe("file library type handling", () => {
     );
 
     expect(file).toMatchObject({
-      contentType: "image/jpeg",
+      previewable: true,
       extension: "jpg",
-      type: { status: "recognized", label: "JPEG image" },
+      type: { label: "JPEG image" },
     });
   });
 
@@ -105,7 +104,7 @@ describe("file library type handling", () => {
       extension: "zzz9",
       fileName: "survey.zzz9",
       state: "available",
-      type: { label: "Unknown file type", status: "unknown" },
+      type: { label: "Unknown file type" },
     });
 
     await setup.library.download(owner, file.id);
@@ -122,7 +121,7 @@ describe("file library type handling", () => {
     expect((await upload(setup, "Plan.docx", fixture.docx)).file).toMatchObject(
       {
         state: "available",
-        type: { id: docx, status: "recognized" },
+        type: { id: "docx" },
       },
     );
 
@@ -136,7 +135,7 @@ describe("file library type handling", () => {
     expect(file).toMatchObject({
       fileName: "survey",
       extension: null,
-      type: { status: "unknown" },
+      type: { id: "unknown" },
     });
   });
 
@@ -152,7 +151,7 @@ describe("file library type handling", () => {
     );
 
     expect(ticket.file).toMatchObject({
-      contentType: "image/png",
+      type: { id: "png" },
       fileName: "photo.png",
     });
   });
@@ -181,15 +180,14 @@ describe("file library type handling", () => {
       {
         state: "available",
         fileName: "Plan.docx",
-        type: { label: "Word document", status: "recognized" },
+        type: { label: "Word document" },
       },
     );
 
     expect((await upload(setup, "totals.csv", fixture.csv)).file.type).toEqual({
-      id: "text/csv",
+      id: "csv",
       label: "CSV spreadsheet",
       category: "document",
-      status: "compatible",
     });
 
     expect((await upload(setup, "Plan.docx", fixture.pdf)).file.state).toBe(
@@ -254,14 +252,14 @@ describe("file library type handling", () => {
       (await upload(setup, "Sprint 4.acmeboard", fixture.json)).file,
     ).toMatchObject({
       name: "Sprint 4",
-      type: { label: "Acme board", status: "compatible" },
+      type: { label: "Acme board" },
     });
 
     expect(
       (await upload(setup, "dump.acmeblob", fixture.binary)).file,
     ).toMatchObject({
       state: "available",
-      type: { status: "inferred" },
+      previewable: false,
     });
   });
 
@@ -295,8 +293,7 @@ describe("file library type handling", () => {
       name: "Final.html",
       extension: "txt",
       fileName: "Final.html.txt",
-      contentType: "text/plain",
-      type: { status: "recognized" },
+      type: { id: "txt" },
     });
 
     const after = (await setup.options.repository.read(owner.tenantId))

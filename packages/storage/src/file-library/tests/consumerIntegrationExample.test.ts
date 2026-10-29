@@ -63,7 +63,7 @@ it("composes a host application around the file library", async () => {
 
   const request = beginFileSchema.parse({
     operationId: randomUUID(),
-    scope: "project:P-1",
+
     name: "report.txt",
 
     contentType: "text/plain",

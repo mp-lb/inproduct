@@ -8,7 +8,8 @@ describe("file type registry", () => {
   it("covers mime-db broadly with labels, stable ids and preferred extensions", () => {
     expect(registry.list().length).toBeGreaterThan(2000);
     expect(registry.get("application/pdf")).toMatchObject({
-      id: "application/pdf",
+      id: "pdf",
+      mediaType: "application/pdf",
       label: "PDF document",
       extensions: ["pdf"],
       source: "iana",
@@ -25,57 +26,57 @@ describe("file type registry", () => {
   });
 
   it("resolves aliases, case and header parameters to one canonical type", () => {
-    expect(registry.get("IMAGE/JPG")?.id).toBe("image/jpeg");
-    expect(registry.get("text/plain; charset=utf-8")?.id).toBe("text/plain");
-    expect(registry.get("application/x-zip-compressed")?.id).toBe(
-      "application/zip",
-    );
+    expect(registry.get("IMAGE/JPG")?.id).toBe("jpeg");
+    expect(registry.get("text/plain; charset=utf-8")?.id).toBe("txt");
+    expect(registry.get("application/x-zip-compressed")?.id).toBe("zip");
 
-    expect(registry.get("text/xml")?.id).toBe("application/xml");
+    expect(registry.get("text/xml")?.id).toBe("xml");
     expect(registry.get("not a type")).toBeUndefined();
   });
 
   it("lists every type for ambiguous extensions with a deterministic preference", () => {
     const mp4 = registry.byExtension(".MP4");
     expect(mp4.ambiguous).toBe(true);
-    expect(mp4.preferred?.id).toBe("video/mp4");
-    expect(mp4.types.map((type) => type.id)).toContain("application/mp4");
+    expect(mp4.preferred?.id).toBe("mp4");
+    expect(mp4.types.map((type) => type.id)).toContain(
+      "format-application-2f-mp4",
+    );
 
     const ts = registry.byExtension("ts");
     expect(ts.types.map((type) => type.id)).toEqual([
-      "video/mp2t",
-      "text/x-typescript",
+      "format-video-2f-mp2t",
+      "format-text-2f-x-2d-typescript",
     ]);
 
     expect(registry.byExtension("exe").preferred?.id).toBe(
-      "application/x-msdownload",
+      "format-application-2f-x-2d-msdownload",
     );
 
     expect(registry.byExtension("zip").ambiguous).toBe(false);
   });
 
   it("knows multi-part extensions", () => {
-    expect(registry.byExtension("tar.gz").preferred?.id).toBe(
-      "application/gzip",
-    );
+    expect(registry.byExtension("tar.gz").preferred?.id).toBe("gzip");
   });
 
   it("adds custom types and overrides fields of built-in types", () => {
     const custom = createFileTypeRegistry({
       types: [
         {
-          id: "application/vnd.acme.board+json",
+          id: "format-application-2f-vnd-2e-acme-2e-board-2b-json",
+          mediaType: "application/vnd.acme.board+json",
           label: "Acme board",
           extensions: [".ACMEBOARD"],
           aliases: ["application/x-acme-board"],
         },
-        { id: "application/pdf", label: "Portable document" },
+        { id: "pdf", mediaType: "application/pdf", label: "Portable document" },
       ],
       extensionPreferences: { ts: "text/x-typescript" },
     });
 
     expect(custom.get("application/x-acme-board")).toMatchObject({
-      id: "application/vnd.acme.board+json",
+      id: "format-application-2f-vnd-2e-acme-2e-board-2b-json",
+      mediaType: "application/vnd.acme.board+json",
       extensions: ["acmeboard"],
       textual: true,
       active: false,
@@ -88,33 +89,56 @@ describe("file type registry", () => {
       aliases: ["application/x-pdf", "application/acrobat"],
     });
 
-    expect(custom.byExtension("ts").preferred?.id).toBe("text/x-typescript");
+    expect(custom.byExtension("ts").preferred?.id).toBe(
+      "format-text-2f-x-2d-typescript",
+    );
   });
 
   it("works without built-ins", () => {
     const only = createFileTypeRegistry({
       builtins: false,
-      types: [{ id: "text/x-note", extensions: ["note"] }],
+      types: [
+        {
+          id: "format-text-2f-x-2d-note",
+          mediaType: "text/x-note",
+          extensions: ["note"],
+        },
+      ],
     });
 
-    expect(only.list().map((type) => type.id)).toEqual(["text/x-note"]);
+    expect(only.list().map((type) => type.id)).toEqual([
+      "format-text-2f-x-2d-note",
+    ]);
+
     expect(only.get("application/pdf")).toBeUndefined();
   });
 
   it("rejects invalid or contradictory definitions", () => {
-    expect(() => createFileTypeRegistry({ types: [{ id: "pdf" }] })).toThrow(
-      "invalid file type id",
-    );
+    expect(() =>
+      createFileTypeRegistry({ types: [{ id: "invalid-format" }] }),
+    ).toThrow("invalid file type id");
 
     expect(() =>
       createFileTypeRegistry({
-        types: [{ id: "text/x-a", extensions: ["../x"] }],
+        types: [
+          {
+            id: "format-text-2f-x-2d-a",
+            mediaType: "text/x-a",
+            extensions: ["../x"],
+          },
+        ],
       }),
     ).toThrow("invalid extension");
 
     expect(() =>
       createFileTypeRegistry({
-        types: [{ id: "text/x-a", aliases: ["application/pdf"] }],
+        types: [
+          {
+            id: "format-text-2f-x-2d-a",
+            mediaType: "text/x-a",
+            aliases: ["application/pdf"],
+          },
+        ],
       }),
     ).toThrow("already defined");
 

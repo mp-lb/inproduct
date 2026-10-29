@@ -18,7 +18,7 @@ export const describeFileDownload = (input: {
 
   const contentType =
     input.type && input.status === "recognized" && !input.type.active
-      ? input.type.id
+      ? input.type.mediaType
       : "application/octet-stream";
 
   return {

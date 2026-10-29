@@ -1,3 +1,4 @@
+import { fileTypeId } from "./fileTypeId.js";
 import { classifyFileType } from "./classifyFileType.js";
 import mimeDb from "mime-db";
 import type { FileType, FileTypeSource } from "./fileTypeContracts.js";
@@ -20,6 +21,7 @@ export const builtinFileTypes = (): FileType[] => {
   ) =>
     types.set(id, {
       id,
+      mediaType: id,
       label: "",
       category: classifyFileType(id),
       extensions: [...extensions],
@@ -75,5 +77,8 @@ export const builtinFileTypes = (): FileType[] => {
       overlay.labels[type.id] ??
       fallbackFileTypeLabel(type.id, type.extensions);
 
-  return [...types.values()];
+  return [...types.values()].map((type) => ({
+    ...type,
+    id: fileTypeId(type.mediaType),
+  }));
 };

@@ -1,7 +1,6 @@
 import type { FileTypeCategory } from "../file-types/fileTypeCategory.js";
 import type { FileLinkTarget } from "./fileLinks.js";
 import type { z } from "zod";
-import type { FileTypeStatus } from "../file-types/fileTypeContracts.js";
 import type {
   beginFileSchema,
   editFileSchema,
@@ -18,13 +17,11 @@ export type ScanState =
   | "unavailable"
   | "not_scanned";
 
-/** The library's type information for a file. `status` says how the type was
- * established; it is never a validity or safety verdict. */
+/** Registry information for the identified file format. */
 export type FileTypeView = {
   category: FileTypeCategory;
   id: string;
   label: string;
-  status: FileTypeStatus;
 };
 
 /** The caller-safe projection. It never contains object keys or versions. */
@@ -34,17 +31,16 @@ export type FileView = {
   links?: FileLinkTarget[];
   /** The editable name, without the extension. */
   name: string;
-  /** Library-managed extension compatible with `contentType`; renames never change it. */
+  /** Library-managed extension compatible with the file type; renames never change it. */
   extension: string | null;
   /** Safe download file name: `name` plus `extension`. */
   fileName: string;
-  scope: string;
 
   tags: string[];
   ownerId: string;
   sizeBytes: number;
-  /** Canonical media type, equal to `type.id`. */
-  contentType: string;
+  /** Whether the verified bytes can be displayed inline. */
+  previewable: boolean;
   type: FileTypeView;
   state: FileState;
   revision: number;

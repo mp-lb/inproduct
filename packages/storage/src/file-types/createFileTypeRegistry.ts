@@ -1,3 +1,4 @@
+import { fileTypeId } from "./fileTypeId.js";
 import { classifyFileType } from "./classifyFileType.js";
 import { fileTypeCategorySchema } from "./fileTypeCategory.js";
 import type {
@@ -24,7 +25,13 @@ const requireMediaType = (value: string) => {
 };
 
 const customType = (input: FileTypeInput, existing?: FileType): FileType => {
-  const id = requireMediaType(input.id);
+  const mediaType = requireMediaType(
+    input.mediaType ?? existing?.mediaType ?? input.id,
+  );
+
+  const id = input.id.includes("/") ? fileTypeId(mediaType) : input.id;
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(id))
+    throw new Error(`invalid file type id ${id}`);
 
   const extensions = (input.extensions ?? existing?.extensions ?? []).map(
     (extension) => {
@@ -41,10 +48,11 @@ const customType = (input: FileTypeInput, existing?: FileType): FileType => {
 
   return {
     id,
+    mediaType,
     category: fileTypeCategorySchema.parse(
-      input.category ?? existing?.category ?? classifyFileType(id),
+      input.category ?? existing?.category ?? classifyFileType(mediaType),
     ),
-    label: label ?? fallbackFileTypeLabel(id, extensions),
+    label: label ?? fallbackFileTypeLabel(mediaType, extensions),
     extensions: [...new Set(extensions)],
     aliases: [
       ...new Set([
@@ -52,8 +60,9 @@ const customType = (input: FileTypeInput, existing?: FileType): FileType => {
         ...(input.aliases ?? []).map(requireMediaType),
       ]),
     ],
-    textual: input.textual ?? existing?.textual ?? isTextualMediaType(id),
-    active: input.active ?? existing?.active ?? isActiveMediaType(id),
+    textual:
+      input.textual ?? existing?.textual ?? isTextualMediaType(mediaType),
+    active: input.active ?? existing?.active ?? isActiveMediaType(mediaType),
     source: "custom",
   };
 };
@@ -72,14 +81,18 @@ export const createFileTypeRegistry = (
   if (builtins) for (const type of builtinFileTypes()) types.set(type.id, type);
 
   for (const input of options.types ?? []) {
-    const id = requireMediaType(input.id);
-    types.set(id, customType(input, types.get(id)));
+    const existing =
+      types.get(input.id) ??
+      [...types.values()].find((type) => type.mediaType === input.id);
+
+    const type = customType(input, existing);
+    types.set(type.id, type);
   }
 
   const aliases = new Map<string, string>();
 
   for (const type of types.values())
-    for (const alias of type.aliases) {
+    for (const alias of [type.mediaType, ...type.aliases]) {
       if (types.has(alias) || (aliases.get(alias) ?? type.id) !== type.id)
         throw new Error(`file type alias ${alias} is already defined`);
       aliases.set(alias, type.id);
@@ -103,18 +116,23 @@ export const createFileTypeRegistry = (
 
   for (const [extension, id] of Object.entries(preferences)) {
     const listed = byExtension.get(extension) ?? [];
-    if (!listed.some((type) => type.id === id))
+    if (!listed.some((type) => type.id === (aliases.get(id) ?? id)))
       throw new Error(`preferred type ${id} does not list .${extension}`);
   }
 
   for (const [extension, listed] of byExtension)
     byExtension.set(
       extension,
-      rankExtensionTypes(extension, listed, preferences[extension]),
+      rankExtensionTypes(
+        extension,
+        listed,
+        aliases.get(preferences[extension] ?? "") ?? preferences[extension],
+      ),
     );
 
   return {
     get: (mediaType) => {
+      if (types.has(mediaType)) return types.get(mediaType);
       const id = normalizeMediaType(mediaType);
       return id ? types.get(aliases.get(id) ?? id) : undefined;
     },
