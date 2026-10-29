@@ -7,6 +7,7 @@ import {
 } from "./fileRequestSchemas.js";
 import { readFileRequest } from "./readFileRequest.js";
 import type { FileStorageClient } from "./fileTypes.js";
+import { contentDisposition } from "./file-types/contentDisposition.js";
 
 export const dispatchFileRequest = async (
   request: IncomingMessage,
@@ -90,7 +91,7 @@ export const dispatchFileRequest = async (
     const object = await storage.download(id);
     response.writeHead(200, {
       "content-type": "application/octet-stream",
-      "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(object.name)}`,
+      "content-disposition": contentDisposition(object.name),
       "x-file-name": encodeURIComponent(object.name),
       "x-file-content-type": encodeURIComponent(
         object.contentType ?? "application/octet-stream",

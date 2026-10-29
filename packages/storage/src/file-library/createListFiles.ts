@@ -3,12 +3,11 @@ import { listFilesSchema } from "./fileLibrarySchemas.js";
 import type { Actor } from "./fileLibraryContracts.js";
 import type { FileList, FileView } from "./fileLibraryTypes.js";
 import type { FileLibraryContext } from "./createFileLibraryContext.js";
-import { fileView } from "./fileView.js";
 import { matchesFileQuery } from "./matchesFileQuery.js";
 
 /** Authorization applies per row before filters and pagination, so cursors never leak hidden rows. */
 export const createListFiles =
-  ({ options }: FileLibraryContext) =>
+  ({ options, view }: FileLibraryContext) =>
   async (
     actor: Actor,
     raw: z.input<typeof listFilesSchema>,
@@ -23,11 +22,11 @@ export const createListFiles =
         !(await options.authorize({
           actor,
           action: "read",
-          file: fileView(file),
+          file: view(file),
         }))
       )
         continue;
-      if (matchesFileQuery(file, input)) visible.push(fileView(file));
+      if (matchesFileQuery(file, input)) visible.push(view(file));
     }
 
     visible.sort((a, b) => a.id.localeCompare(b.id));

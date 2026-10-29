@@ -146,7 +146,8 @@ describe("S3 file driver", () => {
       VersionId: "v1",
       ResponseContentType: "application/octet-stream",
       ResponseCacheControl: "private, no-store",
-      ResponseContentDisposition: "attachment; filename*=UTF-8''a%0D%0Ab.html",
+      ResponseContentDisposition:
+        "attachment; filename=\"a__b.html\"; filename*=UTF-8''a__b.html",
     });
 
     await expect(

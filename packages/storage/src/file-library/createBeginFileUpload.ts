@@ -4,8 +4,8 @@ import type { BeginFile } from "./fileLibraryTypes.js";
 import { FileStorageError } from "../FileStorageError.js";
 import type { Actor, FileRecord } from "./fileLibraryContracts.js";
 import { withStorageDeadline } from "./withStorageDeadline.js";
-import { fileView } from "./fileView.js";
 import type { FileLibraryContext } from "./createFileLibraryContext.js";
+import { resolveUploadType } from "./resolveUploadType.js";
 
 export const createBeginFileUpload = (context: FileLibraryContext) => {
   const {
@@ -17,11 +17,14 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
     allow,
     mutate,
     touch,
+    types,
+    view,
     checkProvider,
   } = context;
 
   return async (actor: Actor, raw: BeginFile) => {
     const input = beginFileSchema.parse(raw);
+    const resolved = resolveUploadType(input.name, input.contentType, types);
     checkProvider();
     await allow(actor, "upload", undefined, input);
 
@@ -72,12 +75,14 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
         operationId: input.operationId,
         requestHash: hash,
         key: `files/${id}`,
-        name: input.name,
+        name: resolved.name,
+        extension: resolved.extension,
         scope: input.scope,
         category: input.category,
         tags: input.tags,
         sizeBytes: input.sizeBytes,
-        contentType: input.contentType,
+        contentType: resolved.type.id,
+        typeStatus: "inferred",
         checksum: input.checksum,
         version: null,
         state: "pending",
@@ -102,19 +107,19 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
     });
 
     await allow(actor, "write", file);
-    if (file.state !== "pending") return { file: fileView(file), upload: null };
+    if (file.state !== "pending") return { file: view(file), upload: null };
 
     const upload = await withStorageDeadline(
       (signal) =>
         options.driver.signUpload({
           key: file.key,
-          metadata: input,
+          metadata: { ...input, contentType: resolved.type.id },
           expiresAt: until,
           signal,
         }),
       timeoutMs,
     );
 
-    return { file: fileView(file), upload: { ...upload, expiresAt: until } };
+    return { file: view(file), upload: { ...upload, expiresAt: until } };
   };
 };

@@ -3,7 +3,8 @@ import { z } from "zod";
 /** Largest object the managed file library accepts, verifies or scans. */
 export const maxLibraryFileBytes = 50 * 1024 * 1024;
 
-/** Content types the built-in byte validator can positively identify. */
+/** The file library's default accepted types. Configure `fileTypes.accept` to
+ * accept others; uploads are checked against the configured list, not this one. */
 export const libraryContentTypes = [
   "application/pdf",
   "text/plain",
@@ -58,8 +59,10 @@ export const beginFileSchema = z
   .object({
     operationId: z.uuid(),
     scope: z.string().min(1).max(160),
+    /** The uploaded file name, including its extension. */
     name: fileNameSchema,
-    contentType: z.enum(libraryContentTypes),
+    /** The client-reported type, such as `File.type`. Optional evidence only. */
+    contentType: z.string().trim().max(255).optional(),
     sizeBytes: z.number().int().positive().max(maxLibraryFileBytes),
     checksum: z.string().regex(/^[a-f0-9]{64}$/),
     category: fileCategorySchema,
@@ -78,6 +81,7 @@ export const fileQuotaSchema = z
 export const editFileSchema = fileIdSchema
   .extend({
     revision: z.number().int().nonnegative(),
+    /** The new name. A trailing extension the file already has is removed. */
     name: fileNameSchema,
     tags: fileTagsSchema,
   })

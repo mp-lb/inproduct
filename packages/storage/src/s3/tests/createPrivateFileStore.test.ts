@@ -92,7 +92,8 @@ it("issues short download capabilities with escaped filenames and rejects foreig
   await storage.download(fileId, "a\r\nfile.html");
   expect(mocks.sign.mock.calls[0][1].input).toMatchObject({
     ResponseContentType: "application/octet-stream",
-    ResponseContentDisposition: "attachment; filename*=UTF-8''a%0D%0Afile.html",
+    ResponseContentDisposition:
+      "attachment; filename=\"a__file.html\"; filename*=UTF-8''a__file.html",
   });
 
   expect(mocks.sign.mock.calls[0][2]).toEqual({ expiresIn: 60 });

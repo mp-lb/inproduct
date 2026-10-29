@@ -2,8 +2,9 @@ import type { FileView } from "./fileLibraryTypes.js";
 import { withStorageDeadline } from "./withStorageDeadline.js";
 import { FileStorageError } from "../FileStorageError.js";
 import type { Actor } from "./fileLibraryContracts.js";
-import { fileView } from "./fileView.js";
 import type { FileLibraryContext } from "./createFileLibraryContext.js";
+import type { FileTypeStatus } from "../file-types/fileTypeContracts.js";
+import { checkedTypeStatus } from "./checkedTypeStatus.js";
 
 export const createFinalizeFileUpload = (context: FileLibraryContext) => {
   const {
@@ -16,6 +17,8 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
     find,
     read,
     touch,
+    types,
+    view,
     checkProvider,
   } = context;
 
@@ -39,7 +42,7 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
           "PRECONDITION_FAILED",
           "file requires malware scanning",
         );
-      return fileView(original);
+      return view(original);
     }
 
     const claim = uuid();
@@ -73,7 +76,7 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
           "PRECONDITION_FAILED",
           "file requires malware scanning",
         );
-      return fileView(claimed);
+      return view(claimed);
     }
 
     try {
@@ -111,20 +114,34 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
         return file.id;
       });
 
+      const type = types.registry.get(claimed.contentType);
+      const contentCheck = type ? types.contentCheck(type) : "exact";
+
       const scanInput = {
         key: claimed.key,
         version: inspection.version,
         checksum: claimed.checksum,
         contentType: claimed.contentType,
+        contentCheck,
       };
 
+      let typeStatus: FileTypeStatus = "inferred";
+
       const result = await withStorageDeadline(async (signal) => {
+        const validation =
+          valid && options.byteValidator
+            ? await options.byteValidator.validate({ ...scanInput, signal })
+            : valid;
+
         const bytesValid =
-          valid &&
-          (!options.byteValidator ||
-            (await options.byteValidator.validate({ ...scanInput, signal })));
+          typeof validation === "boolean" ? validation : validation.valid;
 
         if (!bytesValid) return "rejected" as const;
+        if (options.byteValidator)
+          typeStatus =
+            typeof validation === "boolean"
+              ? checkedTypeStatus(contentCheck)
+              : validation.typeStatus;
         return options.scanner
           ? options.scanner.scan({ ...scanInput, signal })
           : ("not_scanned" as const);
@@ -146,10 +163,11 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
           throw new FileStorageError("CONFLICT", "verification claim changed");
         file.state = result === "rejected" ? "quarantined" : "available";
         file.scan = result;
+        if (result !== "rejected") file.typeStatus = typeStatus;
         file.lease = null;
         file.leaseUntil = 0;
         touch(partition, file, actor, "verification.finished");
-        return fileView(file);
+        return view(file);
       });
     } catch (error) {
       await mutate(actor, (partition) => {

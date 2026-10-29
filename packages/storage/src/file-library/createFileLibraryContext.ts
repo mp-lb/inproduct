@@ -12,6 +12,7 @@ import { fileView } from "./fileView.js";
 import { recordFileEvent } from "./recordFileEvent.js";
 import { isAcceptedFile } from "./isAcceptedFile.js";
 import { assertVerifiedProvider } from "./assertVerifiedProvider.js";
+import { resolveFileTypePolicy } from "./resolveFileTypePolicy.js";
 
 const maxMutationAttempts = 12;
 
@@ -30,6 +31,8 @@ export const createFileLibraryContext = (options: FileLibraryOptions) => {
     maxFiles < 1
   )
     throw new Error("invalid storage limits");
+  const types = resolveFileTypePolicy(options.fileTypes);
+  const view = (file: FileRecord) => fileView(file, types.registry);
 
   const allow = async (
     actor: Actor,
@@ -46,7 +49,7 @@ export const createFileLibraryContext = (options: FileLibraryOptions) => {
       !(await options.authorize({
         actor,
         action,
-        file: file && fileView(file),
+        file: file && view(file),
         ...extra,
       }))
     )
@@ -100,6 +103,8 @@ export const createFileLibraryContext = (options: FileLibraryOptions) => {
     find,
     read,
     touch,
+    types,
+    view,
     checkProvider: () => assertVerifiedProvider(options),
     isAccepted: (file: FileRecord) => isAcceptedFile(options, file),
   };

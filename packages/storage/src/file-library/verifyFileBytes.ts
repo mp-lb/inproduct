@@ -1,14 +1,15 @@
-import { createHash } from "node:crypto";
-import { maxLibraryFileBytes } from "./fileLibrarySchemas.js";
-import { matchesContentType } from "./matchesContentType.js";
+import type {
+  ContentCheck,
+  FileTypeRegistry,
+} from "../file-types/fileTypeContracts.js";
+import { inspectFileBytes } from "./inspectFileBytes.js";
 
 /** Checks size, SHA-256 and detected content type of exact object bytes. */
 export const verifyFileBytes = (
-  bytes: Buffer,
+  bytes: Uint8Array,
   checksum: string,
   contentType: string,
+  contentCheck: ContentCheck = "exact",
+  registry?: FileTypeRegistry,
 ) =>
-  bytes.length > 0 &&
-  bytes.length <= maxLibraryFileBytes &&
-  createHash("sha256").update(bytes).digest("hex") === checksum &&
-  matchesContentType(bytes, contentType);
+  inspectFileBytes(bytes, checksum, contentType, contentCheck, registry).valid;

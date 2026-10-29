@@ -8,7 +8,7 @@ import type { S3Connection } from "./s3Connection.js";
 import type { VersionedDocumentStorage } from "./versionedDocumentStorage.js";
 import { createS3Client } from "./createS3Client.js";
 import { assertBucketVersioning } from "./assertBucketVersioning.js";
-import { attachmentDisposition } from "./attachmentDisposition.js";
+import { contentDisposition } from "../file-types/contentDisposition.js";
 
 const expiresInSeconds = 300;
 
@@ -73,7 +73,7 @@ export const createVersionedDocumentStorage = (
           Key: key,
           VersionId: versionId,
           ResponseContentType: "application/octet-stream",
-          ResponseContentDisposition: attachmentDisposition(fileName),
+          ResponseContentDisposition: contentDisposition(fileName),
         }),
         { expiresIn: expiresInSeconds },
       ),

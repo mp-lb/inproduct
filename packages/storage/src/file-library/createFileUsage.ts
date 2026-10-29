@@ -1,10 +1,9 @@
 import { FileStorageError } from "../FileStorageError.js";
 import type { Actor } from "./fileLibraryContracts.js";
-import { fileView } from "./fileView.js";
 import type { FileLibraryContext } from "./createFileLibraryContext.js";
 
 export const createFileUsage = (context: FileLibraryContext) => {
-  const { mutate, find, read, allow, touch, isAccepted } = context;
+  const { mutate, find, read, allow, touch, isAccepted, view } = context;
 
   return async (
     actor: Actor,
@@ -53,13 +52,13 @@ export const createFileUsage = (context: FileLibraryContext) => {
         (hold.state === state ||
           (hold.state === "attached" && state === "reserved"))
       )
-        return fileView(file);
+        return view(file);
       if (hold) {
         if (!(hold.state === "attached" && state === "reserved"))
           hold.state = state;
       } else file.holds.push({ id: holdId, consumer, state });
       touch(partition, file, actor, `usage.${state}`, { id: holdId, consumer });
-      return fileView(file);
+      return view(file);
     });
   };
 };

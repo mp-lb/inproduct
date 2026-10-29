@@ -125,7 +125,7 @@ describe("file library audit recovery", () => {
           name: "renamed.txt",
           tags: [],
         })
-      ).name,
+      ).fileName,
     ).toBe("renamed.txt");
   });
 });

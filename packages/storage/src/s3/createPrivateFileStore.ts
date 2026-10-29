@@ -5,7 +5,7 @@ import type { PrivateFileStore } from "./privateFileStore.js";
 import { createS3Client } from "./createS3Client.js";
 import { assertSecureEndpoint } from "./assertSecureEndpoint.js";
 import { assertKeyPrefix } from "./assertKeyPrefix.js";
-import { attachmentDisposition } from "./attachmentDisposition.js";
+import { contentDisposition } from "../file-types/contentDisposition.js";
 import { putImmutablePrivateObject } from "./putImmutablePrivateObject.js";
 import { removeAllObjectVersions } from "./removeAllObjectVersions.js";
 
@@ -40,7 +40,7 @@ export const createPrivateFileStore = (
           Bucket: input.bucket,
           Key: key(id),
           ResponseContentType: "application/octet-stream",
-          ResponseContentDisposition: attachmentDisposition(name),
+          ResponseContentDisposition: contentDisposition(name),
         }),
         { expiresIn: downloadSeconds },
       ),

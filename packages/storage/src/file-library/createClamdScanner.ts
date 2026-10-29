@@ -1,6 +1,7 @@
 import type { Scanner } from "./fileLibraryContracts.js";
 import type { ReadObjectVersion } from "./readObjectVersion.js";
 import { verifyFileBytes } from "./verifyFileBytes.js";
+import type { FileTypeRegistry } from "../file-types/fileTypeContracts.js";
 import { clamdRequest } from "./clamdRequest.js";
 import { assertFreshClamd } from "./assertFreshClamd.js";
 
@@ -9,10 +10,19 @@ export const createClamdScanner = (options: {
   endpoint: string;
   readVersion: ReadObjectVersion;
   now?: () => number;
+  /** Pass the library's registry when it defines custom types. */
+  registry?: FileTypeRegistry;
 }): Scanner => {
   let busy = false;
   return {
-    scan: async ({ key, version, checksum, contentType, signal }) => {
+    scan: async ({
+      key,
+      version,
+      checksum,
+      contentType,
+      contentCheck,
+      signal,
+    }) => {
       if (busy) throw new Error("scanner busy; retry verification");
       busy = true;
 
@@ -24,7 +34,16 @@ export const createClamdScanner = (options: {
         );
 
         const bytes = await options.readVersion(key, version, signal);
-        if (!verifyFileBytes(bytes, checksum, contentType)) return "rejected";
+        if (
+          !verifyFileBytes(
+            bytes,
+            checksum,
+            contentType,
+            contentCheck,
+            options.registry,
+          )
+        )
+          return "rejected";
 
         const result = await clamdRequest(
           options.endpoint,

@@ -18,6 +18,7 @@ export type {
   FileExplorerClient,
   FileList,
   FileState,
+  FileTypeView,
   FileView,
   ScanState,
   UploadTicket,

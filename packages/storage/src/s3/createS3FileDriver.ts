@@ -6,7 +6,7 @@ import { createS3Client } from "./createS3Client.js";
 import { assertSecureEndpoint } from "./assertSecureEndpoint.js";
 import { assertKeyPrefix } from "./assertKeyPrefix.js";
 import { assertBucketVersioning } from "./assertBucketVersioning.js";
-import { attachmentDisposition } from "./attachmentDisposition.js";
+import { contentDisposition } from "../file-types/contentDisposition.js";
 import { capabilitySeconds } from "./capabilitySeconds.js";
 import { inspectS3Object } from "./inspectS3Object.js";
 import { readS3ObjectVersion } from "./readS3ObjectVersion.js";
@@ -69,16 +69,16 @@ export const createS3FileDriver = (
     },
     inspect: async (key, version, signal) =>
       inspectS3Object(client, config.bucket, keyFor(key), version, signal),
-    download: async ({ key, version, name, expiresAt }) => ({
+    download: async ({ key, version, name, contentType, expiresAt }) => ({
       url: await getSignedUrl(
         client,
         new GetObjectCommand({
           Bucket: config.bucket,
           Key: keyFor(key),
           VersionId: version,
-          ResponseContentType: "application/octet-stream",
+          ResponseContentType: contentType ?? "application/octet-stream",
           ResponseCacheControl: "private, no-store",
-          ResponseContentDisposition: attachmentDisposition(name),
+          ResponseContentDisposition: contentDisposition(name),
         }),
         { expiresIn: capabilitySeconds(expiresAt) },
       ),

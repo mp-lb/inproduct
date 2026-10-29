@@ -41,14 +41,14 @@ export const createSyntheticObjects = () => {
         checksum: found.checksum,
       };
     },
-    download: async ({ key, version }) => {
+    download: async ({ key, version, contentType }) => {
       const object = versions
         .get(key)
         ?.find((entry) => entry.version === version);
 
       if (!object) throw new Error("synthetic object missing");
       return {
-        url: `data:application/octet-stream;base64,${Buffer.from(object.bytes).toString("base64")}`,
+        url: `data:${contentType ?? "application/octet-stream"};base64,${Buffer.from(object.bytes).toString("base64")}`,
       };
     },
   };

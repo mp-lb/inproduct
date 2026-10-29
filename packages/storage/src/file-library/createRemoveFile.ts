@@ -1,11 +1,10 @@
 import { FileStorageError } from "../FileStorageError.js";
 import type { Actor } from "./fileLibraryContracts.js";
 import type { FileLibraryContext } from "./createFileLibraryContext.js";
-import { fileView } from "./fileView.js";
 
 /** Soft deletion. Retention holds and unsettled verification block it; bytes and quota are kept. */
 export const createRemoveFile =
-  ({ read, mutate, find, touch, now }: FileLibraryContext) =>
+  ({ read, mutate, find, touch, now, view }: FileLibraryContext) =>
   async (actor: Actor, id: string) => {
     await read(actor, id, "delete");
     return mutate(actor, (partition) => {
@@ -27,6 +26,6 @@ export const createRemoveFile =
         touch(partition, file, actor, "deleted");
       }
 
-      return fileView(file);
+      return view(file);
     });
   };

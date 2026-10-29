@@ -81,7 +81,7 @@ describe("file library authorization hooks", () => {
     expect(second.items).toHaveLength(1);
     expect(second.nextCursor).toBeNull();
     expect(
-      [...first.items, ...second.items].map((file) => file.name).sort(),
+      [...first.items, ...second.items].map((file) => file.fileName).sort(),
     ).toEqual(["a.txt", "b.txt", "c.txt"]);
   });
 

@@ -129,7 +129,7 @@ describe("versioned document storage", () => {
       VersionId: "v1",
       ResponseContentType: "application/octet-stream",
       ResponseContentDisposition:
-        "attachment; filename*=UTF-8''Client%27s%20contract.pdf",
+        "attachment; filename=\"Client's contract.pdf\"; filename*=UTF-8''Client%27s%20contract.pdf",
     });
   });
 });

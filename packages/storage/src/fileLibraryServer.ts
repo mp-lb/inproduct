@@ -11,6 +11,7 @@ export type {
   FilePartition,
   FileRecord,
   FileRepository,
+  FileTypePolicy,
   MalwarePolicy,
   ObjectDriver,
   ObjectInspection,
@@ -29,6 +30,8 @@ export type {
 } from "./file-library/fileReferences.js";
 export { createFileByteValidator } from "./file-library/createFileByteValidator.js";
 export { verifyFileBytes } from "./file-library/verifyFileBytes.js";
+export { inspectFileBytes } from "./file-library/inspectFileBytes.js";
+export { fileRecordName } from "./file-library/fileRecordName.js";
 export type { ReadObjectVersion } from "./file-library/readObjectVersion.js";
 export { createClamdScanner } from "./file-library/createClamdScanner.js";
 export { scanPrivateFileBytes } from "./file-library/scanPrivateFileBytes.js";

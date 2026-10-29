@@ -1,4 +1,9 @@
 import type { BeginFile, FileCategory, FileView } from "./fileLibraryTypes.js";
+import type {
+  ContentCheck,
+  FileTypeRegistry,
+  FileTypeStatus,
+} from "../file-types/fileTypeContracts.js";
 
 /** Trusted identity resolved by the host from its own session, never request JSON. */
 export type Actor = { id: string; tenantId: string };
@@ -22,7 +27,15 @@ export type FileHold = {
   state: "reserved" | "attached" | "released";
 };
 
-export type FileRecord = Omit<FileView, "holdCount"> & {
+/** Persisted file. `name` is the editable name and `extension` the library-managed
+ * extension. Records written by 0.1.6 and earlier have neither `extension` nor `typeStatus`
+ * and keep the full uploaded file name in `name`; views derive both on read. */
+export type FileRecord = Omit<
+  FileView,
+  "holdCount" | "extension" | "fileName" | "type"
+> & {
+  extension?: string | null;
+  typeStatus?: FileTypeStatus;
   malwarePolicy?: MalwarePolicy;
   tenantId: string;
   operationId: string;
@@ -87,9 +100,10 @@ export type ObjectDriver = {
     checksum: boolean;
     conditionalCreate: boolean;
   };
+  /** `metadata.contentType` is the library's resolved canonical type. */
   signUpload(input: {
     key: string;
-    metadata: BeginFile;
+    metadata: BeginFile & { contentType: string };
     expiresAt: number;
     signal?: AbortSignal;
   }): Promise<{ url: string; headers: Record<string, string> }>;
@@ -98,10 +112,13 @@ export type ObjectDriver = {
     version?: string,
     signal?: AbortSignal,
   ): Promise<ObjectInspection>;
+  /** `name` is the sanitized download file name and `contentType` the type to
+   * serve. Always respond as an attachment. */
   download(input: {
     key: string;
     version: string;
     name: string;
+    contentType?: string;
     expiresAt: number;
     signal?: AbortSignal;
   }): Promise<{ url: string }>;
@@ -112,6 +129,8 @@ export type ScanInput = {
   version: string;
   checksum: string;
   contentType: string;
+  /** The byte check the type must pass. Absent means `exact`. */
+  contentCheck?: ContentCheck;
   signal?: AbortSignal;
 };
 
@@ -120,8 +139,26 @@ export type Scanner = {
   scan(input: ScanInput): Promise<"clean" | "rejected">;
 };
 
+/** `true` passes with the status implied by `contentCheck`; return an object to
+ * report what the bytes actually showed. */
 export type ByteValidator = {
-  validate(input: ScanInput): Promise<boolean>;
+  validate(
+    input: ScanInput,
+  ): Promise<boolean | { valid: boolean; typeStatus: FileTypeStatus }>;
+};
+
+/** Which file types uploads may have and the evidence each must show. */
+export type FileTypePolicy = {
+  /** Defaults to the built-in registry. */
+  registry?: FileTypeRegistry;
+  /** Accepted type ids or aliases. Defaults to `libraryContentTypes`. */
+  accept?: readonly string[];
+  /** Byte check for accepted types. Defaults to `exact`. */
+  contentCheck?: "exact" | "compatible";
+  /** Per-type checks. `unchecked` accepts a type without content matching. */
+  contentChecks?: Record<string, ContentCheck>;
+  /** When the file name and the client-reported type disagree. Defaults to `reject`. */
+  onConflict?: "reject" | "prefer-extension" | "prefer-declared";
 };
 
 /** Host authorization decision. Return false unless the exact request is allowed. */
@@ -136,6 +173,7 @@ export type AuthorizeFileAction = (input: {
 
 export type FileLibraryOptions = {
   malwarePolicy?: MalwarePolicy;
+  fileTypes?: FileTypePolicy;
   byteValidator?: ByteValidator;
   repository: FileRepository;
   driver: ObjectDriver;
