@@ -26,7 +26,21 @@ export const createListFiles =
         }))
       )
         continue;
-      if (matchesFileQuery(file, input)) visible.push(view(file));
+
+      const links = (partition.links ?? [])
+        .filter((link) => link.fileId === file.id)
+        .map(({ type, targetId }) => ({ type, targetId }));
+
+      if (
+        input.linkedTo &&
+        !links.some(
+          (link) =>
+            link.type === input.linkedTo!.type &&
+            link.targetId === input.linkedTo!.targetId,
+        )
+      )
+        continue;
+      if (matchesFileQuery(file, input)) visible.push({ ...view(file), links });
     }
 
     visible.sort((a, b) => a.id.localeCompare(b.id));

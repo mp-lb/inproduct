@@ -1,4 +1,9 @@
 export {
+  fileLinkSchema,
+  fileLinkTargetSchema,
+} from "./file-library/fileLinks.js";
+export type { FileLink, FileLinkTarget } from "./file-library/fileLinks.js";
+export {
   beginFileSchema,
   editFileSchema,
   fileCategorySchema,

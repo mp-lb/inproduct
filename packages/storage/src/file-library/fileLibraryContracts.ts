@@ -1,3 +1,4 @@
+import type { FileLink, FileLinkTarget } from "./fileLinks.js";
 import type { BeginFile, FileCategory, FileView } from "./fileLibraryTypes.js";
 import type {
   ContentCheck,
@@ -9,6 +10,8 @@ import type {
 export type Actor = { id: string; tenantId: string };
 
 export type Action =
+  | "link"
+  | "unlink"
   | "upload"
   | "read"
   | "write"
@@ -32,7 +35,7 @@ export type FileHold = {
  * and keep the full uploaded file name in `name`; views derive both on read. */
 export type FileRecord = Omit<
   FileView,
-  "holdCount" | "extension" | "fileName" | "type"
+  "holdCount" | "extension" | "fileName" | "type" | "links"
 > & {
   extension?: string | null;
   typeStatus?: FileTypeStatus;
@@ -66,6 +69,7 @@ export type FileAudit = {
     malwarePolicy?: MalwarePolicy;
     state: FileRecord["state"];
     usage?: { id: string; consumer: string };
+    link?: FileLinkTarget;
   };
 };
 
@@ -76,6 +80,8 @@ export type FilePartition = {
   quotaUpdatedAt?: number;
   quotaUpdatedBy?: string;
   files: FileRecord[];
+  /** Authoritative associations, persisted separately from file records. */
+  links?: FileLink[];
   audit: FileAudit[];
 };
 
@@ -169,9 +175,12 @@ export type AuthorizeFileAction = (input: {
   scope?: string;
   category?: FileCategory;
   consumer?: string;
+  link?: FileLinkTarget;
 }) => Promise<boolean>;
 
 export type FileLibraryOptions = {
+  /** Optional per-file limits by link type, checked atomically. No limit by default. */
+  maxLinksPerType?: Record<string, number>;
   malwarePolicy?: MalwarePolicy;
   fileTypes?: FileTypePolicy;
   byteValidator?: ByteValidator;

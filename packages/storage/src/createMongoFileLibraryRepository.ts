@@ -15,13 +15,15 @@ type FileSettings = Pick<
 /**
  * Transactional file library repository. One document per file lives in the
  * host-chosen collection; revision, quota and the audit outbox live in
- * `${collectionName}Settings`. Requires a MongoDB replica set.
+ * `${collectionName}Settings`; associations live in the separately named links collection. Requires a MongoDB replica set.
  */
 export const createMongoFileLibraryRepository = (
   db: Db,
   collectionName = "files",
+  linksCollectionName = `${collectionName}Links`,
 ): FileRepository =>
   createMongoFileMetadataRepository<FileRecord, FileAudit, FileSettings>(
     db,
     collectionName,
+    linksCollectionName,
   );

@@ -1,3 +1,4 @@
+import { createFileLinks } from "./createFileLinks.js";
 import type { Actor, FileLibraryOptions } from "./fileLibraryContracts.js";
 import { createFileLibraryContext } from "./createFileLibraryContext.js";
 import { createBeginFileUpload } from "./createBeginFileUpload.js";
@@ -19,6 +20,7 @@ export const createFileLibrary = (options: FileLibraryOptions) => {
   const context = createFileLibraryContext(options);
   const usage = createFileUsage(context);
   return {
+    ...createFileLinks(context),
     begin: createBeginFileUpload(context),
     finalize: createFinalizeFileUpload(context),
     setQuota: createSetFileQuota(context),

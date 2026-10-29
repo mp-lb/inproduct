@@ -111,4 +111,45 @@ describe.skipIf(!url)("file library on MongoDB", () => {
 
     expect(await db.collection("hostReferences").countDocuments()).toBe(1);
   });
+
+  it("persists links separately and serializes concurrent single-target links", async () => {
+    const repository = createMongoFileLibraryRepository(
+      db,
+      "linkedFiles",
+      "customLinks",
+    );
+
+    const { library, ready } = createFixture({
+      repository,
+      maxLinksPerType: { matter: 1 },
+    });
+
+    const fileId = await ready();
+
+    const results = await Promise.allSettled(
+      ["a", "b"].map((targetId) =>
+        library.link(owner, { fileId, type: "matter", targetId }),
+      ),
+    );
+
+    expect(
+      results.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(1);
+
+    expect(await db.collection("customLinks").countDocuments()).toBe(1);
+    const links = (await repository.read(owner.tenantId)).links!;
+    expect(links).toHaveLength(1);
+    expect(
+      await db.collection("linkedFiles").findOne({ id: fileId }),
+    ).not.toHaveProperty("links");
+
+    expect(
+      await db
+        .collection("linkedFilesSettings")
+        .findOne({ _id: owner.tenantId as never }),
+    ).not.toHaveProperty("links");
+
+    await library.unlink(owner, links[0]);
+    expect(await db.collection("customLinks").countDocuments()).toBe(0);
+  });
 });

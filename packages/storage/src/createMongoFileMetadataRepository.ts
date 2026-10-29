@@ -1,4 +1,5 @@
 import type { Db } from "mongodb";
+import type { FileLink } from "./file-library/fileLinks.js";
 
 export type FileMetadataPartition<
   TFile extends { id: string; tenantId: string },
@@ -9,6 +10,7 @@ export type FileMetadataPartition<
   revision: number;
   files: TFile[];
   audit: TAudit[];
+  links?: FileLink[];
 } & TSettings;
 
 export type FileMetadataRepository<
@@ -40,9 +42,19 @@ export const createMongoFileMetadataRepository = <
 >(
   db: Db,
   collectionName: string,
+  linksCollectionName?: string,
 ): FileMetadataRepository<TFile, TAudit, TSettings> => {
   if (!collectionName.trim())
     throw new TypeError("collection name is required");
+
+  if (
+    linksCollectionName !== undefined &&
+    (!linksCollectionName.trim() ||
+      [collectionName, `${collectionName}Settings`].includes(
+        linksCollectionName,
+      ))
+  )
+    throw new TypeError("links collection must have a distinct name");
 
   type Partition = FileMetadataPartition<TFile, TAudit, TSettings>;
   type FileDocument = {
@@ -57,6 +69,20 @@ export const createMongoFileMetadataRepository = <
     audit: unknown[];
     [key: string]: unknown;
   };
+
+  const links = linksCollectionName
+    ? db.collection<FileLink & { tenantId: string }>(linksCollectionName)
+    : undefined;
+
+  const linkIndexes = links
+    ? Promise.all([
+        links.createIndex(
+          { tenantId: 1, fileId: 1, type: 1, targetId: 1 },
+          { unique: true },
+        ),
+        links.createIndex({ tenantId: 1, type: 1, targetId: 1 }),
+      ])
+    : undefined;
 
   const files = db.collection<FileDocument>(collectionName, {
     writeConcern: { w: "majority", j: true },
@@ -86,6 +112,7 @@ export const createMongoFileMetadataRepository = <
   return {
     read: async (tenantId) => {
       await ready;
+      await linkIndexes;
       const session = db.client.startSession();
 
       try {
@@ -111,6 +138,17 @@ export const createMongoFileMetadataRepository = <
 
             partition = {
               ...control,
+              ...(links
+                ? {
+                    links: (
+                      await links.find({ tenantId }, { session }).toArray()
+                    ).map(({ fileId, type, targetId }) => ({
+                      fileId,
+                      type,
+                      targetId,
+                    })),
+                  }
+                : {}),
               files: documents.map((document) => {
                 const record = { ...document };
                 delete (record as Partial<FileDocument>)._id;
@@ -128,6 +166,7 @@ export const createMongoFileMetadataRepository = <
     },
     save: async (next, expectedRevision) => {
       await ready;
+      await linkIndexes;
       const session = db.client.startSession();
       let saved = false;
 
@@ -135,7 +174,9 @@ export const createMongoFileMetadataRepository = <
         await session.withTransaction(
           async () => {
             saved = false;
-            const { files: records, ...control } = next;
+            const { files: records, links: associations, ...control } = next;
+            if (associations?.length && !links)
+              throw new TypeError("links collection is not configured");
 
             if (expectedRevision === 0) {
               if (await settings.findOne({ _id: next._id }, { session }))
@@ -161,6 +202,20 @@ export const createMongoFileMetadataRepository = <
                 record as unknown as FileDocument,
                 { upsert: true, session },
               );
+            }
+
+            if (links) {
+              await links.deleteMany({ tenantId: next._id }, { session });
+
+              if (associations?.length) {
+                const ids = new Set(records.map((file) => file.id));
+                if (associations.some((link) => !ids.has(link.fileId)))
+                  throw new TypeError("link file does not exist in partition");
+                await links.insertMany(
+                  associations.map((link) => ({ ...link, tenantId: next._id })),
+                  { session },
+                );
+              }
             }
 
             saved = true;

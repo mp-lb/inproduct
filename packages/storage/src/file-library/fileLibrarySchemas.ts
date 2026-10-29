@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { fileLinkTargetSchema } from "./fileLinks.js";
 
 /** Largest object the managed file library accepts, verifies or scans. */
 export const maxLibraryFileBytes = 50 * 1024 * 1024;
@@ -88,6 +89,7 @@ export const editFileSchema = fileIdSchema
 
 export const listFilesSchema = z
   .object({
+    linkedTo: fileLinkTargetSchema.optional(),
     scope: z.string().max(160).optional(),
     search: z.string().max(100).default(""),
     category: fileCategorySchema.optional(),

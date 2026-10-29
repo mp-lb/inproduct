@@ -84,8 +84,8 @@ A host typically exposes the library through its own authorized API:
 3. **Finalize.** `library.finalize(actor, fileId)` pins one immutable version, checks
    size, type and checksum, validates bytes and scans. Retries rescan the pinned version
    and can never repin it. Scanner or provider failures leave the file retryable.
-4. **Reference.** Attach the file to a domain record with
-   `createFileReferenceCoordinator`, which holds the file against deletion.
+4. **Link.** Associate the available file with a domain record using `library.link`.
+   Use retention holds separately only when your application needs to block deletion.
 5. **Audit.** A trusted worker drains each tenant's audit outbox with
    `createFileAuditDispatcher(repository, ledger)`.
 
@@ -221,6 +221,40 @@ supported, and there is no non-transactional mode.
 `createMongoFileReferenceStore(db, collectionName = 'fileStorageReferences')` are
 single-document adapters. Pass a `Db` scoped to your application's database and restrict
 database access to the server.
+
+## Record links
+
+The library owns associations in a separate collection. Initialize the repository with
+`createMongoFileLibraryRepository(db, 'files', 'fileLinks')`; the third argument defaults
+to `<collectionName>Links`. Existing files need no migration and initially have no links.
+File metadata, links and audit events commit in the same transaction.
+
+```ts
+await library.link(actor, { fileId, type: 'matter', targetId: matterId });
+const page = await library.list(actor, { linkedTo: { type: 'matter', targetId: matterId } });
+await library.unlink(actor, { fileId, type: 'matter', targetId: matterId });
+```
+
+List results include `links`, containing each target's `type` and `targetId`. This is the
+source of truth; do not also persist an array of file IDs on the target record. Repeating
+a completed link or unlink is safe. Concurrent changes can return `CONFLICT`; reload and
+retry. Linking requires an available file; unlinking also works after soft deletion.
+Soft deletion preserves links for administration and audit history.
+
+Links are many-to-many by default. Configure `maxLinksPerType: { matter: 1 }` in the
+library options to allow at most one matter per file. The limit is enforced inside the
+atomic mutation, including concurrent requests. Unlink before linking to another matter.
+
+The host's authorization callback receives `link` for the `link` and `unlink` actions.
+Verify target existence and permissions there. Read permission is also required. A link
+does not grant access, transfer ownership or create a retention hold. Your application
+chooses what these associations mean and how target deletion is handled. Target labels
+and navigation URLs belong to the application's UI. All links on an authorized file are
+visible in its list result; use a host projection if target identities need finer access control.
+
+The older reference coordinator is a separate, opt-in retention protocol. It does not
+populate these links; existing consumers keep working. Categories and scopes remain
+compatible policy metadata and are not inferred from links.
 
 ## Retention holds and references
 

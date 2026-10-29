@@ -1,3 +1,4 @@
+import type { FileLinkTarget } from "./fileLinks.js";
 import type { z } from "zod";
 import type { FileTypeStatus } from "../file-types/fileTypeContracts.js";
 import type {
@@ -29,6 +30,8 @@ export type FileTypeView = {
 /** The caller-safe projection. It never contains object keys or versions. */
 export type FileView = {
   id: string;
+  /** Present on list results; links convey no access rights or retention holds. */
+  links?: FileLinkTarget[];
   /** The editable name, without the extension. */
   name: string;
   /** Library-managed extension compatible with `contentType`; renames never change it. */

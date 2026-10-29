@@ -1,3 +1,4 @@
+import type { FileLinkTarget } from "./fileLinks.js";
 import { randomUUID } from "node:crypto";
 import { FileStorageError } from "../FileStorageError.js";
 import type {
@@ -18,6 +19,9 @@ const maxMutationAttempts = 12;
 
 /** Validated options plus the shared authorization and CAS primitives. */
 export const createFileLibraryContext = (options: FileLibraryOptions) => {
+  for (const limit of Object.values(options.maxLinksPerType ?? {}))
+    if (!Number.isSafeInteger(limit) || limit < 1)
+      throw new TypeError("invalid file link limit");
   const now = options.now ?? Date.now;
   const uuid = options.uuid ?? randomUUID;
   const timeoutMs = options.operationTimeoutMs ?? 15_000;
@@ -38,7 +42,12 @@ export const createFileLibraryContext = (options: FileLibraryOptions) => {
     actor: Actor,
     action: Action,
     file?: FileRecord,
-    extra?: { scope?: string; category?: FileCategory; consumer?: string },
+    extra?: {
+      scope?: string;
+      category?: FileCategory;
+      consumer?: string;
+      link?: FileLinkTarget;
+    },
   ) => {
     if (
       !actor.id ||
