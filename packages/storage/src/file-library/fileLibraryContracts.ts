@@ -119,8 +119,9 @@ export type ObjectDriver = {
     signal?: AbortSignal,
   ): Promise<ObjectInspection>;
   /** `name` is the sanitized download file name and `contentType` the type to
-   * serve. Always respond as an attachment. */
+   * serve. Defaults to attachment; inline is requested only for verified preview types. */
   download(input: {
+    disposition?: "attachment" | "inline";
     key: string;
     version: string;
     name: string;

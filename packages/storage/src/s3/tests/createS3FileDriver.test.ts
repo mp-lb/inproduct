@@ -160,6 +160,25 @@ describe("S3 file driver", () => {
     ).rejects.toThrow("capability expired");
   });
 
+  it("signs inline previews without changing attachment defaults", async () => {
+    const { driver } = createS3FileDriver(config);
+    await driver.download({
+      key: `files/${id}`,
+      version: "v1",
+      name: "image.png",
+      contentType: "image/png",
+      disposition: "inline",
+      expiresAt: Date.now() + 60_000,
+    });
+
+    expect(vi.mocked(getSignedUrl).mock.calls[0][1].input).toMatchObject({
+      VersionId: "v1",
+      ResponseContentType: "image/png",
+      ResponseContentDisposition:
+        "inline; filename=\"image.png\"; filename*=UTF-8''image.png",
+    });
+  });
+
   it("reads exactly the requested version and rejects truncated bodies", async () => {
     const send = vi.spyOn(S3Client.prototype, "send");
     const { readVersion } = createS3FileDriver(config);

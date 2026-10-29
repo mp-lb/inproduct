@@ -8,8 +8,11 @@ const encode = (value: string) =>
 
 /** RFC 6266 attachment header with an ASCII `filename` fallback and an RFC 5987
  * UTF-8 `filename*`. The name is sanitized first; CR/LF can never reach the header. */
-export const contentDisposition = (fileName: string) => {
+export const contentDisposition = (
+  fileName: string,
+  disposition: "attachment" | "inline" = "attachment",
+) => {
   const name = sanitizeFileName(fileName);
   const ascii = name.replace(/[^\x20-\x7e]|["\\%]/g, "_");
-  return `attachment; filename="${ascii}"; filename*=UTF-8''${encode(name)}`;
+  return `${disposition}; filename="${ascii}"; filename*=UTF-8''${encode(name)}`;
 };

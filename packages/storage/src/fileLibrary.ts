@@ -29,3 +29,5 @@ export type {
   UploadTicket,
 } from "./file-library/fileLibraryTypes.js";
 export { formatFileValidationError } from "./file-library/formatFileValidationError.js";
+
+export { canPreviewFile } from "./file-library/canPreviewFile.js";

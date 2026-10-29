@@ -35,6 +35,58 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
     const id = uuid();
     const until = now() + 300_000;
 
+    const proposed: FileRecord = {
+      id,
+      tenantId: actor.tenantId,
+      ownerId: actor.id,
+      operationId: input.operationId,
+      requestHash: hash,
+      key: `files/${id}`,
+      name: resolved.name,
+      extension: resolved.extension,
+      scope: input.scope,
+      category: input.category,
+      tags: input.tags,
+      sizeBytes: input.sizeBytes,
+      contentType: resolved.type.id,
+      typeStatus:
+        resolved.type.id === "application/octet-stream"
+          ? "unknown"
+          : "inferred",
+      checksum: input.checksum,
+      version: null,
+      state: "pending",
+      scan: "pending",
+      malwarePolicy: options.scanner
+        ? "required"
+        : (options.malwarePolicy ?? "required"),
+      revision: 0,
+      createdAt: now(),
+      updatedAt: now(),
+      uploadUntil: until,
+      expiresAt: now() + 86_400_000,
+      lease: null,
+      leaseUntil: 0,
+      deletedAt: null,
+      holds: [],
+    };
+
+    const links = [
+      ...new Map(
+        (input.links ?? []).map((link) => [JSON.stringify(link), link]),
+      ).values(),
+    ];
+
+    for (const link of links) {
+      await allow(actor, "link", proposed, { link });
+      const limit = options.maxLinksPerType?.[link.type];
+      if (
+        limit &&
+        links.filter((target) => target.type === link.type).length > limit
+      )
+        throw new FileStorageError("CONFLICT", "file link limit reached");
+    }
+
     const file = await mutate(actor, (partition) => {
       const existing = partition.files.find(
         (entry) =>
@@ -68,44 +120,16 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
           "storage quota reached",
         );
 
-      const record: FileRecord = {
-        id,
-        tenantId: actor.tenantId,
-        ownerId: actor.id,
-        operationId: input.operationId,
-        requestHash: hash,
-        key: `files/${id}`,
-        name: resolved.name,
-        extension: resolved.extension,
-        scope: input.scope,
-        category: input.category,
-        tags: input.tags,
-        sizeBytes: input.sizeBytes,
-        contentType: resolved.type.id,
-        typeStatus:
-          resolved.type.id === "application/octet-stream"
-            ? "unknown"
-            : "inferred",
-        checksum: input.checksum,
-        version: null,
-        state: "pending",
-        scan: "pending",
-        malwarePolicy: options.scanner
-          ? "required"
-          : (options.malwarePolicy ?? "required"),
-        revision: 0,
-        createdAt: now(),
-        updatedAt: now(),
-        uploadUntil: until,
-        expiresAt: now() + 86_400_000,
-        lease: null,
-        leaseUntil: 0,
-        deletedAt: null,
-        holds: [],
-      };
-
+      const record = structuredClone(proposed);
       partition.files.push(record);
       touch(partition, record, actor, "upload.requested");
+
+      for (const link of links) {
+        (partition.links ??= []).push({ fileId: record.id, ...link });
+        touch(partition, record, actor, "linked");
+        partition.audit[partition.audit.length - 1].details.link = link;
+      }
+
       return record;
     });
 

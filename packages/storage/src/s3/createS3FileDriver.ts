@@ -69,7 +69,14 @@ export const createS3FileDriver = (
     },
     inspect: async (key, version, signal) =>
       inspectS3Object(client, config.bucket, keyFor(key), version, signal),
-    download: async ({ key, version, name, contentType, expiresAt }) => ({
+    download: async ({
+      key,
+      version,
+      name,
+      contentType,
+      expiresAt,
+      disposition,
+    }) => ({
       url: await getSignedUrl(
         client,
         new GetObjectCommand({
@@ -78,7 +85,7 @@ export const createS3FileDriver = (
           VersionId: version,
           ResponseContentType: contentType ?? "application/octet-stream",
           ResponseCacheControl: "private, no-store",
-          ResponseContentDisposition: contentDisposition(name),
+          ResponseContentDisposition: contentDisposition(name, disposition),
         }),
         { expiresIn: capabilitySeconds(expiresAt) },
       ),

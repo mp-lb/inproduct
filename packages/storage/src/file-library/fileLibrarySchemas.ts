@@ -58,6 +58,8 @@ export const fileTagsSchema = z
 export const beginFileSchema = z
   .object({
     operationId: z.uuid(),
+    /** Initial links, authorized and saved atomically with the upload intent. */
+    links: z.array(fileLinkTargetSchema).max(100).optional(),
     scope: z.string().min(1).max(160),
     /** The uploaded file name, including its extension. */
     name: fileNameSchema,

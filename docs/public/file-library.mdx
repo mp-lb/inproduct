@@ -306,3 +306,9 @@ them into safe, field-specific messages. Treat other errors as internal and retr
   seconds. The ClamAV adapter requires a trusted private TCP endpoint and signatures less
   than 72 hours old.
 - Issued S3 presigned URLs cannot be revoked before they expire.
+
+### Linked uploads and browser previews
+
+Pass optional `links: [{ type, targetId }]` to `begin` to bind a new upload to application records from the start. Each target requires `link` authorization against the proposed pending file. Links and the upload intent commit atomically, obey `maxLinksPerType`, and are included in the idempotency input. Retrying with another target fails rather than moving the upload. Links still confer neither access rights nor retention holds.
+
+`canPreviewFile(file)` is a browser-safe eligibility helper for available, byte-recognized PDFs and supported raster images. `preview(actor, fileId)` rechecks download authorization and availability, then requests an inline, version-pinned URL with the same short lifetime as downloads. HTML, SVG, office documents and unrecognized types remain download-only. Preview is browser-native; there are no thumbnails or conversion jobs. The S3 adapter honors inline disposition; custom object drivers must honor the optional `disposition` argument to display previews. Normal downloads remain attachments.

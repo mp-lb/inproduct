@@ -34,6 +34,7 @@ export const createFileLibrary = (options: FileLibraryOptions) => {
     edit: createEditFile(context),
     remove: createRemoveFile(context),
     download: createDownloadFile(context),
+    preview: createDownloadFile(context, true),
     diagnostics: createFileDiagnostics(context),
   };
 };
