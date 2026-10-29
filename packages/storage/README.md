@@ -34,7 +34,7 @@ await storage.delete("2026/order-123.txt");
 ## Managed file library
 
 `/file-library`, `/file-library/server`, `/s3` and the Mongo adapters in `/node`
-provide verified uploads to a versioned S3 bucket, quotas, immutable version pins,
+provide verified uploads to S3, quotas, optional immutable version pins,
 retention holds, durable reference coordination and audit dispatch. Metadata stays
 in your MongoDB replica set; identity, authorization and domain records stay in your
 application. See the [managed file library guide](../../docs/public/file-library.mdx).

@@ -20,6 +20,7 @@ const id = "d7ea777e-af81-4a54-a6a2-b60b7c8faf12";
 const checksum = "ab".repeat(32);
 
 const config = {
+  versionPinning: true,
   bucket: "library",
   region: "ap-southeast-2",
   endpoint: "https://s3.example",
@@ -37,6 +38,97 @@ const metadata = {
 };
 
 describe("S3 file driver", () => {
+  it("defaults to conditional uploads without a bucket-versioning permission", async () => {
+    const send = vi
+      .spyOn(S3Client.prototype, "send")
+      .mockRejectedValue(new Error("AccessDenied"));
+
+    const standard = { ...config, versionPinning: undefined };
+    const { driver } = createS3FileDriver(standard);
+    expect(driver.capabilities.versioned).toBe(false);
+    await driver.signUpload({
+      key: `files/${id}`,
+      metadata,
+      expiresAt: Date.now() + 60_000,
+    });
+
+    expect(send).not.toHaveBeenCalled();
+    expect(vi.mocked(getSignedUrl).mock.calls[0][1].input).toMatchObject({
+      IfNoneMatch: "*",
+      ChecksumSHA256: Buffer.from(checksum, "hex").toString("base64"),
+    });
+  });
+
+  it.each([undefined, "null"])(
+    "verifies and reads an unversioned object (%s)",
+    async (VersionId) => {
+      const send = vi.spyOn(S3Client.prototype, "send");
+
+      const { driver, readVersion } = createS3FileDriver({
+        ...config,
+        versionPinning: false,
+      });
+
+      send.mockImplementationOnce(async () => ({
+        VersionId,
+        ContentLength: 4,
+        ContentType: "text/plain",
+        ChecksumSHA256: Buffer.from(checksum, "hex").toString("base64"),
+      }));
+
+      expect(await driver.inspect(`files/${id}`)).toMatchObject({
+        version: null,
+        checksum,
+      });
+
+      send.mockImplementationOnce(async () => ({
+        VersionId,
+        ContentLength: 4,
+        Body: {
+          async *[Symbol.asyncIterator]() {
+            yield Buffer.from("abcd");
+          },
+        },
+      }));
+
+      expect((await readVersion(`files/${id}`, null)).toString()).toBe("abcd");
+      await driver.download({
+        key: `files/${id}`,
+        version: null,
+        name: "a.txt",
+        expiresAt: Date.now() + 60_000,
+      });
+
+      expect(vi.mocked(getSignedUrl).mock.calls[0][1].input).toHaveProperty(
+        "VersionId",
+        undefined,
+      );
+    },
+  );
+
+  it("does not drop an existing pin when standard mode encounters a different version", async () => {
+    vi.spyOn(S3Client.prototype, "send").mockImplementation(async () => ({
+      VersionId: "v2",
+      ContentLength: 10,
+      ContentType: "application/pdf",
+      ChecksumSHA256: Buffer.from(checksum, "hex").toString("base64"),
+    }));
+
+    const { driver } = createS3FileDriver({ ...config, versionPinning: false });
+    await expect(driver.inspect(`files/${id}`, "v1")).rejects.toThrow();
+    await driver.download({
+      key: `files/${id}`,
+      version: "v1",
+      name: "a.pdf",
+      expiresAt: Date.now() + 60_000,
+    });
+
+    expect(vi.mocked(getSignedUrl).mock.calls[0][1].input).toHaveProperty(
+      "VersionId",
+      "v1",
+    );
+  });
+
   it("rejects insecure endpoints, unsafe prefixes and foreign keys", async () => {
     expect(() =>
       createS3FileDriver({ ...config, endpoint: "http://s3.example" }),

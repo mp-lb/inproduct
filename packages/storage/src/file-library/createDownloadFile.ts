@@ -10,7 +10,7 @@ import { canPreviewFile } from "./canPreviewFile.js";
 
 const downloadLifetimeMs = 60_000;
 
-/** Reauthorizes and signs a short download of the pinned version only, with the
+/** Reauthorizes and signs a short download, honoring any stored version pin, with the
  * library's download name and served type (see `describeFileDownload`). */
 export const createDownloadFile =
   (
@@ -28,7 +28,7 @@ export const createDownloadFile =
   async (actor: Actor, id: string) => {
     const file = await read(actor, id, "download");
     const version = file.version;
-    if (!isAccepted(file) || !version)
+    if (!isAccepted(file))
       throw new FileStorageError(
         "PRECONDITION_FAILED",
         "file is not available",

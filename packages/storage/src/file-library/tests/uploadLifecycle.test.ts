@@ -141,7 +141,7 @@ describe("file library upload lifecycle", () => {
       createFixture({ scanner: undefined }).library.begin(owner, metadata()),
     ).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 
-    objects.driver.capabilities.versioned = false;
+    objects.driver.capabilities.conditionalCreate = false;
     await expect(library.begin(owner, metadata())).rejects.toMatchObject({
       code: "PRECONDITION_FAILED",
     });

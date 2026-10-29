@@ -7,7 +7,6 @@ export const assertVerifiedProvider = (options: FileLibraryOptions) => {
     ((options.malwarePolicy ?? "required") === "required" &&
       !options.scanner) ||
     (options.malwarePolicy === "allow-unscanned" && !options.byteValidator) ||
-    options.driver.capabilities.versioned !== true ||
     options.driver.capabilities.checksum !== true ||
     options.driver.capabilities.conditionalCreate !== true
   )

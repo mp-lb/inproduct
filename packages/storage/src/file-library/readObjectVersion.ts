@@ -1,6 +1,6 @@
-/** Reads the exact bytes of one immutable object version. */
+/** Reads a pinned object version, or the current object when version is null. */
 export type ReadObjectVersion = (
   key: string,
-  version: string,
+  version: string | null,
   signal?: AbortSignal,
 ) => Promise<Buffer>;

@@ -51,6 +51,7 @@ export const createBeginFileUpload = (context: FileLibraryContext) => {
       typeStatus: resolved.type.id === "unknown" ? "unknown" : "inferred",
       checksum: input.checksum,
       version: null,
+      versionPinning: options.driver.capabilities.versioned,
       state: "pending",
       scan: "pending",
       malwarePolicy: options.scanner

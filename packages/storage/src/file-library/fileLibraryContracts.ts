@@ -50,6 +50,8 @@ export type FileRecord = Omit<
   key: string;
   checksum: string;
   version: string | null;
+  /** Missing on legacy records means version pinning is required. */
+  versionPinning?: boolean;
   uploadUntil: number;
   expiresAt: number;
   lease: string | null;
@@ -97,13 +99,13 @@ export type FileRepository = {
 };
 
 export type ObjectInspection = {
-  version: string;
+  version: string | null;
   sizeBytes: number;
   contentType: string;
   checksum: string;
 };
 
-/** Object-store adapter. Capabilities are declarations the library refuses to run without. */
+/** Object-store adapter. Checksum and conditional creation are required; versioning is optional. */
 export type ObjectDriver = {
   capabilities: {
     versioned: boolean;
@@ -127,7 +129,7 @@ export type ObjectDriver = {
   download(input: {
     disposition?: "attachment" | "inline";
     key: string;
-    version: string;
+    version: string | null;
     name: string;
     contentType?: string;
     expiresAt: number;
@@ -137,7 +139,7 @@ export type ObjectDriver = {
 
 export type ScanInput = {
   key: string;
-  version: string;
+  version: string | null;
   checksum: string;
   contentType: string;
   /** The byte check the type must pass. Absent means `exact`. */
@@ -145,7 +147,7 @@ export type ScanInput = {
   signal?: AbortSignal;
 };
 
-/** Must inspect the exact pinned version and detect content, not trust upload MIME. */
+/** Must read the pinned version (or current object for null), verify checksum and detect content. */
 export type Scanner = {
   scan(input: ScanInput): Promise<"clean" | "rejected">;
 };

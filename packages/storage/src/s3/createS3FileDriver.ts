@@ -12,14 +12,16 @@ import { inspectS3Object } from "./inspectS3Object.js";
 import { readS3ObjectVersion } from "./readS3ObjectVersion.js";
 
 /**
- * Object driver for a versioned S3 bucket. Uploads are presigned conditional
- * creates bound to type, length and SHA-256; downloads pin a version as an
- * attachment. `readVersion` feeds byte validators and scanners.
+ * S3 uploads use conditional creates bound to type, length and SHA-256.
+ * Version pinning is optional; any returned version is retained and honored.
+ * `readVersion` feeds byte validators and scanners.
  */
 export const createS3FileDriver = (
   config: S3Connection & {
     /** Defaults to `file-library/`. */
     prefix?: string;
+    /** Require S3 versioning and pin every upload. Defaults to false. Existing pins are always honored. */
+    versionPinning?: boolean;
     allowLocalHttpForTests?: boolean;
   },
 ) => {
@@ -36,9 +38,14 @@ export const createS3FileDriver = (
   const client = createS3Client(config);
 
   const driver: ObjectDriver = {
-    capabilities: { versioned: true, checksum: true, conditionalCreate: true },
+    capabilities: {
+      versioned: config.versionPinning === true,
+      checksum: true,
+      conditionalCreate: true,
+    },
     signUpload: async ({ key, metadata, expiresAt, signal }) => {
-      await assertBucketVersioning(client, config.bucket, signal);
+      if (config.versionPinning)
+        await assertBucketVersioning(client, config.bucket, signal);
       const checksum = Buffer.from(metadata.checksum, "hex").toString("base64");
 
       const command = new PutObjectCommand({
@@ -68,7 +75,14 @@ export const createS3FileDriver = (
       };
     },
     inspect: async (key, version, signal) =>
-      inspectS3Object(client, config.bucket, keyFor(key), version, signal),
+      inspectS3Object(
+        client,
+        config.bucket,
+        keyFor(key),
+        version,
+        signal,
+        config.versionPinning,
+      ),
     download: async ({
       key,
       version,
@@ -82,7 +96,7 @@ export const createS3FileDriver = (
         new GetObjectCommand({
           Bucket: config.bucket,
           Key: keyFor(key),
-          VersionId: version,
+          VersionId: version ?? undefined,
           ResponseContentType: contentType ?? "application/octet-stream",
           ResponseCacheControl: "private, no-store",
           ResponseContentDisposition: contentDisposition(name, disposition),
@@ -94,7 +108,11 @@ export const createS3FileDriver = (
 
   return {
     driver,
-    readVersion: async (key: string, version: string, signal?: AbortSignal) =>
+    readVersion: async (
+      key: string,
+      version: string | null,
+      signal?: AbortSignal,
+    ) =>
       readS3ObjectVersion(client, config.bucket, keyFor(key), version, signal),
     close: () => client.destroy(),
   };

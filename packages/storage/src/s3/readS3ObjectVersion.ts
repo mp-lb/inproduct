@@ -3,16 +3,20 @@ import { maxLibraryFileBytes } from "../file-library/fileLibrarySchemas.js";
 
 type Body = AsyncIterable<Uint8Array> & { destroy?: (error?: Error) => void };
 
-/** Buffers one exact object version, bounded by its declared length and the library limit. */
+/** Buffers the requested version (or current object for null), bounded by its declared length and the library limit. */
 export const readS3ObjectVersion = async (
   client: S3Client,
   bucket: string,
   key: string,
-  version: string,
+  version: string | null,
   signal?: AbortSignal,
 ) => {
   const response = await client.send(
-    new GetObjectCommand({ Bucket: bucket, Key: key, VersionId: version }),
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      VersionId: version ?? undefined,
+    }),
     { abortSignal: signal },
   );
 
@@ -21,7 +25,7 @@ export const readS3ObjectVersion = async (
 
   if (
     !body ||
-    response.VersionId !== version ||
+    (version !== null && response.VersionId !== version) ||
     !length ||
     length > maxLibraryFileBytes
   ) {

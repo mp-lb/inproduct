@@ -90,7 +90,7 @@ export const createSyntheticObjects = () => {
     return object.version;
   };
 
-  const readVersion = async (key: string, version: string) => {
+  const readVersion = async (key: string, version: string | null) => {
     const object = versions
       .get(key)
       ?.find((entry) => entry.version === version);

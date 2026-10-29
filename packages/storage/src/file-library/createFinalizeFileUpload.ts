@@ -92,7 +92,7 @@ export const createFinalizeFileUpload = (context: FileLibraryContext) => {
       );
 
       if (
-        !inspection.version ||
+        (claimed.versionPinning !== false && !inspection.version) ||
         inspection.version === "null" ||
         (claimed.version && claimed.version !== inspection.version)
       )
