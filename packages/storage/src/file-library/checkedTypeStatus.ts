@@ -5,4 +5,8 @@ import type {
 
 /** The status a passing byte check establishes. */
 export const checkedTypeStatus = (check: ContentCheck): FileTypeStatus =>
-  check === "exact" ? "recognized" : check === "compatible" ? "compatible" : "inferred";
+  check === "exact"
+    ? "recognized"
+    : check === "compatible"
+      ? "compatible"
+      : "inferred";

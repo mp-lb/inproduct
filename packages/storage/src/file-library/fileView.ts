@@ -5,7 +5,10 @@ import { downloadFileName } from "../file-types/downloadFileName.js";
 import { fallbackFileTypeLabel } from "../file-types/fallbackFileTypeLabel.js";
 import { fileRecordName } from "./fileRecordName.js";
 
-export const fileView = (row: FileRecord, registry: FileTypeRegistry): FileView => {
+export const fileView = (
+  row: FileRecord,
+  registry: FileTypeRegistry,
+): FileView => {
   const { name, extension } = fileRecordName(row, registry);
   const type = registry.get(row.contentType);
 

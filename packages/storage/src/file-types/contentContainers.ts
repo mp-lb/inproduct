@@ -1,6 +1,11 @@
-const wordprocessing = "application/vnd.openxmlformats-officedocument.wordprocessingml";
-const spreadsheet = "application/vnd.openxmlformats-officedocument.spreadsheetml";
-const presentation = "application/vnd.openxmlformats-officedocument.presentationml";
+const wordprocessing =
+  "application/vnd.openxmlformats-officedocument.wordprocessingml";
+
+const spreadsheet =
+  "application/vnd.openxmlformats-officedocument.spreadsheetml";
+
+const presentation =
+  "application/vnd.openxmlformats-officedocument.presentationml";
 
 export const officeOpenXmlParts = [
   {
@@ -84,7 +89,12 @@ export const contentContainers: Record<
   },
   ebml: {
     generic: ["video/x-matroska"],
-    members: ["video/webm", "audio/webm", "video/x-matroska", "audio/x-matroska"],
+    members: [
+      "video/webm",
+      "audio/webm",
+      "video/x-matroska",
+      "audio/x-matroska",
+    ],
   },
   ogg: {
     generic: ["audio/ogg", "video/ogg", "application/ogg"],

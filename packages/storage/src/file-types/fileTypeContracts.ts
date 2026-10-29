@@ -65,7 +65,11 @@ export type ContentMatch = "exact" | "compatible" | "mismatch" | "unrecognized";
  * - `compatible`: bytes fit the type's container or text family but do not pin it down.
  * - `inferred`: from the file name or client-reported type only.
  * - `unknown`: no type could be determined; stored as `application/octet-stream`. */
-export type FileTypeStatus = "recognized" | "compatible" | "inferred" | "unknown";
+export type FileTypeStatus =
+  | "recognized"
+  | "compatible"
+  | "inferred"
+  | "unknown";
 
 /** The byte check a type must pass. `unchecked` skips content matching only. */
 export type ContentCheck = "exact" | "compatible" | "unchecked";

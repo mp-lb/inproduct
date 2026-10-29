@@ -1,5 +1,8 @@
 import type { FileTypePolicy } from "./fileLibraryContracts.js";
-import type { ContentCheck, FileType } from "../file-types/fileTypeContracts.js";
+import type {
+  ContentCheck,
+  FileType,
+} from "../file-types/fileTypeContracts.js";
 import { canCheckContent } from "../file-types/canCheckContent.js";
 import { defaultFileTypeRegistry } from "../file-types/defaultFileTypeRegistry.js";
 import { libraryContentTypes } from "./fileLibrarySchemas.js";
@@ -27,7 +30,7 @@ export const resolveFileTypePolicy = (policy: FileTypePolicy = {}) => {
     if (!type) throw new Error(`unknown file type ${id}`);
     if (!canCheckContent(type, contentCheck(type)))
       throw new Error(
-        `file type ${type.id} cannot pass a ${contentCheck(type)} content check; set contentChecks to "compatible" or "unchecked"`,
+        `file type ${type.id} cannot pass the "${contentCheck(type)}" content check; set contentChecks to "compatible" or "unchecked"`,
       );
     accepted.set(type.id, type);
   }

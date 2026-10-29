@@ -9,7 +9,10 @@ import { findFileExtension } from "./findFileExtension.js";
 import { matchFileContent } from "./matchFileContent.js";
 import { normalizeMediaType } from "./normalizeMediaType.js";
 
-const uninformative = new Set(["application/octet-stream", "binary/octet-stream"]);
+const uninformative = new Set([
+  "application/octet-stream",
+  "binary/octet-stream",
+]);
 
 /**
  * Weighs a file name, a client-reported type and optionally bytes. Bytes that
@@ -48,6 +51,7 @@ export const identifyFileType = (
   ];
 
   const detection = input.bytes ? detectFileContent(input.bytes) : null;
+
   const matches = detection
     ? claims.map((type) => ({ type, match: matchFileContent(detection, type) }))
     : [];
@@ -92,7 +96,9 @@ export const identifyFileType = (
       conflicts.push("content-extension");
 
     const fitting = matches
-      .filter((entry) => entry.match === "exact" || entry.match === "compatible")
+      .filter(
+        (entry) => entry.match === "exact" || entry.match === "compatible",
+      )
       .map((entry) => entry.type);
 
     if (best)
@@ -108,7 +114,11 @@ export const identifyFileType = (
 
     if (!claims.length && detected[0])
       return result("recognized", detected[0], detected);
-    return result(claims.length ? "conflict" : "unknown", detected[0] ?? null, detected);
+    return result(
+      claims.length ? "conflict" : "unknown",
+      detected[0] ?? null,
+      detected,
+    );
   }
 
   if (conflicts.length) return result("conflict", null, claims);

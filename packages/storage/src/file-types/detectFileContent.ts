@@ -9,7 +9,8 @@ import { startsWithAt } from "./startsWithAt.js";
 
 const signature = (bytes: Uint8Array, weak: boolean) => {
   const found = contentSignatures.find(
-    (entry) => !!entry.weak === weak && startsWithAt(bytes, entry.bytes, entry.offset),
+    (entry) =>
+      !!entry.weak === weak && startsWithAt(bytes, entry.bytes, entry.offset),
   );
 
   if (!found) return null;

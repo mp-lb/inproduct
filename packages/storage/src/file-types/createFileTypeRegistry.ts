@@ -93,10 +93,7 @@ export const createFileTypeRegistry = (
     Object.freeze(type);
 
     for (const extension of type.extensions)
-      byExtension.set(extension, [
-        ...(byExtension.get(extension) ?? []),
-        type,
-      ]);
+      byExtension.set(extension, [...(byExtension.get(extension) ?? []), type]);
   }
 
   for (const [extension, id] of Object.entries(preferences)) {

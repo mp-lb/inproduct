@@ -28,7 +28,12 @@ export const builtinFileTypes = (): FileType[] => {
     });
 
   for (const [id, entry] of Object.entries(mimeDb))
-    define(id, entry.extensions ?? [], entry.source ?? "mime-db", entry.charset);
+    define(
+      id,
+      entry.extensions ?? [],
+      entry.source ?? "mime-db",
+      entry.charset,
+    );
 
   for (const input of overlay.types) {
     const existing = types.get(input.id);
@@ -59,12 +64,14 @@ export const builtinFileTypes = (): FileType[] => {
 
   for (const [id, extensions] of Object.entries(overlay.extensions)) {
     const type = types.get(id);
-    if (type) type.extensions = [...new Set([...type.extensions, ...extensions])];
+    if (type)
+      type.extensions = [...new Set([...type.extensions, ...extensions])];
   }
 
   for (const type of types.values())
     type.label =
-      overlay.labels[type.id] ?? fallbackFileTypeLabel(type.id, type.extensions);
+      overlay.labels[type.id] ??
+      fallbackFileTypeLabel(type.id, type.extensions);
 
   return [...types.values()];
 };

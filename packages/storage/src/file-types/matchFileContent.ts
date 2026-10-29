@@ -13,7 +13,9 @@ export const matchFileContent = (
 ): ContentMatch => {
   const ids = [type.id, ...type.aliases];
   if (detection.types.some((id) => ids.includes(id))) return "exact";
-  const container = detection.container && contentContainers[detection.container];
+
+  const container =
+    detection.container && contentContainers[detection.container];
 
   if (container) {
     const member =

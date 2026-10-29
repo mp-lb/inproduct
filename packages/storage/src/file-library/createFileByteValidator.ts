@@ -12,7 +12,14 @@ export const createFileByteValidator = (
 ): ByteValidator => {
   let busy = false;
   return {
-    validate: async ({ key, version, checksum, contentType, contentCheck, signal }) => {
+    validate: async ({
+      key,
+      version,
+      checksum,
+      contentType,
+      contentCheck,
+      signal,
+    }) => {
       if (busy) throw new Error("byte validation busy; retry verification");
       busy = true;
 

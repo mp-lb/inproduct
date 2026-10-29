@@ -1,16 +1,28 @@
 const reserved = /^(?:con|prn|aux|nul|com[0-9]|lpt[0-9])(?:\.|$)/i;
 const maxBytes = 200;
 
+const unsafe = (character: string) => {
+  const code = character.charCodeAt(0);
+  return (
+    code < 32 ||
+    (code >= 127 && code <= 159) ||
+    '/\\:*?"<>|'.includes(character)
+  );
+};
+
 /**
  * A name safe to offer as a downloaded file name on common systems: Unicode NFC,
  * no control, bidirectional-override, path or reserved characters, no leading or
  * trailing dots and spaces, no Windows device names, at most 200 UTF-8 bytes.
  */
 export const sanitizeFileName = (value: string, fallback = "file") => {
-  let name = value
-    .normalize("NFC")
-    .replace(/[\u202a-\u202e\u2066-\u2069\u200e\u200f\u061c]/g, "")
-    .replace(/[\u0000-\u001f\u007f-\u009f/\\:*?"<>|]/g, "_")
+  let name = Array.from(
+    value
+      .normalize("NFC")
+      .replace(/[\u202a-\u202e\u2066-\u2069\u200e\u200f\u061c]/g, ""),
+    (character) => (unsafe(character) ? "_" : character),
+  )
+    .join("")
     .replace(/\s+/g, " ")
     .replace(/^[\s.]+|[\s.]+$/g, "");
 

@@ -15,10 +15,7 @@ export const resolveUploadType = (
 ) => {
   const { registry, accepted, onConflict } = policy;
 
-  const identified = identifyFileType(
-    { fileName, declaredType },
-    registry,
-  );
+  const identified = identifyFileType({ fileName, declaredType }, registry);
 
   const { extension, declared } = identified.evidence;
   let type = identified.type;
@@ -29,8 +26,10 @@ export const resolveUploadType = (
         "INVALID_INPUT",
         "The file name does not match the reported file type.",
       );
+
     const preferred =
       onConflict === "prefer-extension" ? extension?.types[0] : declared?.type;
+
     type = preferred ? (registry.get(preferred) ?? null) : null;
   }
 

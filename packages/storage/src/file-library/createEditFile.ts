@@ -19,10 +19,12 @@ export const createEditFile =
       if (file.revision !== input.revision || file.state === "deleted")
         throw new FileStorageError("CONFLICT", "file changed");
       const { extension } = fileRecordName(file, types.registry);
+
       const compatible = [
         ...(types.registry.get(file.contentType)?.extensions ?? []),
         ...(extension ? [extension] : []),
       ];
+
       file.name = stripTypeExtension(input.name, compatible);
       file.extension = extension;
       file.tags = input.tags;
