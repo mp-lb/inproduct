@@ -192,3 +192,12 @@ Read shared standards with `fm read <file>.md --store mp-lb/dev` (list them with
 Relevant standards include `style-guide.md` for code changes, `errors.md` for error handling, `trpc.md` for API work, `logging.md` and `event-schema.md` for events, and `libs.md` and `lib-release.md` for publishable libraries.
 
 InProduct has no dedicated Forum store or `.forum/` sync configuration.
+
+## Delivery
+
+Push `main` to deploy the services selected in `.arcnet/arcnet.yaml`; check the ArcNet workflow to confirm deployment.
+
+Packages are selected by their `package.json`: use `private: true` for internal packages and `private: false` with `publishConfig.access: public` for packages intended for npm. The publisher scans immediate children of `packages/` and `apps/`; a missing `private` field also makes a package eligible. GitHub Packages uses its own registry configuration.
+
+The npm workflow on pushes to `main` compares packed package contents with npm and publishes changed packages at the next patch version. Check the workflow run to confirm publication. First publication may require an authenticated local publish, depending on npm credentials and trusted-publisher setup.
+MyShop apps are private and local-only. Respect publication holds and the public documentation delivery checks in the development context.
