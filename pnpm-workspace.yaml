@@ -4,6 +4,7 @@ packages:
 
 allowBuilds:
   esbuild: true
+  fs-ext: true
   msw: true
 
 minimumReleaseAge: 5

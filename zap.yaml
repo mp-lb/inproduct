@@ -40,6 +40,16 @@ native:
     cmd: pnpm --filter @mp-lb/inproduct-myshop-backend dev
     env: "*"
 tasks:
+  validation:
+    cmds:
+      - pnpm exec tsx packages/scripts/runValidation.ts {{REST}}
+  validation-test:
+    cmds:
+      - pnpm exec tsx --test packages/scripts/validation.test.ts
+  validation-check:
+    cmds:
+      - pnpm exec eslint packages/scripts/runValidation.ts packages/scripts/validation packages/scripts/validation.test.ts
+      - pnpm --dir packages/scripts run typecheck
   scripts:
     desc: Introduce this project
     cmds:

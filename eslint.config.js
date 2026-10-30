@@ -18,6 +18,10 @@ export default [
   }),
   // Published storage output runs directly in Node ESM and needs file extensions.
   {
+    files: ["packages/scripts/**/*.ts"],
+    languageOptions: { parserOptions: { project: "./packages/scripts/tsconfig.json", tsconfigRootDir: import.meta.dirname } },
+  },
+  {
     files: ["packages/storage/src/**/*.ts"],
     ignores: ["packages/storage/src/**/*.test.ts"],
     rules: {
