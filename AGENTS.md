@@ -1,9 +1,12 @@
 <!-- Standard -->
+
 ## Agent context
 
 Agent instructions are compiled from reusable blocks in `context/`, with `context/index.md` listing the blocks in order. This keeps shared and project-specific instructions easy to maintain.
 
 Edit the blocks and index in `context/`, then run `zap task context-build` to regenerate `AGENTS.md` and `CLAUDE.md`.
+
+
 
 ## Code style
 
@@ -76,6 +79,12 @@ Bootstrap dependencies with `zap t setup` before running TypeScript tasks. The v
 Mise is the base layer: it selects Node and the package manager. Zapper runs tasks and services on top of those tools. Run `mise trust` and `mise install` for checkout setup, then use an activated mise shell or `mise exec -- zap task <task>`.
 
 Read Node from `.node-version` and pnpm from `package.json#packageManager`; `mise.toml` reads these pins rather than duplicating them. npm projects use npm bundled with Node. Preserve the project's versions and package manager. Keep locally built CLI entrypoints in a version-independent PATH directory so switching Node does not hide `zap` or `fm`.
+
+## Validation
+
+Run the applicable configured checks, tests and builds; use `zap task check`, `zap task test` and `zap task build` where available. Run focused checks and follow project-specific validation instructions; report checks that could not run.
+
+
 ## Validation
 
 Use `zap task check`, `zap task test`, `zap task build` for the applicable checks. For context-only changes, run `zap task context-build`, check required imports and review both generated outputs. Preserve specialized testing and evaluation constraints in the project instructions.
@@ -118,6 +127,12 @@ InProduct has no dedicated Forum store or `.forum/` sync configuration.
 Every new public package must have a discoverable consumer guide in `docs/public/`, linked from `meta.json` and the docs introduction. A package README alone is not website documentation: the docs loader only reads `docs/public/`. Explain installation availability, initialization, configuration, behavior, and limitations; keep declarations as the API reference. Extend `apps/docs/scripts/checkDocs.ts` to verify the guide's HTML, per-page Markdown, `llms-full.txt`, search entry, and navigation link, then run `pnpm docs:check` before handoff.
 
 `apps/docs` renders `docs/public/` with Fumadocs. No docs hosting is configured by this repository.
+
+## Delivery
+
+Push `main` to run the configured delivery workflows for applications and packages. Check GitHub Actions and follow any project-specific release exceptions.
+
+
 ## Delivery
 
 Push `main` to deploy configured services and publish eligible npm packages; check the GitHub Actions runs. Respect publication holds, and verify the deployed revision and public documentation before production sign-off; MyShop is local-only.
