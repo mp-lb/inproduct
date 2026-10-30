@@ -59,6 +59,23 @@ tasks:
     cmds:
       - pnpm exec eslint packages/scripts
       - pnpm --dir packages/scripts run typecheck
+  scripts-test:
+    cmds:
+      - pnpm exec tsx --test packages/scripts/*.test.ts packages/scripts/publishing/*.test.ts
+  docs-scripts-check:
+    cmds:
+      - pnpm exec eslint apps/docs/scripts tests/docs/*.ts
+      - pnpm exec tsc -p apps/docs/tsconfig.scripts.json --noEmit
+  augment-docs-site:
+    cmds:
+      - pnpm exec tsx packages/scripts/augmentDocsSite.ts {{REST}}
+  publish-packages:
+    cmds:
+      - pnpm exec tsx packages/scripts/autoPublish.ts {{REST}}
+  verify-publication:
+    env: "*"
+    cmds:
+      - pnpm exec tsx packages/scripts/verifyPublication.ts
   mongo-test:
     env: "*"
     cmds:
