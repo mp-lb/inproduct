@@ -19,3 +19,5 @@
 @documentation.md
 
 @delivery.md
+
+@scripts.md
