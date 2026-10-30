@@ -14,7 +14,7 @@ for (const [path, title] of [
   ["file-library/", "Managed file library"],
   ["file-types/", "File types and names"],
   ["myshop/", "MyShop local example"],
-]) {
+] as const) {
   assert.ok(
     read(`docs/${path}index.html`).includes(title),
     `missing HTML: ${title}`,
