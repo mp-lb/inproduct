@@ -87,18 +87,27 @@ tasks:
   docs-check:
     cmds:
       - pnpm docs:check
+  docs-test:
+    cmds:
+      - pnpm docs:test
+  docs-prepare-preview:
+    cmds:
+      - pnpm exec tsx apps/docs/scripts/prepareDocsPreview.ts
+  docs-verify:
+    cmds:
+      - pnpm exec tsx apps/docs/scripts/checkDocs.ts
   docs-preview:
     env: "*"
     cmds:
       - pnpm --filter @mp-lb/inproduct-docs start
   myshop:
     cmds:
-      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct --filter @mp-lb/inproduct-storage build
+      - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct --filter @mp-lb/inproduct-storage build
       - zap up myshop-backend myshop-frontend
   myshop-check:
     cmds:
-      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop-backend build:local
-      - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop-frontend build:local
+      - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct-myshop-backend build:local
+      - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct-myshop-frontend build:local
   context-copy:
     cmds:
       - pnpm exec tsx packages/scripts/contextFiles.ts copy {{REST}}
@@ -107,7 +116,7 @@ tasks:
       - pnpm exec tsx packages/scripts/contextFiles.ts build {{REST}}
   setup:
     cmds:
-      - python3 scripts/run_validation.py -- pnpm install
+      - pnpm install
   build:
     cmds:
       - pnpm build
@@ -131,6 +140,6 @@ tasks:
       - pnpm test
   worktree-setup:
     cmds:
-      - python3 scripts/run_validation.py -- pnpm install
+      - pnpm install
       - cp "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.env" . 2>/dev/null || true
       - zap task context-build

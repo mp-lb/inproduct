@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "react-router dev --host 127.0.0.1 --port ${DOCS_PORT:?Run through Zap to allocate DOCS_PORT}",
-    "build": "react-router build && node ../../scripts/prepare-docs-preview.mjs && node ../../scripts/check-docs.mjs",
-    "typecheck": "react-router typegen && tsc --noEmit",
+    "build": "react-router build && tsx scripts/prepareDocsPreview.ts && tsx scripts/checkDocs.ts",
+    "typecheck": "react-router typegen && tsc --noEmit && tsc -p tsconfig.scripts.json --noEmit",
     "start": "serve ./build/client --config ../../serve.json -l tcp://127.0.0.1:${DOCS_PORT:?Run through Zap to allocate DOCS_PORT}"
   },
   "dependencies": {

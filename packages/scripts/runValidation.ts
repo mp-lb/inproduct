@@ -1,6 +1,15 @@
 import { runValidation } from "./validation/runValidation";
 
 const args = process.argv.slice(2);
+
+const usage =
+  "Usage: zap t validation -- [--profile default|lint] -- <command> [args...]";
+
+if (args[0] === "--help" || args[0] === "-h") {
+  console.log(usage);
+  process.exit(0);
+}
+
 let profile = "default";
 if (args[0] === "--profile") {
   args.shift();
@@ -10,9 +19,7 @@ if (args[0] === "--profile") {
 if (args[0] === "--") args.shift();
 
 if (!args.length || !["default", "lint"].includes(profile)) {
-  console.error(
-    "Usage: zap t validation -- [--profile default|lint] -- <command> [args...]",
-  );
+  console.error(usage);
 
   process.exitCode = 2;
 } else {

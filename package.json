@@ -7,16 +7,16 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "build": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present build",
+    "build": "tsx packages/scripts/runValidation.ts -- pnpm -r --workspace-concurrency=1 --if-present build",
     "dev": "zap task myshop",
-    "lint": "python3 scripts/run_validation.py --profile lint -- eslint . && monolith-mapper check",
+    "lint": "tsx packages/scripts/runValidation.ts --profile lint -- eslint . && monolith-mapper check",
     "modules:map": "monolith-mapper map --output module-map.json",
-    "typecheck": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present typecheck",
-    "test": "python3 scripts/run_validation.py -- pnpm -r --workspace-concurrency=1 --if-present test",
-    "docs:gen": "python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-docs build",
+    "typecheck": "tsx packages/scripts/runValidation.ts -- pnpm -r --workspace-concurrency=1 --if-present typecheck",
+    "test": "tsx packages/scripts/runValidation.ts -- pnpm -r --workspace-concurrency=1 --if-present test",
+    "docs:gen": "tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct-docs build",
     "docs:check": "pnpm docs:gen",
     "secrets:sync": "arcnet secrets sync",
-    "docs:test": "python3 scripts/run_validation.py -- pnpm exec playwright test --config tests/docs/playwright.config.mjs",
+    "docs:test": "tsx packages/scripts/runValidation.ts -- pnpm exec playwright test --config tests/docs/playwright.config.ts",
     "secrets:check": "arcnet env check"
   },
   "devDependencies": {

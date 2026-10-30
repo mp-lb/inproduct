@@ -36,12 +36,12 @@ jobs:
           INPRODUCT_MONGO_TEST_URI: mongodb://127.0.0.1:27017/?directConnection=true
       - name: Publish changed package builds
         id: publish
-        run: pnpm exec arcnet env run --consumer publish -- node
-          scripts/auto-publish.mjs
+        run: pnpm exec arcnet env run --consumer publish -- packages/scripts/node_modules/.bin/tsx
+          packages/scripts/autoPublish.ts --github-output="$GITHUB_OUTPUT"
         env:
           INPRODUCT_SECRETS_KEY: ${{ secrets.INPRODUCT_SECRETS_KEY }}
           ARCNET_STANDARD_SECRETS_KEY: ${{ secrets.ARCNET_STANDARD_SECRETS_KEY }}
       - name: Verify public registry packages
-        run: node scripts/verifyPublication.mjs
+        run: pnpm exec tsx packages/scripts/verifyPublication.ts
         env:
           FSSSTACK_RELEASE_RESULT: ${{ steps.publish.outputs.release_report }}
