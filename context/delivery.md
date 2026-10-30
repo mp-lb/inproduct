@@ -1,12 +1,3 @@
 ## Delivery
 
-Push `main` to deploy the services selected in `.arcnet/arcnet.yaml`; check the ArcNet workflow to confirm deployment.
-
-Packages are selected by their `package.json`: use `private: true` for internal packages and `private: false` with `publishConfig.access: public` for packages intended for npm. The publisher scans immediate children of `packages/` and `apps/`; a missing `private` field also makes a package eligible. GitHub Packages uses its own registry configuration.
-
-The npm workflow on pushes to `main` compares packed package contents with npm and publishes changed packages at the next patch version. ArcNet supplies the configured publishing credential through its `publish` secret consumer; the secret source must contain `NPM_TOKEN`. Check the workflow run to confirm publication. First publication may require an authenticated local publish, depending on npm credentials and trusted-publisher setup.
-MyShop apps are private and local-only. Respect publication holds and the public documentation delivery checks below.
-
-Local validation establishes readiness for integration, not production delivery. Before requesting production sign-off, the delivery owner must record the deployed revision and successful live checks of the intended public URL, guide content, navigation, search, and agent-readable output. Report uncompleted deployment or publication explicitly. Website deployment and npm publication are separate actions: respect any publication hold and inspect workflow triggers before pushing because a changed package build publishes automatically.
-
-Configured service domains: `inproduct.mp-lb.dev`, `docs.inproduct.mp-lb.dev`. Their service mapping is in `.arcnet/arcnet.yaml`.
+Push `main` to deploy configured services and publish eligible npm packages; check the GitHub Actions runs. Respect publication holds, and verify the deployed revision and public documentation before production sign-off; MyShop is local-only.
