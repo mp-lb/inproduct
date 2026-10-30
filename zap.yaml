@@ -146,4 +146,3 @@ tasks:
     cmds:
       - pnpm install
       - cp "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.env" . 2>/dev/null || true
-      - zap task context-build
