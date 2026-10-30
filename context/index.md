@@ -1,6 +1,8 @@
 <!-- Standard -->
 @context.md
 @project.md
+@standards.md
+@code-style.md
 @development.md
 @validation.md
 @scripts.md
@@ -17,10 +19,9 @@
 @secrets.md
 @mongodb.md
 @s3.md
+@playwright.md
 @domains.md
 
 <!-- MapLab augmentations -->
 @maplab-workflow.md
-@maplab-standards.md
-@maplab-code-style.md
 @maplab-toolchain.md
