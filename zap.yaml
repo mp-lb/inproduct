@@ -82,10 +82,12 @@ tasks:
     cmds:
       - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop-backend build:local
       - python3 scripts/run_validation.py -- pnpm --filter @mp-lb/inproduct-myshop-frontend build:local
+  context-copy:
+    cmds:
+      - pnpm exec tsx packages/scripts/contextFiles.ts copy {{REST}}
   context-build:
     cmds:
-      - npx -y @mp-lb/mdcompile context/index.md --optional --silent | fm compile --stdin -o AGENTS.md
-      - npx -y @mp-lb/mdcompile context/index.md --optional --silent | fm compile --stdin -o CLAUDE.md
+      - pnpm exec tsx packages/scripts/contextFiles.ts build {{REST}}
   setup:
     cmds:
       - python3 scripts/run_validation.py -- pnpm install

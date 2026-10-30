@@ -6,7 +6,7 @@ This project publishes docs generated from the source of truth. A library's API 
 
 Read `libs.md` from `mp-lb/dev` for the full model (`fm read libs.md --store mp-lb/dev`). For packages with a CLI, also read `clis.md` from that store.
 
-Read shared standards with `fm read <file>.md --store mp-lb/dev` (list them with `fm ls --store mp-lb/dev`). Read shared extensions with `fm read extensions/<file>.md --store mp-lb/fssstack` (list them with `fm ls extensions --store mp-lb/fssstack`).
+Read shared standards with `fm read <file>.md --store mp-lb/dev` (list them with `fm ls --store mp-lb/dev`). Read shared extensions with `fm read extensions/<extension>/README.md --store mp-lb/fssstack` (list them with `fm ls extensions --store mp-lb/fssstack`).
 
 Relevant standards include `style-guide.md` for code changes, `errors.md` for error handling, `trpc.md` for API work, `logging.md` and `event-schema.md` for events, and `libs.md` and `lib-release.md` for publishable libraries.
 

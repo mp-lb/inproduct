@@ -4,10 +4,7 @@ Use pnpm for dependencies and Zap for service orchestration. Run `zap status`, `
 
 Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before handing off meaningful changes. Keep tRPC procedure integration tests alongside the router. Use Chrome for manual testing only when the user explicitly asks for it.
 
-Project-specific context source lives in `context/`; shared blocks are Forum
-file references from `mp-lb/fssstack/agents-md`. Regenerate with
-`zap task context-build`. Commit the generated `AGENTS.md` and `CLAUDE.md`
-alongside their source changes.
+Project context is composed from local `context/` blocks. Follow `context/context.md` for rebuilding and committing all three generated files.
 
 
 Docs live in `docs/public/` and are rendered by `apps/docs` (Fumadocs). No docs hosting is configured by this repository. MyShop (`apps/myshop-frontend` and `apps/myshop-backend`) is private and local-only; never publish or deploy it. Run `zap task myshop` for the seeded demo and `zap task myshop-check` for its explicit local build. Ordinary builds exclude both MyShop apps. Uploaded files persist in ignored `apps/myshop-backend/.data/files`; reset only affects the catalog/cart. Root validations use `scripts/run_validation.py` and share the per-user heavy-task lock; do not nest wrapped commands or remove the lock.

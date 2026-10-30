@@ -46,7 +46,7 @@ the docs CI workflow runs this check.
 - Public content comes only from `docs/public/`; HTML, Orama local search and raw Markdown
   are prerendered into `apps/docs/build/client`.
 - Conditional documentation guidance comes from the shared FSSstack
-  `agents-md/docs-website.md` Forum file, included by this repository's
+  local `context/documentation.md` block, included by this repository's
   `context/index.md` compiler entry.
 
 ## Version-dependent exceptions
