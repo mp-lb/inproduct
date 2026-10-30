@@ -138,6 +138,7 @@ Frontend packages: `apps/myshop-frontend`, `apps/landing-page`. Run component in
 Installed shadcn component locations: `apps/landing-page/src/components/ui` (configuration: `apps/landing-page/components.json`, theme: `apps/landing-page/src/index.css`).
 
 <!-- Extensions -->
+
 ## ArcNet
 
 This project uses ArcNet. `.arcnet/arcnet.yaml` records its configured sources, consumers and selected deployment services. Read that configuration and the project’s delivery instructions before changing infrastructure. Minimal installations may only manage secrets/variables; do not assume an application is deployed.
@@ -146,7 +147,7 @@ Keep deployment build paths, runtime entrypoints, health settings and domains al
 
 Setup and updates: `fm read extensions/arcnet/README.md --store mp-lb/fssstack` and `fm read SETUP.md --store mp-lb/arcnet`.
 
-### Secrets and variables
+## ArcNet secrets and variables
 
 Read `.arcnet/arcnet.yaml` for the actual Forum sources and configured consumers. Source values live in those stores; encrypted snapshots under `.arcnet/secrets/` are committed. GitHub repository secrets contain CI decryption keys, not the plaintext source values.
 
