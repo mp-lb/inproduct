@@ -13,3 +13,6 @@ minimumReleaseAgeExclude:
   - '@mp-lb/arcnet@0.2.0'
   - '@mp-lb/arcnet@0.4.0'
   - '@mp-lb/zapper@0.21.4'
+
+# Save exact external versions; internal dependencies use workspace:*.
+saveExact: true
