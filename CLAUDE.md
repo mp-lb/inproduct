@@ -51,9 +51,18 @@ The storage library provides MongoDB and S3 adapters for consumers and local tes
 ### Related tooling
 
 Shared tooling is developed in sibling checkouts under `~/Work`: Zapper (`zapper`) runs tasks, Forum (`forum`) provides `fm`, Tools (`tools`) provides ArcNet, and Stackforge (`stackforge`) owns setup conventions. When a change belongs in an owned dependency, inspect and update that source repository as needed, follow its `AGENTS.md`, then rebuild/relink the CLI or update the consuming dependency. Verify the command resolves to the intended build.
+
 ## Standards
 
-List shared standards with `fm ls --store mp-lb/dev`; read one with `fm read <file>.md --store mp-lb/dev`.
+Read the relevant MAP Lab standards before changing the corresponding code. List them with `fm ls --store mp-lb/dev` and read one with `fm read <file>.md --store mp-lb/dev`.
+
+- `style-guide.md` and `component-decomposition.md`: code and component structure.
+- `crud.md`, `errors.md`, `trpc.md` and `logging.md`: backend APIs, services and error handling; list the store for current available guidance.
+- `event-schema.md` and `event-sourcing.md`: event schemas and event-sourced domains.
+- `libs.md`, `lib-release.md` and `clis.md`: libraries, publishing and command-line tools.
+- `context-files.md`: maintaining agent context.
+
+
 ## Development
 
 Use pnpm for dependencies and Zap for service orchestration. Run `zap status`, `zap up`, and `zap logs <service> --no-follow` to manage local services. Ports are allocated by Zap through zap.yaml; do not commit numeric local ports. Non-secret defaults live in .env.local; secrets belong in the ignored .env.
@@ -80,9 +89,18 @@ The Playwright suite in `tests/docs/` checks the documentation website. Run it t
 The config allocates a local port, uses one worker and starts the docs server itself without reusing an existing server. `TEST_DOCS_URL` selects an already deployed target and disables that local server; `PLAYWRIGHT_CHANNEL` selects the browser channel. Use this configured lifecycle rather than starting a second web server or assuming an application-auth E2E stack.
 
 Setup reference: `fm read extensions/playwright/README.md --store mp-lb/fssstack`.
+
 ## Scripts
 
 Write project scripts in TypeScript in the package that owns the behaviour, or `packages/scripts` when there is no natural owner, and include them in normal lint and typecheck checks. Expose each script as a thin Zap task that invokes it with `tsx` (for example, `zap t somemigration` runs `packages/scripts/somemigration.ts`); keep CI callers aligned when moving scripts.
+
+
+
+## Documentation
+
+Keep project-specific documentation in `docs/` and update it with behavior changes. Follow the project's own instructions for any Forum sync mapping; read shared standards and extension setup from their Forum stores.
+
+
 ## Documentation
 
 Keep InProduct-specific documentation in `docs/`. `docs/public/` contains the published library guides and `docs/internals/` contains internal engineering notes. Root-level project documents such as `README.md` and `MANIFESTO.md` stay at the repository root. Shared standards and extensions belong in Forum.
