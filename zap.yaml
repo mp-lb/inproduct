@@ -108,12 +108,16 @@ tasks:
     cmds:
       - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct-myshop-backend build:local
       - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct-myshop-frontend build:local
-  context-copy:
-    cmds:
-      - pnpm exec tsx packages/scripts/contextFiles.ts copy {{REST}}
   context-build:
     cmds:
-      - pnpm exec tsx packages/scripts/contextFiles.ts build {{REST}}
+      - |
+        set -eu
+        context_temp=$(mktemp -d)
+        trap 'rm -rf "$context_temp"' EXIT
+        mdcompile context/index.md --silent -o "$context_temp/local.md"
+        fm compile --stdin -o "$context_temp/shared.md" < "$context_temp/local.md"
+        cp "$context_temp/shared.md" AGENTS.md
+        cp "$context_temp/shared.md" CLAUDE.md
   setup:
     cmds:
       - pnpm install

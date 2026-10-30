@@ -5,13 +5,13 @@ Shared agent instructions live in `context/`. `context/index.md` explicitly impo
 
 Edit source blocks, not generated root files. To add a block, create it and add its import to the index. To remove one, remove the import and unused file. Keep rules short and specific to the actual project.
 
-Run `zap task context-build` after changes. Review and commit the source changes together with `AGENTS.base.md`, `AGENTS.md`, and `CLAUDE.md`. Without personal additions, all three outputs should match. Missing shared imports are errors, not optional omissions.
+Run `zap task context-build` after changes. It calls the shared `mdcompile` CLI from Tools and `fm compile` from Forum directly, then writes matching `AGENTS.md` and `CLAUDE.md`. Keep both CLIs available on PATH. Required local imports and remote reads must succeed before either output is replaced. Commit the source changes and both generated files together.
 
-Keep private and machine-specific instructions out of committed context. The compiler supports explicit extra context paths for a local working copy; never commit those additions. `zap task context-copy` restores the root agent files from the shared base.
+Keep private and machine-specific instructions in your agent's personal configuration, outside committed context. Rebuild from the shared sources to restore the generated project instructions.
 
 Extensions are documented at `extensions/<extension>/README.md` in the FSS Stack source (`fm read extensions/<extension>/README.md --store mp-lb/fssstack`). Add recurring, non-obvious operational instructions only when a capability needs them; a dependency alone does not justify a context file. Keep setup steps in extension documentation and project details in their existing subject files.
 
-MAP Lab code style is a standalone remote link in `context/index.md`. Context compilation expands local imports with mdcompile, then remote links with `fm compile --stdin`. The shared `fm` CLI on PATH (outside project `node_modules/.bin`) and Forum access are required to refresh it; a failed remote fetch must fail the build. Generated root files remain usable offline. Keep project overrides in `project.md` after the shared style import.
+MAP Lab code style is a standalone remote link in `context/index.md`. Forum access is required to refresh it. Generated root files remain usable offline. Keep project overrides in `project.md` after the shared style import.
 
 ## Code style
 
@@ -77,7 +77,7 @@ Mise is the base layer: it selects Node and the package manager. Zapper runs tas
 Read Node from `.node-version` and pnpm from `package.json#packageManager`; `mise.toml` reads these pins rather than duplicating them. npm projects use npm bundled with Node. Preserve the project's versions and package manager. Keep locally built CLI entrypoints in a version-independent PATH directory so switching Node does not hide `zap` or `fm`.
 ## Validation
 
-Use `zap task check`, `zap task test`, `zap task build` for the applicable checks. For context-only changes, run `zap task context-build`, check required imports and review all three generated outputs. Preserve specialized testing and evaluation constraints in the project instructions.
+Use `zap task check`, `zap task test`, `zap task build` for the applicable checks. For context-only changes, run `zap task context-build`, check required imports and review both generated outputs. Preserve specialized testing and evaluation constraints in the project instructions.
 
 Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before handing off meaningful changes. Keep tRPC procedure integration tests alongside the router. Use Chrome for manual testing only when the user explicitly asks for it.
 
