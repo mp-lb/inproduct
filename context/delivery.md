@@ -8,3 +8,5 @@ The npm workflow on pushes to `main` compares packed package contents with npm a
 MyShop apps are private and local-only. Respect publication holds and the public documentation delivery checks below.
 
 Local validation establishes readiness for integration, not production delivery. Before requesting production sign-off, the delivery owner must record the deployed revision and successful live checks of the intended public URL, guide content, navigation, search, and agent-readable output. Report uncompleted deployment or publication explicitly. Website deployment and npm publication are separate actions: respect any publication hold and inspect workflow triggers before pushing because a changed package build publishes automatically.
+
+Configured service domains: `inproduct.mp-lb.dev`, `docs.inproduct.mp-lb.dev`. Their service mapping is in `.arcnet/arcnet.yaml`.

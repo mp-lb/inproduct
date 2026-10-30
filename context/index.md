@@ -1,8 +1,10 @@
 <!-- Standard -->
 @context.md
+
+[MAP Lab code style](https://hyperdoc.forumlabs.net/ad089738-f27b-41ec-b77e-b4342f1773c6)
+
 @project.md
 @standards.md
-@code-style.md
 @development.md
 @validation.md
 @scripts.md
@@ -11,17 +13,7 @@
 
 <!-- Project types -->
 @ui.md
-@backend.md
 @library-cli.md
 
 <!-- Extensions -->
 @arcnet.md
-@secrets.md
-@mongodb.md
-@s3.md
-@playwright.md
-@domains.md
-
-<!-- MapLab augmentations -->
-@maplab-workflow.md
-@maplab-toolchain.md

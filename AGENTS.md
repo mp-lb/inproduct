@@ -9,28 +9,10 @@ Run `zap task context-build` after changes. Review and commit the source changes
 
 Keep private and machine-specific instructions out of committed context. The compiler supports explicit extra context paths for a local working copy; never commit those additions. `zap task context-copy` restores the root agent files from the shared base.
 
-Extensions are documented at `extensions/<extension>/README.md` in the FSS Stack source (read with `fm read extensions/<extension>/README.md --store mp-lb/fssstack`). Each extension owns its context and other payloads. When installing one, copy its context payload, adapt it to the project, add the import once, and rebuild. Merge updates into existing customized blocks instead of overwriting them.
-# 👑 InProduct
+Extensions are documented at `extensions/<extension>/README.md` in the FSS Stack source (`fm read extensions/<extension>/README.md --store mp-lb/fssstack`). Add recurring, non-obvious operational instructions only when a capability needs them; a dependency alone does not justify a context file. Keep setup steps in extension documentation and project details in their existing subject files.
 
-A collection of tools to put in your product.
+MAP Lab code style is a standalone remote link in `context/index.md`. Context compilation expands local imports with mdcompile, then remote links with `fm compile --stdin`. The shared `fm` CLI on PATH (outside project `node_modules/.bin`) and Forum access are required to refresh it; a failed remote fetch must fail the build. Generated root files remain usable offline. Keep project overrides in `project.md` after the shared style import.
 
-Read MANIFESTO.md for the product philosophy. Setup values live in fssstack.yaml.
-
-## Packages
-
-- apps/landing-page: `@mp-lb/inproduct-landing-page`, public React/Vite marketing site.
-- apps/myshop-frontend: `@mp-lb/inproduct-myshop-frontend`, local-only React/Vite library demo.
-- apps/myshop-backend: `@mp-lb/inproduct-myshop-backend`, local-only Node HTTP demo using the storage library handler and disk adapter.
-- packages/storage: `@mp-lb/inproduct-storage`, object/file storage, memory and disk adapters, HTTP transport and headless React hooks.
-- packages/inproduct: `@mp-lb/inproduct`, publishable library.
-- packages/core, packages/server, packages/trpc: private shared schemas, server helpers, and API router.
-
-MyShop demonstrates the public libraries through a real frontend/backend boundary. No extensions are enabled.
-## Standards
-
-FSS Stack ships with MAP Lab's public engineering standards. Read relevant standards on demand with `fm read <file>.md --store mp-lb/dev`; list them with `fm ls --store mp-lb/dev`. Public FSS Stack setup standards and extension payloads are also available in Stackforge's `fssstack/` tree, published as `mp-lb/fssstack`.
-
-Keep code focused and well organized, reuse domain schemas and shared components, and prefer sentence case for product copy and documentation. Follow project-specific architecture and validation policies. Record documentation sources and any Forum sync mapping in the documentation block; these standards do not require a project-specific or private Forum store.
 ## Code style
 
 - Use PascalCase for components
@@ -53,6 +35,33 @@ Take extra care when organizing tests.
 ### Tech debt
 
 In general, follow the boy scout principle. But if you come across tech debt that's too big to address, add a .md doc to docs/tech-debt and raise it with the user.
+
+
+# 👑 InProduct
+
+A collection of tools to put in your product.
+
+Read MANIFESTO.md for the product philosophy. Setup values live in fssstack.yaml.
+
+## Packages
+
+- apps/landing-page: `@mp-lb/inproduct-landing-page`, public React/Vite marketing site.
+- apps/myshop-frontend: `@mp-lb/inproduct-myshop-frontend`, local-only React/Vite library demo.
+- apps/myshop-backend: `@mp-lb/inproduct-myshop-backend`, local-only Node HTTP demo using the storage library handler and disk adapter.
+- packages/storage: `@mp-lb/inproduct-storage`, object/file storage, memory and disk adapters, HTTP transport and headless React hooks.
+- packages/inproduct: `@mp-lb/inproduct`, publishable library.
+- packages/core, packages/server, packages/trpc: private shared schemas, server helpers, and API router.
+
+MyShop demonstrates the public libraries through a real frontend/backend boundary. No extensions are enabled.
+
+The storage library provides MongoDB and S3 adapters for consumers and local tests. MyShop remains local-only with its existing disk adapter; these adapters do not imply deployed database or object-storage services.
+
+### Related tooling
+
+Shared tooling is developed in sibling checkouts under `~/Work`: Zapper (`zapper`) runs tasks, Forum (`forum`) provides `fm`, Tools (`tools`) provides ArcNet, and Stackforge (`stackforge`) owns setup conventions. When a change belongs in an owned dependency, inspect and update that source repository as needed, follow its `AGENTS.md`, then rebuild/relink the CLI or update the consuming dependency. Verify the command resolves to the intended build.
+## Standards
+
+List shared standards with `fm ls --store mp-lb/dev`; read one with `fm read <file>.md --store mp-lb/dev`.
 ## Development
 
 Use pnpm for dependencies and Zap for service orchestration. Run `zap status`, `zap up`, and `zap logs <service> --no-follow` to manage local services. Ports are allocated by Zap through zap.yaml; do not commit numeric local ports. Non-secret defaults live in .env.local; secrets belong in the ignored .env.
@@ -60,11 +69,25 @@ Use pnpm for dependencies and Zap for service orchestration. Run `zap status`, `
 MyShop (`apps/myshop-frontend` and `apps/myshop-backend`) is private and local-only; never publish or deploy it. Run `zap task myshop` for the seeded demo and `zap task myshop-check` for its explicit local build. Ordinary builds exclude both MyShop apps. Uploaded files persist in ignored `apps/myshop-backend/.data/files`; reset only affects the catalog/cart. Root validations use `packages/scripts/runValidation.ts` and share the per-user heavy-task lock; do not nest wrapped commands or remove the lock.
 
 Bootstrap dependencies with `zap t setup` before running TypeScript tasks. The validation runner uses the same persistent OS file lock as older checkouts, with a 2 GiB Node heap (4 GiB for lint) and one worker; setup installs dependencies directly so a fresh checkout does not require an already installed runner.
+
+### Local tool versions
+
+Mise is the base layer: it selects Node and the package manager. Zapper runs tasks and services on top of those tools. Run `mise trust` and `mise install` for checkout setup, then use an activated mise shell or `mise exec -- zap task <task>`.
+
+Read Node from `.node-version` and pnpm from `package.json#packageManager`; `mise.toml` reads these pins rather than duplicating them. npm projects use npm bundled with Node. Preserve the project's versions and package manager. Keep locally built CLI entrypoints in a version-independent PATH directory so switching Node does not hide `zap` or `fm`.
 ## Validation
 
 Use `zap task check`, `zap task test`, `zap task build` for the applicable checks. For context-only changes, run `zap task context-build`, check required imports and review all three generated outputs. Preserve specialized testing and evaluation constraints in the project instructions.
 
 Run `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before handing off meaningful changes. Keep tRPC procedure integration tests alongside the router. Use Chrome for manual testing only when the user explicitly asks for it.
+
+## Browser tests
+
+The Playwright suite in `tests/docs/` checks the documentation website. Run it through `pnpm docs:test`, which uses the project's shared validation runner and `tests/docs/playwright.config.ts`. Browser testing requires explicit user permission.
+
+The config allocates a local port, uses one worker and starts the docs server itself without reusing an existing server. `TEST_DOCS_URL` selects an already deployed target and disables that local server; `PLAYWRIGHT_CHANNEL` selects the browser channel. Use this configured lifecycle rather than starting a second web server or assuming an application-auth E2E stack.
+
+Setup reference: `fm read extensions/playwright/README.md --store mp-lb/fssstack`.
 ## Scripts
 
 Write project scripts in TypeScript in the package that owns the behaviour, or `packages/scripts` when there is no natural owner, and include them in normal lint and typecheck checks. Expose each script as a thin Zap task that invokes it with `tsx` (for example, `zap t somemigration` runs `packages/scripts/somemigration.ts`); keep CI callers aligned when moving scripts.
@@ -96,19 +119,36 @@ MyShop apps are private and local-only. Respect publication holds and the public
 
 Local validation establishes readiness for integration, not production delivery. Before requesting production sign-off, the delivery owner must record the deployed revision and successful live checks of the intended public URL, guide content, navigation, search, and agent-readable output. Report uncompleted deployment or publication explicitly. Website deployment and npm publication are separate actions: respect any publication hold and inspect workflow triggers before pushing because a changed package build publishes automatically.
 
+Configured service domains: `inproduct.mp-lb.dev`, `docs.inproduct.mp-lb.dev`. Their service mapping is in `.arcnet/arcnet.yaml`.
+
 <!-- Project types -->
 ## Frontend
 
-Use the UI framework and component library configured in the frontend package. For shadcn/ui frontends, add components from that package's directory with the shadcn CLI and reuse the existing utilities, preset and theme. Do not assume the frontend is named `apps/frontend`.
+Use shadcn/ui consistently for supported UI patterns. Reuse installed components before creating anything new; when a suitable component is missing, install it through the CLI rather than hand-building a substitute. Use the existing `cn` utility for conditional classes.
 
-Keep components focused, reuse form schemas and existing loading/error patterns, and validate the affected frontend through its configured Zap tasks.
+Run these commands from the frontend package containing `components.json`:
+
+```sh
+pnpm dlx shadcn@latest list @shadcn
+pnpm dlx shadcn@latest search @shadcn -q dialog
+pnpm dlx shadcn@latest add dialog
+```
+
+`components.json` defines component aliases and the theme CSS location; resolve its `aliases.ui` through the app's TypeScript aliases to find installed components. Review existing files before installation and preserve local customizations; do not blindly use `--overwrite`.
+
+Use the shared theme tokens and existing component variants for colors, typography, spacing and radii. UI consistency takes priority over making one screen look different. Do not override theme-owned styles in individual components without a concrete reason; make intentional design-system changes at the shared theme or component level.
+
+MAP Lab's Shad repository (`~/Work/shad`) provides additional components at `https://shad.mp-lb.dev`. Consult its catalog before building an equivalent, for example:
+
+```sh
+pnpm dlx shadcn@latest add https://shad.mp-lb.dev/r/ui-states.json
+```
+
+CLI reference: https://ui.shadcn.com/docs/cli.
 
 Frontend packages: `apps/myshop-frontend`, `apps/landing-page`. Run component installation in the relevant package.
-## Backend
 
-Keep application configuration at the app boundary and pass shared dependencies into packages. Reuse domain schemas rather than duplicating validation between API and UI. For tRPC backends, enforce authorization in procedures and test important behavior at the API boundary. Adapt this block to the selected backend and actual schema/package ownership.
-
-Backend applications: `apps/myshop-backend`.
+Installed shadcn component locations: `apps/landing-page/src/components/ui` (configuration: `apps/landing-page/components.json`, theme: `apps/landing-page/src/index.css`).
 ## Libraries and CLIs
 
 Keep public package boundaries explicit. After changing a CLI, build it and verify the installed command resolves to the intended local build. Update and validate public API/command documentation when behavior changes. Use the project's actual build, link and documentation tasks; do not assume tasks that have not been configured.
@@ -116,63 +156,16 @@ Keep public package boundaries explicit. After changing a CLI, build it and veri
 <!-- Extensions -->
 ## ArcNet
 
-This project uses ArcNet. `.arcnet/arcnet.yaml` records its configured sources, consumers and selected deployment services. Read that configuration and the delivery block before changing infrastructure. Minimal installations may only manage secrets/variables; do not assume an application is deployed.
+This project uses ArcNet. `.arcnet/arcnet.yaml` records its configured sources, consumers and selected deployment services. Read that configuration and the project’s delivery instructions before changing infrastructure. Minimal installations may only manage secrets/variables; do not assume an application is deployed.
 
 Keep deployment build paths, runtime entrypoints, health settings and domains aligned with the actual applications. Local databases are not automatically deployment services. Verify the relevant workflow and runtime result after delivery.
 
 Setup and updates: `fm read extensions/arcnet/README.md --store mp-lb/fssstack` and `fm read SETUP.md --store mp-lb/arcnet`.
-## ArcNet secrets and variables
+
+### Secrets and variables
 
 Read `.arcnet/arcnet.yaml` for the actual Forum sources and configured consumers. Source values live in those stores; encrypted snapshots under `.arcnet/secrets/` are committed. GitHub repository secrets contain CI decryption keys, not the plaintext source values.
 
 After changing sources, run `arcnet secrets sync` or `arcnet variables sync` as appropriate and commit refreshed snapshots. Use `arcnet env check --password` for local validation and `arcnet env run --consumer <name> -- <command>` for a configured consumer. Keep plaintext, passwords and decryption keys out of context and Git.
 
 These delivery sources are distinct from local `.env` secrets and `.env.local` non-secret defaults where the project uses those files.
-## MongoDB
-
-The storage library provides MongoDB adapters, with local database services for their tests. The MyShop demo remains local-only. Reuse its existing connection and collection/schema helpers. Application configuration supplies the connection URL and database name; shared packages should not independently load runtime environment files.
-
-Use the MongoDB service and dynamic port configured in `zap.yaml` for local work. Maintenance/reset tasks are destructive: verify the resolved target is the intended disposable local database and follow the project's data policy before running them. Close clients during script/test cleanup.
-
-Setup and updates: `fm read extensions/mongodb/README.md --store mp-lb/fssstack`.
-
-Installed dependency owners: `packages/storage`. Consult their existing configuration and the matching `zap.yaml` services/tasks before changes.
-## Object storage
-
-The storage library provides an S3-compatible adapter. This does not imply a deployed S3 service for the MyShop demo. Reuse its existing storage client and bucket configuration. Consumers supply storage configuration; preserve the demo's existing disk adapter and local-only scope.
-
-An explicit local endpoint requires path-style addressing. Bootstrap local buckets and browser CORS when needed. Localhost presigned URLs cannot be fetched by external services. Keep real credentials out of context and committed defaults.
-
-Setup and updates: `fm read extensions/s3/README.md --store mp-lb/fssstack`.
-
-Installed dependency owners: `packages/storage`. Consult their existing configuration and the matching `zap.yaml` services/tasks before changes.
-## Browser tests
-
-The Playwright suite in `tests/docs/` checks the documentation website. Run it through `pnpm docs:test`, which uses the project's shared validation runner and `tests/docs/playwright.config.ts`. Follow validation's explicit browser-testing permission requirement; installing this block does not authorize a browser run.
-
-The config allocates a local port, uses one worker and starts the docs server itself without reusing an existing server. `TEST_DOCS_URL` selects an already deployed target and disables that local server; `PLAYWRIGHT_CHANNEL` selects the browser channel. Use this configured lifecycle rather than starting a second web server or assuming an application-auth E2E stack.
-
-Setup reference: `fm read extensions/playwright/README.md --store mp-lb/fssstack`.
-## Domains
-
-Use the project's deployment configuration and runbook for its actual canonical hostnames and authoritative DNS/provider ownership. For ArcNet, service domains live in `.arcnet/arcnet.yaml`; do not assume historical Terraform files control the current deployment.
-
-A domain change must account for application URLs, CORS, auth callbacks, redirects and external integrations. Verify provider mappings, DNS, TLS and application health before retiring a working hostname. Use provider-reported DNS targets, not copied account-specific values.
-
-Setup and updates: `fm read extensions/custom-domains/README.md --store mp-lb/fssstack`.
-
-Configured service domains: `inproduct.mp-lb.dev`, `docs.inproduct.mp-lb.dev`. Their service mapping is in `.arcnet/arcnet.yaml`.
-
-<!-- MapLab augmentations -->
-## MapLab workflow
-
-Commit completed changes promptly, then use follow-up commits for fixes. Commit only your own changes; unrelated edits are normal and do not block work. Follow explicit project/user push preferences, and establish the preference once if unknown. Do not assume a push is harmless: it may trigger delivery.
-
-Use Berth for project work and tasks; use `berth project list` and built-in help to locate the relevant project. Keep locally developed CLI tools built and linked after changing them. Run environment-dependent work through the project's Zap tasks.
-## MapLab toolchain
-
-Every project using the MapLab augmentation uses mise for local tool selection. Read Node from `.node-version`. For pnpm projects, read pnpm from `package.json#packageManager`; do not duplicate these pins in `mise.toml`. npm projects keep npm and use the version bundled with the selected Node unless they explicitly pin another version. Preserve existing project versions and package managers.
-
-Run `mise trust` and `mise install` when setting up a checkout. Use an activated shell or `mise exec -- zap ...` so tasks inherit the selected tools. Zapper remains the task/process runner. Verify the resolved Node and package-manager versions against their canonical sources.
-
-Prefer installed tools' built-in help and verify authentication when needed; do not assume every cloud service is authenticated. Keep local CLI commands linked to the intended local build through a version-independent PATH directory, so changing the selected Node version does not hide `zap` or `fm`.
