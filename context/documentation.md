@@ -11,3 +11,7 @@ Read shared standards with `fm read <file>.md --store mp-lb/dev` (list them with
 Relevant standards include `style-guide.md` for code changes, `errors.md` for error handling, `trpc.md` for API work, `logging.md` and `event-schema.md` for events, and `libs.md` and `lib-release.md` for publishable libraries.
 
 InProduct has no dedicated Forum store or `.forum/` sync configuration.
+
+Every new public package must have a discoverable consumer guide in `docs/public/`, linked from `meta.json` and the docs introduction. A package README alone is not website documentation: the docs loader only reads `docs/public/`. Explain installation availability, initialization, configuration, behavior, and limitations; keep declarations as the API reference. Extend `apps/docs/scripts/checkDocs.ts` to verify the guide's HTML, per-page Markdown, `llms-full.txt`, search entry, and navigation link, then run `pnpm docs:check` before handoff.
+
+`apps/docs` renders `docs/public/` with Fumadocs. No docs hosting is configured by this repository.
