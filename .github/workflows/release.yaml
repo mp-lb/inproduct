@@ -35,6 +35,7 @@ jobs:
         env:
           INPRODUCT_MONGO_TEST_URI: mongodb://127.0.0.1:27017/?directConnection=true
       - name: Publish changed package builds
+        id: publish
         run: pnpm exec arcnet env run --consumer publish -- node
           scripts/auto-publish.mjs
         env:
@@ -42,3 +43,5 @@ jobs:
           ARCNET_STANDARD_SECRETS_KEY: ${{ secrets.ARCNET_STANDARD_SECRETS_KEY }}
       - name: Verify public registry packages
         run: node scripts/verifyPublication.mjs
+        env:
+          FSSSTACK_RELEASE_RESULT: ${{ steps.publish.outputs.release_report }}

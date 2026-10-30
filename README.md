@@ -105,3 +105,9 @@ mise shell or `mise exec -- <command>` so Zapper inherits these tools.
 For nvm, run `nvm install "$(cat .node-version)"` and
 `nvm use "$(cat .node-version)"`. Dependency policy lives in
 `pnpm-workspace.yaml`; use `workspace:*` for internal dependencies.
+
+## Release reports
+
+Release scripts print their package/version report to the console. CI passes
+that report through the publisher step’s `release_report` output to verification
+via `FSSSTACK_RELEASE_RESULT`; no release-result file is created in the checkout.
