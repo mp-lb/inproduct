@@ -1,0 +1,169 @@
+---
+title: Data jobs
+description: Inspect, run and verify MongoDB cleanup jobs from an admin panel and a CLI.
+---
+
+`@mp-lb/inproduct-data-jobs` runs data manipulation jobs, such as cleanups, backfills,
+repairs and resets, against your own MongoDB. You register jobs in code. Operators
+pick a job by ID, review a preview, confirm it, and see the run and verification
+results. The admin panel and the CLI share the same runner and the same structured results.
+
+InProduct knows nothing about your collection names or domain models. Your application
+supplies the MongoDB connection, authorization and each job's scope.
+
+```sh
+pnpm add @mp-lb/inproduct-data-jobs mongodb
+```
+
+## Register jobs
+
+Remove fields is the built-in job. It reads raw documents, so legacy data does not
+need to pass your current application schemas.
+
+```ts
+import { createDataJobRunner } from '@mp-lb/inproduct-data-jobs';
+import { createRemoveFieldsJob } from '@mp-lb/inproduct-data-jobs/mongodb';
+
+export const createJobs = (db: Db) => [
+  createRemoveFieldsJob({
+    id: 'remove-legacy-product-fields',
+    title: 'Remove legacy product fields',
+    description: 'Removes retired pricing and notes from archived products.',
+    collection: db.collection('products'),
+    fields: ['legacyPrice', 'internal.notes'],
+    filter: { status: 'archived' },
+    scope: 'Archived products',
+  }),
+];
+
+export const runner = createDataJobRunner({ jobs: createJobs(db) });
+```
+
+Keep the job registry in a module that imports only job definitions and the database
+driver. The CLI can then load it when the rest of your application cannot start.
+
+Every job has a stable ID, a description, a scope, a destructive flag and a retry policy:
+
+- `safe_to_rerun` means repeating the job converges, so a failed run can be rerun.
+- `manual_recovery` means an operator must repair the data before running it again.
+
+There are no automatic retries.
+
+### Remove fields semantics
+
+- Field paths are dot-separated object paths: `legacyPrice` or `internal.notes`.
+- Array indexes (`items.0.name`), operators (`$`, `$[]`), `_id`, empty segments and
+  overlapping paths (`a` and `a.b`) are rejected when the job is created.
+- **Inspect** counts the scoped documents that contain each field.
+- **Run** removes only those fields, in batches. Fields that are already removed are skipped,
+  so the job is `safe_to_rerun`.
+- **Verify** checks that no scoped document still contains any of the fields.
+- If a field can only be reached through an array (for example, `internal` is an
+  array of objects), the job does not change it. Inspect lists it as a warning, and
+  verification fails until you repair those documents yourself.
+- Remove fields is marked destructive, because it deletes data.
+
+### Your own jobs
+
+`defineDataJob` is the extension point. It validates the metadata. You provide
+`inspect`, `run` (which can call `reportProgress`) and `verify`:
+
+```ts
+import { defineDataJob } from '@mp-lb/inproduct-data-jobs';
+
+const backfillSlugs = defineDataJob({
+  id: 'backfill-slugs',
+  title: 'Backfill product slugs',
+  description: 'Adds slugs to products created before slugs existed.',
+  scope: 'Products without a slug',
+  destructive: false,
+  retryPolicy: 'safe_to_rerun',
+  inspect: async () => ({ summary: '…', matchedCount: 0, changes: [], warnings: [] }),
+  run: async ({ reportProgress }) => ({ summary: '…', changedCount: 0, skippedCount: 0, changes: [] }),
+  verify: async () => ({ passed: true, remainingCount: 0, summary: '…' }),
+});
+```
+
+## Confirmation and concurrency
+
+`runner.inspect(id)` returns a preview and a single-use confirmation token. The token
+expires after five minutes, and a newer inspection replaces it. `runner.run` needs that
+token. For destructive jobs, it also needs `acceptDataLoss: true`. After every run, the
+runner verifies the job. A run fails if the job throws or if verification does not pass.
+Failed results include any partial progress, plus `rerunSupported`.
+
+The runner rejects a second run of a job while that job is already running. This
+protection and the run state are in memory and cover only one process. If several
+processes can run jobs against the same database, you must serialize the runs yourself,
+for example with a lock document or by allowing only one operator process.
+Data jobs do not provide distributed or exactly-once execution.
+
+## Connect your tRPC router
+
+Expose the runner through your own authorized tRPC router. The library's input
+schemas accept only a job ID, a confirmation token and the data-loss flag. Callers
+can never send collection names, field paths, filters or database commands.
+
+```ts
+import { dataJobRequestSchema, runDataJobSchema } from '@mp-lb/inproduct-data-jobs';
+
+export const dataJobsRouter = router({
+  list: adminProcedure.query(() => runner.list()),
+  inspect: adminProcedure.input(dataJobRequestSchema).mutation(({ input }) => runner.inspect(input.id)),
+  run: adminProcedure.input(runDataJobSchema).mutation(({ input }) => runner.run(input)),
+  verify: adminProcedure.input(dataJobRequestSchema).query(({ input }) => runner.verify(input.id)),
+});
+```
+
+Map `DataJobError` codes (`NOT_FOUND`, `CONFIRMATION_REQUIRED`, `ALREADY_RUNNING`)
+to your API errors. Check authorization on the server for every procedure.
+
+## Show the Data jobs panel
+
+The panel uses only the DOM. It does not require React or any other framework.
+
+```ts
+import { mountDataJobsPanel } from '@mp-lb/inproduct-data-jobs/panel';
+import { createDataJobsTRPCClient } from '@mp-lb/inproduct-data-jobs/trpc';
+
+const panel = mountDataJobsPanel(element, createDataJobsTRPCClient(trpc.dataJobs));
+// later: panel.destroy();
+```
+
+For each job, the panel shows the description, scope, whether the job deletes data,
+and its retry policy. **Inspect** shows the changes and warnings. **Confirm and run**
+requires a new inspection each time. For destructive jobs, the operator must also tick
+a data-loss acknowledgement. While a job runs, the panel shows progress. Afterwards, it
+shows the outcome and the verification result. If the run failed, it shows the error
+and whether a rerun is supported. The markup uses plain elements and `data-job*`
+classes for your styles. To build your own UI, use `createDataJobsController`.
+
+## Add a CLI
+
+Write a small script, and run it with your own database connection:
+
+```ts
+import { runDataJobsCli } from '@mp-lb/inproduct-data-jobs/cli';
+
+const client = new MongoClient(process.env.MONGO_URI!);
+const runner = createDataJobRunner({ jobs: createJobs(client.db('shop')) });
+try {
+  process.exitCode = await runDataJobsCli({ runner, name: 'shop-data-jobs' });
+} finally {
+  await client.close();
+}
+```
+
+The CLI has these commands: `list`, `inspect <id>`, `run <id>` and `verify <id>`. Add
+`--json` to any command for one JSON value. Before running a job, `run` shows the preview.
+The operator then types the job ID, or you pass `--yes`. Destructive jobs also need
+`--accept-data-loss`. With `--noninteractive`, the CLI never prompts. Each command
+exits with a non-zero code when the run or verification fails. Run `--help` on any
+command for its options.
+
+## Not included
+
+Version 1 does not include resumable checkpoints, scheduling, queues, distributed
+workers, rollback, a persistent audit log, jobs that run automatically on startup,
+or built-in jobs other than Remove fields. Test your jobs against disposable
+databases, never by running destructive jobs on production data.

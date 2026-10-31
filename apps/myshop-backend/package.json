@@ -3,14 +3,29 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "exports": {
+    "./trpc": {
+      "types": "./src/trpc/createMyShopRouter.ts"
+    }
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build:local": "pnpm --filter @mp-lb/inproduct-storage build && tsc --project tsconfig.build.json",
-    "typecheck": "pnpm --filter @mp-lb/inproduct-storage build && tsc --project tsconfig.json --noEmit",
+    "build:local": "pnpm --filter @mp-lb/inproduct-storage --filter @mp-lb/inproduct-data-jobs build && tsc --project tsconfig.build.json",
+    "typecheck": "pnpm --filter @mp-lb/inproduct-storage --filter @mp-lb/inproduct-data-jobs build && tsc --project tsconfig.json --noEmit",
     "test": "vitest run --maxWorkers=1"
   },
   "dependencies": {
+    "@mp-lb/fssstack-platform": "0.1.0",
+    "@mp-lb/inproduct-data-jobs": "workspace:*",
     "@mp-lb/inproduct-server": "workspace:*",
-    "@mp-lb/inproduct-storage": "workspace:*"
+    "@mp-lb/inproduct-storage": "workspace:*",
+    "@trpc/server": "11.7.1",
+    "mongodb": "7.2.0",
+    "superjson": "2.2.6"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.2",
+    "@trpc/client": "11.7.1",
+    "jsdom": "30.0.1"
   }
 }

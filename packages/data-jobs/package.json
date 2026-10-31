@@ -1,0 +1,71 @@
+{
+  "name": "@mp-lb/inproduct-data-jobs",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mongodb": {
+      "types": "./dist/mongodb.d.ts",
+      "import": "./dist/mongodb.js"
+    },
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.js"
+    },
+    "./trpc": {
+      "types": "./dist/trpc.d.ts",
+      "import": "./dist/trpc.js"
+    },
+    "./panel": {
+      "types": "./dist/panel.d.ts",
+      "import": "./dist/panel.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "src/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/tests/**"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run --maxWorkers=1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mp-lb/inproduct.git",
+    "directory": "packages/data-jobs"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "description": "MongoDB data jobs with a shared runner, CLI and admin panel for InProduct applications.",
+  "peerDependencies": {
+    "mongodb": "^7.2.0"
+  },
+  "peerDependenciesMeta": {
+    "mongodb": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "commander": "14.0.3",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "jsdom": "^30.0.1",
+    "mongodb": "7.2.0"
+  }
+}

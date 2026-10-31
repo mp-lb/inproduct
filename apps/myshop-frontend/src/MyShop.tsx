@@ -1,5 +1,8 @@
 import { useState } from "react";
+import type { DataJobsClient } from "@mp-lb/inproduct-data-jobs";
 import type { FileStorageClient } from "@mp-lb/inproduct-storage";
+import { dataJobs as defaultDataJobs } from "./dataJobs";
+import { DataJobsSection } from "./DataJobsSection";
 import { files as defaultFiles } from "./files";
 import { FileStorageSection } from "./FileStorageSection";
 import { seedProducts, type Cart, type Product } from "./catalog";
@@ -9,12 +12,14 @@ import { ProductAdmin } from "./ProductAdmin";
 
 export const MyShop = ({
   files = defaultFiles,
+  dataJobs = defaultDataJobs,
 }: {
   files?: FileStorageClient;
+  dataJobs?: DataJobsClient;
 }) => {
-  const [adminSection, setAdminSection] = useState<"products" | "files">(
-    "products",
-  );
+  const [adminSection, setAdminSection] = useState<
+    "products" | "files" | "data-jobs"
+  >("products");
 
   const [products, setProducts] = useState<Product[]>(seedProducts);
   const [cart, setCart] = useState<Cart>({});
@@ -62,7 +67,7 @@ export const MyShop = ({
         <p className="intro">
           {view === "store"
             ? "Thoughtful essentials for your daily rituals. A tiny storefront powered by your own application."
-            : "Manage your catalog and files in one place."}
+            : "Manage your catalog, files and data jobs in one place."}
         </p>
         <p className="notice" role="status">
           {notice}
@@ -101,9 +106,18 @@ export const MyShop = ({
               >
                 File storage
               </button>
+              <button
+                className={adminSection === "data-jobs" ? "" : "secondary"}
+                aria-pressed={adminSection === "data-jobs"}
+                onClick={() => setAdminSection("data-jobs")}
+              >
+                Data jobs
+              </button>
             </nav>
             {adminSection === "files" ? (
               <FileStorageSection client={files} />
+            ) : adminSection === "data-jobs" ? (
+              <DataJobsSection client={dataJobs} />
             ) : (
               <ProductAdmin
                 products={products}
@@ -119,8 +133,8 @@ export const MyShop = ({
       </main>
       <footer>
         <p>
-          InProduct provides slugs and file storage. Catalog and cart behavior
-          are example application code.
+          InProduct provides slugs, file storage and data jobs. Catalog and cart
+          behavior are example application code.
           <br />
           Catalog and cart changes live in this tab. Reset restores the seed
           products. Files are saved by the local backend and survive reloads and

@@ -41,8 +41,9 @@ Read MANIFESTO.md for the product philosophy. Setup values live in fssstack.yaml
 
 - apps/landing-page: `@mp-lb/inproduct-landing-page`, public React/Vite marketing site.
 - apps/myshop-frontend: `@mp-lb/inproduct-myshop-frontend`, local-only React/Vite library demo.
-- apps/myshop-backend: `@mp-lb/inproduct-myshop-backend`, local-only Node HTTP demo using the storage library handler and disk adapter.
+- apps/myshop-backend: `@mp-lb/inproduct-myshop-backend`, local-only Node HTTP demo using the storage library handler and disk adapter, plus a data-jobs tRPC router.
 - packages/storage: `@mp-lb/inproduct-storage`, object/file storage, memory and disk adapters, HTTP transport and headless React hooks.
+- packages/data-jobs: `@mp-lb/inproduct-data-jobs`, MongoDB data jobs (Remove fields built in) with a shared runner, framework-free panel, tRPC client adapter and CLI.
 - packages/inproduct: `@mp-lb/inproduct`, publishable library.
 - packages/core, packages/server, packages/trpc: private shared schemas, server helpers, and API router.
 
@@ -56,7 +57,7 @@ Shared tooling is developed in sibling checkouts under `~/Work`: Zapper (`zapper
 
 ## Project-specific operations
 
-MyShop (`apps/myshop-frontend` and `apps/myshop-backend`) is private and local-only. Use `zap task myshop` and `zap task myshop-check`; uploads persist in ignored `apps/myshop-backend/.data/files`. Run `zap t setup` before TypeScript tasks. Root validation uses `packages/scripts/runValidation.ts` and a shared per-user lock; do not nest wrapped commands or remove the lock.
+MyShop (`apps/myshop-frontend` and `apps/myshop-backend`) is private and local-only. Use `zap task myshop` and `zap task myshop-check`; uploads persist in ignored `apps/myshop-backend/.data/files`. MyShop data jobs need `zap up mongodb`, use the disposable `myshop_demo` database and run from `zap task myshop-data-jobs`; `zap task data-jobs-test` runs the MongoDB-backed data-jobs tests. Run `zap t setup` before TypeScript tasks. Root validation uses `packages/scripts/runValidation.ts` and a shared per-user lock; do not nest wrapped commands or remove the lock.
 
 Published guides live in `docs/public/` and internal notes in `docs/internals/`; this project has no Forum sync. After public API or CLI changes, run `docs:gen` and commit generated references and agent bundles. New public packages need consumer guides linked through `meta.json` and the docs introduction; update `apps/docs/scripts/checkDocs.ts` and run `pnpm docs:check`.
 

@@ -13,12 +13,14 @@ Feature flags, audit logs, notifications, payments and commerce APIs are not imp
 - [Initialize object storage](/docs/storage) with a memory, disk or MongoDB adapter.
 - [Manage verified files](/docs/file-library) in a versioned S3 bucket with quotas, holds and audit.
 - [Identify file types and name downloads](/docs/file-types) without your own MIME or extension tables.
+- [Run MongoDB data jobs](/docs/data-jobs) with a shared admin panel and CLI.
 - [Integrate with a backend](/docs/backend) without a hosted service or API key.
 - [Run MyShop locally](/docs/myshop) to see a storefront and backend-powered file storage.
 
 The library is `@mp-lb/inproduct`. The repository's `@mp-lb/inproduct-myshop-backend` package
 is the private local demo backend, not a package to install in your app. Object storage is
-a separate package, `@mp-lb/inproduct-storage`; it is not re-exported by `@mp-lb/inproduct`.
+a separate package, `@mp-lb/inproduct-storage`, and data jobs are `@mp-lb/inproduct-data-jobs`;
+neither is re-exported by `@mp-lb/inproduct`.
 
 ## Planned pieces
 

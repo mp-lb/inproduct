@@ -80,6 +80,12 @@ tasks:
     env: "*"
     cmds:
       - INPRODUCT_MONGO_TEST_URI="mongodb://127.0.0.1:${MONGO_PORT}/?directConnection=true" pnpm --filter @mp-lb/inproduct-storage exec vitest run src/mongoAdapters.test.ts
+  data-jobs-test:
+    desc: Run data-jobs and MyShop data-jobs tests against the local MongoDB
+    env: "*"
+    cmds:
+      - INPRODUCT_MONGO_TEST_URI="mongodb://127.0.0.1:${MONGO_PORT}/?directConnection=true" pnpm --filter @mp-lb/inproduct-data-jobs test
+      - INPRODUCT_MONGO_TEST_URI="mongodb://127.0.0.1:${MONGO_PORT}/?directConnection=true" pnpm --filter @mp-lb/inproduct-myshop-backend test
   file-metadata-test:
     env: "*"
     cmds:
@@ -102,8 +108,14 @@ tasks:
       - pnpm --filter @mp-lb/inproduct-docs start
   myshop:
     cmds:
-      - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct --filter @mp-lb/inproduct-storage build
+      - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct --filter @mp-lb/inproduct-storage --filter @mp-lb/inproduct-data-jobs build
       - zap up myshop-backend myshop-frontend
+  myshop-data-jobs:
+    desc: Run MyShop data jobs from the command line against the local MongoDB
+    env: "*"
+    cmds:
+      - pnpm --filter @mp-lb/inproduct-data-jobs build
+      - pnpm --filter @mp-lb/inproduct-myshop-backend exec tsx src/dataJobsCli.ts {{REST}}
   myshop-check:
     cmds:
       - pnpm exec tsx packages/scripts/runValidation.ts -- pnpm --filter @mp-lb/inproduct-myshop-backend build:local

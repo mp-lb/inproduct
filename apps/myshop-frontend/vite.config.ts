@@ -15,6 +15,10 @@ export default defineConfig(({ command }) => {
             target: `http://127.0.0.1:${port}`,
             changeOrigin: true,
           },
+          "/api/trpc": {
+            target: `http://127.0.0.1:${port}`,
+            changeOrigin: true,
+          },
         }
       : undefined;
   return {

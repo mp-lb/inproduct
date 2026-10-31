@@ -13,6 +13,7 @@ for (const [path, title] of [
   ["storage/", "File storage"],
   ["file-library/", "Managed file library"],
   ["file-types/", "File types and names"],
+  ["data-jobs/", "Data jobs"],
   ["myshop/", "MyShop local example"],
 ] as const) {
   assert.ok(
@@ -141,3 +142,25 @@ assert.ok(
 );
 
 console.log("Verified prerendered documentation, Markdown and local search.");
+
+const dataJobsMarkdown = read("llms.mdx/docs/data-jobs/content.md");
+
+for (const marker of [
+  "createDataJobRunner",
+  "createRemoveFieldsJob",
+  "defineDataJob",
+  "mountDataJobsPanel",
+  "runDataJobsCli",
+  "safe_to_rerun",
+  "exactly-once",
+]) {
+  assert.ok(
+    dataJobsMarkdown.includes(marker),
+    `data jobs Markdown missing: ${marker}`,
+  );
+
+  assert.ok(
+    full.includes(marker),
+    `agent bundle missing data jobs content: ${marker}`,
+  );
+}

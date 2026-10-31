@@ -190,34 +190,74 @@ importers:
 
   apps/myshop-backend:
     dependencies:
+      '@mp-lb/fssstack-platform':
+        specifier: 0.1.0
+        version: 0.1.0(typescript@5.9.3)(zod@4.6.5)
+      '@mp-lb/inproduct-data-jobs':
+        specifier: workspace:*
+        version: link:../../packages/data-jobs
       '@mp-lb/inproduct-server':
         specifier: workspace:*
         version: link:../../packages/server
       '@mp-lb/inproduct-storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@trpc/server':
+        specifier: 11.7.1
+        version: 11.7.1(typescript@5.9.3)
+      mongodb:
+        specifier: 7.2.0
+        version: 7.2.0(socks@2.8.10)
+      superjson:
+        specifier: 2.2.6
+        version: 2.2.6
+    devDependencies:
+      '@testing-library/dom':
+        specifier: 10.4.2
+        version: 10.4.2
+      '@trpc/client':
+        specifier: 11.7.1
+        version: 11.7.1(@trpc/server@11.7.1(typescript@5.9.3))(typescript@5.9.3)
+      jsdom:
+        specifier: 30.0.1
+        version: 30.0.1
 
   apps/myshop-frontend:
     dependencies:
       '@mp-lb/inproduct':
         specifier: workspace:*
         version: link:../../packages/inproduct
+      '@mp-lb/inproduct-data-jobs':
+        specifier: workspace:*
+        version: link:../../packages/data-jobs
       '@mp-lb/inproduct-storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@trpc/client':
+        specifier: 11.7.1
+        version: 11.7.1(@trpc/server@11.7.1(typescript@5.9.3))(typescript@5.9.3)
       react:
         specifier: ^19.2.8
         version: 19.3.0
       react-dom:
         specifier: ^19.2.8
         version: 19.3.0(react@19.3.0)
+      superjson:
+        specifier: 2.2.6
+        version: 2.2.6
     devDependencies:
+      '@mp-lb/inproduct-myshop-backend':
+        specifier: workspace:*
+        version: link:../myshop-backend
       '@testing-library/react':
         specifier: ^16.3.3
         version: 16.3.3(@testing-library/dom@10.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@testing-library/user-event':
         specifier: ^14.6.7
         version: 14.6.7(@testing-library/dom@10.4.2)
+      '@trpc/server':
+        specifier: 11.7.1
+        version: 11.7.1(typescript@5.9.3)
       '@types/react':
         specifier: ^19
         version: 19.3.0
@@ -242,6 +282,25 @@ importers:
       zod:
         specifier: 4.4.3
         version: 4.4.3
+
+  packages/data-jobs:
+    dependencies:
+      commander:
+        specifier: 14.0.3
+        version: 14.0.3
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@testing-library/dom':
+        specifier: ^10.4.2
+        version: 10.4.2
+      jsdom:
+        specifier: ^30.0.1
+        version: 30.0.1
+      mongodb:
+        specifier: 7.2.0
+        version: 7.2.0(socks@2.8.10)
 
   packages/inproduct: {}
 
@@ -1832,6 +1891,12 @@ packages:
     engines: {node: '>=12', npm: '>=6'}
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
+
+  '@trpc/client@11.7.1':
+    resolution: {integrity: sha512-uOnAjElKI892/U6aQMcBHYs3x7mme3Cvv1F87ytBL56rBvs7+DyK7r43zgaXKf13+GtPEI6ex5xjVUfyDW8XcQ==}
+    peerDependencies:
+      '@trpc/server': 11.7.1
+      typescript: '>=5.7.2'
 
   '@trpc/server@11.7.1':
     resolution: {integrity: sha512-N3U8LNLIP4g9C7LJ/sLkjuPHwqlvE3bnspzC4DEFVdvx2+usbn70P80E3wj5cjOTLhmhRiwJCSXhlB+MHfGeCw==}
@@ -6637,6 +6702,15 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+  '@mp-lb/fssstack-platform@0.1.0(typescript@5.9.3)(zod@4.6.5)':
+    dependencies:
+      '@trpc/server': 11.7.1(typescript@5.9.3)
+      pino: 10.3.0
+      superjson: 2.2.6
+      zod: 4.6.5
+    transitivePeerDependencies:
+      - typescript
+
   '@mp-lb/fssstack-testing@0.1.0(@playwright/test@1.64.0)(@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.2)(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1)))(mongodb@7.2.0(socks@2.8.10))(vitest@4.0.16(@types/node@20.19.39)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.20.6)(yaml@2.9.1))':
     optionalDependencies:
       '@playwright/test': 1.64.0
@@ -7050,6 +7124,11 @@ snapshots:
   '@testing-library/user-event@14.6.7(@testing-library/dom@10.4.2)':
     dependencies:
       '@testing-library/dom': 10.4.2
+
+  '@trpc/client@11.7.1(@trpc/server@11.7.1(typescript@5.9.3))(typescript@5.9.3)':
+    dependencies:
+      '@trpc/server': 11.7.1(typescript@5.9.3)
+      typescript: 5.9.3
 
   '@trpc/server@11.7.1(typescript@5.9.3)':
     dependencies:

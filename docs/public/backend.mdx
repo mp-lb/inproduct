@@ -35,4 +35,5 @@ backend restarts. See [MyShop](/docs/myshop) and [File storage](/docs/storage).
 
 The separate `apps/landing-page` is the public marketing site. The private
 core/server/tRPC packages remain shared scaffold examples; consumers of the public
-libraries do not need them. MyShop's file API uses the library's HTTP handler.
+libraries do not need them. MyShop's file API uses the library's HTTP handler. Its
+[data jobs](/docs/data-jobs) use a tRPC router at `/api/trpc`.

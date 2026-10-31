@@ -1,18 +1,11 @@
-import { request, type Server } from "node:http";
+import { request } from "node:http";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createFileStorageClient } from "@mp-lb/inproduct-storage";
 import { createMyShopBackend } from "./createMyShopBackend";
-
-const listen = async (server: Server) => {
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const address = server.address();
-  if (!address || typeof address === "string")
-    throw new Error("expected TCP address");
-  return `http://127.0.0.1:${address.port}`;
-};
+import { listenForTests as listen } from "./listenForTests";
 
 describe("MyShop backend", () => {
   it("serves the library API with durable bytes and rejects other browser origins", async () => {

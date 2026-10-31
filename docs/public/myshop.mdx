@@ -23,7 +23,7 @@ zap status
 
 `zap task myshop` builds the libraries and starts `myshop-backend` and
 `myshop-frontend`. Zap allocates both ports; no database credentials or external
-services are needed. The separate `landing-page` service runs the public marketing site.
+services are needed. Only the optional data jobs section needs the local MongoDB service. The separate `landing-page` service runs the public marketing site.
 
 ## Storefront and products
 
@@ -55,6 +55,34 @@ validation, transport, persistence and async state. See [File storage](/docs/sto
 Files and metadata are saved in ignored `apps/myshop-backend/.data/files`. They survive
 browser reloads, frontend/backend restarts and **Reset demo**. Delete files explicitly
 in File storage. Files are not malware-scanned; no production storage is accessed.
+
+## Data jobs against a disposable MongoDB
+
+Data jobs need the project's local MongoDB service. Start it with `zap up mongodb`,
+then open **Admin → Data jobs**. The jobs use the disposable `myshop_demo` database.
+Without MongoDB, the section shows an error, and the rest of MyShop keeps working.
+
+1. Run **Reset demo products**. This app-defined job replaces the collection with
+   synthetic legacy products. Archived products still have the retired `legacyPrice` and
+   `internal.notes` fields. One active product keeps them on purpose.
+2. Inspect **Remove legacy product fields**. It is the built-in job, scoped to archived
+   products. The preview shows the count for each field, the scope, the data-loss
+   warning and the retry policy.
+3. Tick the acknowledgement, and confirm. The panel shows progress, the outcome and verification.
+4. Inspect and run it again. Nothing is left to remove, and the second run changes nothing.
+
+The same jobs run from the terminal:
+
+```sh
+zap task myshop-data-jobs -- list
+zap task myshop-data-jobs -- inspect remove-legacy-product-fields
+zap task myshop-data-jobs -- run remove-legacy-product-fields --accept-data-loss
+zap task myshop-data-jobs -- verify remove-legacy-product-fields --json
+```
+
+The CLI loads only the job definitions and the MongoDB driver, not the MyShop server.
+The backend exposes the jobs through a local tRPC router at `/api/trpc`, and the
+frontend mounts the library's framework-free panel. See [Data jobs](/docs/data-jobs).
 
 ## Local-only boundary
 

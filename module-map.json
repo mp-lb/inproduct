@@ -10,6 +10,10 @@
       "dependencies": []
     },
     {
+      "name": "@mp-lb/inproduct-data-jobs",
+      "dependencies": []
+    },
+    {
       "name": "@mp-lb/inproduct-docs",
       "dependencies": []
     },
@@ -20,6 +24,7 @@
     {
       "name": "@mp-lb/inproduct-myshop-backend",
       "dependencies": [
+        "@mp-lb/inproduct-data-jobs",
         "@mp-lb/inproduct-server",
         "@mp-lb/inproduct-storage"
       ]
@@ -28,8 +33,14 @@
       "name": "@mp-lb/inproduct-myshop-frontend",
       "dependencies": [
         "@mp-lb/inproduct",
+        "@mp-lb/inproduct-data-jobs",
+        "@mp-lb/inproduct-myshop-backend",
         "@mp-lb/inproduct-storage"
       ]
+    },
+    {
+      "name": "@mp-lb/inproduct-scripts",
+      "dependencies": []
     },
     {
       "name": "@mp-lb/inproduct-server",
